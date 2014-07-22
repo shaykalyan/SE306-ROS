@@ -9,7 +9,7 @@ Software Engineering Design 2 (SE306)
 | Member                 | Github ID                                      | UPI     | UoAID  | Role |
 |:-----------------------|:-----------------------------------------------|:--------|:-------|:--|
 | Hugo Bateman           | [hbateman](http://github.com/hbateman)         | hbat205 |        ||
-| James Butler           | [JmsBtlr111](http://github.com/JmsBtlr111)     | jbut052 |        ||
+| James Butler           | [JmsBtlr111](http://github.com/JmsBtlr111)     | jbut052 | 1487690||
 | Matthew Chiam          | [mchi112](http://github.com/mchi112)           | mchi112 | 1857129||
 | Bert Huang             | [bert-huang](http://github.com/bert-huang)     | ihua164 | 5503504||
 | Akshay Kalyan (Leader) | [xShay](http://github.com/xShay)               | akal881 | 5786866||
