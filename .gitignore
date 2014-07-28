@@ -1,3 +1,10 @@
+# ROS Specific files/folders
+build/
+bin/
+lib/
+msg_gen/
+srv_gen/
+
 # Compiled Object files
 *.slo
 *.lo
