@@ -1,0 +1,25 @@
+<package>
+  <description brief="project">
+    Softeng306 Project One.
+    Team One
+  </description>
+  <author>
+    Akshay Kalyan
+    Hugo Bateman
+    James Butler
+    Matthew Chiam
+    I-Yang (Bert) Huang
+    Hoang Trung Hieu (Tommy) Ngo
+    Michael Shafer
+    Nicholas Weatherburn
+  </author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/project</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+
+</package>
+
+
