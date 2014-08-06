@@ -55,7 +55,7 @@ window
 floorplan
 ( 
   name "swarm"
-  bitmap "floor.pgm"
+  bitmap "swarm_world.pgm"
   size [30 20 0.5]
   pose [ 0 0 0 0.000 ]
 )
