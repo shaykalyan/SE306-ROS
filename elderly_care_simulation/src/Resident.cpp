@@ -18,11 +18,12 @@ double theta;
 
 void StageOdom_callback(nav_msgs::Odometry msg)
 {
-	// This is the call back function to process odometry messages coming from Stage. 	
+	// This is the call back function to process odometry messages coming from Stage.
+    // Receiving current position from stage, then updates state. 	
 	px = 5 + msg.pose.pose.position.x;
 	py = 10 + msg.pose.pose.position.y;
-	ROS_INFO("Current x position is: %f", px);
-	ROS_INFO("Current y position is: %f", py);
+	// ROS_INFO("Current x position is: %f", px);
+	// ROS_INFO("Current y position is: %f", py);
 }
 
 
@@ -62,7 +63,7 @@ int main(int argc, char **argv)
 
     ros::Rate loop_rate(10);
 
-    // A count of howmany messages we have sent
+    // A count of how many messages we have sent
     int count = 0;
 
     // Messages
