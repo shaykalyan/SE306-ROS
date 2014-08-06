@@ -48,21 +48,20 @@ window
 ( 
   size [ 800.000 600.000 ] #size of the window in pixels
   scale 20
-  
 )
 
 # load an environment bitmap
 floorplan
 ( 
-  name "swarm"
+  name "floor"
   bitmap "floor.pgm"
   size [30 20 0.5]
   pose [ 0 0 0 0.000 ]
 )
 
 # throw in a robot
-myRobot( pose [ 0 0 0 0 ] name "r0" color "red")
-myRobot( pose [ -3 0 0 0 ] name "r1" color "black")
-myRobot( pose [ 3 -3 0 0 ] name "r2" color "green")
-myRobot( pose [ 3 3 0 0 ] name "r3" color "blue")
-#myRobot( pose [ 12 0 0 0 ] name "r4" color "brown")
+myRobot( pose [ 0 -4 0 0 ] name "Resident" color "red")
+myRobot( pose [ 0 -6 0 0 ] name "r1" color "green")
+myRobot( pose [ -2 -4 0 0 ] name "r2" color "black")
+
+
