@@ -30,6 +30,3 @@ setup.*sh
 *.exe
 *.out
 *.app
-
-# pyc files
-*.pyc

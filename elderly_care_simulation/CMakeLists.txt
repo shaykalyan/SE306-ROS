@@ -32,3 +32,4 @@ rosbuild_genmsg()
 
 # Build robots
 rosbuild_add_executable(Resident src/Resident.cpp)
+rosbuild_add_executable(EntertainmentAssistant src/EntertainmentAssistant.cpp)
