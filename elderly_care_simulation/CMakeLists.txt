@@ -29,6 +29,7 @@ rosbuild_gensrv()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_executable(Resident src/Resident.cpp)
-rosbuild_add_executable(Scheduler src/Scheduler.cpp)
-rosbuild_add_executable(R1 src/R1.cpp)
+rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
+rosbuild_add_executable(Scheduler src/Scheduler.cpp)	#R1
+rosbuild_add_executable(Visitor src/Visitor.cpp)		#R2
+rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
