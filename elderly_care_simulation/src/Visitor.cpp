@@ -21,6 +21,7 @@ double px;
 double py;
 double theta;
 
+ros::Publisher RobotNode_stage_pub;
 ros::Publisher EventTrigger_pub;
 ros::Subscriber EventTrigger_sub;
 
@@ -29,8 +30,6 @@ void StageOdom_callback(nav_msgs::Odometry msg)
 	//This is the call back function to process odometry messages coming from Stage. 	
 	px = WORLD_POS_X + msg.pose.pose.position.x;
 	py = WORLD_POS_Y + msg.pose.pose.position.y;
-	// ROS_INFO("Current x position is: %f", px);
-	// ROS_INFO("Current y position is: %f", py);
 }
 
 
@@ -48,6 +47,7 @@ void EventTrigger_reply() {
 	msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
 	EventTrigger_pub.publish(msg);
+	ROS_INFO("Visitor Reply Message Sent");
 }
 
 void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
@@ -57,8 +57,19 @@ void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
 			ROS_INFO("Visitor Message Recieved");
 
 			// carry out activity
-			sleep(5);
+			// update angular z and inform stage
+			geometry_msgs::Twist RobotNode_cmdvel;
+			RobotNode_cmdvel.linear.x = linear_x;
+			RobotNode_cmdvel.angular.z = 2.0;
+			RobotNode_stage_pub.publish(RobotNode_cmdvel);
 
+			// stall for 5 seconds to allow robot to spin
+			sleep(4);
+
+			// reset angular z and update stage
+			RobotNode_cmdvel.linear.x = linear_x;
+			RobotNode_cmdvel.angular.z = 0.0;
+			RobotNode_stage_pub.publish(RobotNode_cmdvel);
 			// reply done function
 			EventTrigger_reply();
 		}
@@ -86,7 +97,7 @@ int main(int argc, char **argv)
 
 	//advertise() function will tell ROS that you want to publish on a given topic_
 	//to stage
-	ros::Publisher RobotNode_stage_pub = n.advertise<geometry_msgs::Twist>("robot_2/cmd_vel",1000);
+	RobotNode_stage_pub = n.advertise<geometry_msgs::Twist>("robot_2/cmd_vel",1000);
 	EventTrigger_pub = n.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
 
 	//subscribe to listen to messages coming from stage
