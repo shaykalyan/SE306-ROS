@@ -41,6 +41,7 @@ void stageOdometryCallback(const nav_msgs::Odometry msg)
 {
     //Update Current Position
     currentLocation = msg.pose.pose;
+    ROS_INFO("Quaternion angle: \nx: %f\ny: %f\nz: %f\nw: %f", msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
 }
 
 void updateDesiredLocationCallback(const geometry_msgs::Pose location)
