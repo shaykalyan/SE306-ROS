@@ -8,7 +8,7 @@
 #include "math.h"
 #include "EventTriggerConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
-#include <time.h>
+#include <unistd.h>
 
 //velocity of the robot
 double linear_x;
@@ -41,11 +41,6 @@ void StageLaser_callback(sensor_msgs::LaserScan msg)
 	
 }
 
-void stall(unsigned ms){
-    clock_t goal = clock()+ms;
-    while(goal>clock());
-}
-
 void EventTrigger_reply() {
 	elderly_care_simulation::EventTrigger msg;
 	msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
@@ -62,7 +57,7 @@ void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
 			ROS_INFO("Assistant Message Recieved");
 
 			// carry out activity
-			//stall(1000);
+			sleep(5); 
 
 			// reply done function
 			EventTrigger_reply();
@@ -92,7 +87,7 @@ ros::NodeHandle n;
 //advertise() function will tell ROS that you want to publish on a given topic_
 //to stage
 ros::Publisher RobotNode_stage_pub = n.advertise<geometry_msgs::Twist>("robot_3/cmd_vel",1000);
-EventTrigger_pub = n.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000);
+EventTrigger_pub = n.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
 
 //subscribe to listen to messages coming from stage
 ros::Subscriber StageOdo_sub = n.subscribe<nav_msgs::Odometry>("robot_3/odom",1000, StageOdom_callback);
