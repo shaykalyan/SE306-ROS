@@ -13,7 +13,7 @@ define mylaser ranger
 
 define myRobot position
 (
-  size [0.8 0.8 0.8]
+  size [0.5 0.5 0.5]
   drive "diff"
   mylaser(pose [ 0.050 0.000 0 0.000 ])
 
@@ -61,8 +61,7 @@ floorplan
 )
 
 # throw in a robot
-myRobot( pose [ 0 0 0 0 ] name "r0" color "red")
-myRobot( pose [ -3 0 0 0 ] name "r1" color "black")
-myRobot( pose [ 3 -3 0 0 ] name "r2" color "green")
-myRobot( pose [ 3 3 0 0 ] name "r3" color "blue")
-#myRobot( pose [ 12 0 0 0 ] name "r4" color "brown")
+myRobot( pose [ 0 0 0 0 ] name "r0" color "black")      # Resident
+myRobot( pose [ 10 10 0 0 ] name "r1" color "blue")   # Scheduler
+myRobot( pose [ 3 0 0 0 ] name "r2" color "green")    # Visitor
+myRobot( pose [ -3 0 0 0 ] name "r3" color "orange")    # Assistant
