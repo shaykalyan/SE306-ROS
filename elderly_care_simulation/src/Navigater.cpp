@@ -71,6 +71,8 @@ void updateCurrentVelocity()
     currentVelocity.linear.x = desiredLocation.position.x - currentLocation.position.x;
     currentVelocity.linear.y = desiredLocation.position.y - currentLocation.position.y;
     currentVelocity.linear.z = desiredLocation.position.z - currentLocation.position.z;
+
+    //currentVelocity.angular.z = M_PI;
     
     // Normalizes direction
     normalize(currentVelocity.linear);
@@ -86,6 +88,7 @@ bool atDesiredLocation()
     double toleratedDifference = 0.15;
     logLocation("Current location: ", currentLocation);
     logLocation("Desired location: ", desiredLocation);
+    //return false;    
     return doubleEquals(currentLocation.position.x, desiredLocation.position.x, toleratedDifference) &&
            doubleEquals(currentLocation.position.y, desiredLocation.position.y, toleratedDifference) &&
            doubleEquals(currentLocation.position.z, desiredLocation.position.z, toleratedDifference);
