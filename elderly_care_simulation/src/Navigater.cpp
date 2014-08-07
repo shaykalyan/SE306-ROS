@@ -3,10 +3,13 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/Quaternion.h>
 #include <nav_msgs/Odometry.h>
+#include <tf2_bullet.h>
+
 
 #include <sstream>
-#include "math.h"
+#include <math.h>
 #include <string>
 
 // Publisher to stage
@@ -27,6 +30,9 @@ geometry_msgs::Pose desiredLocation;
 // Current Velocity
 geometry_msgs::Twist currentVelocity;
 
+// Current Angle
+double currentAngle;
+
 void logLocation(std::string s, geometry_msgs::Pose p)
 {
     // Log current location details
@@ -41,7 +47,18 @@ void stageOdometryCallback(const nav_msgs::Odometry msg)
 {
     //Update Current Position
     currentLocation = msg.pose.pose;
-    ROS_INFO("Quaternion angle: \nx: %f\ny: %f\nz: %f\nw: %f", msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
+    double q0 = msg.pose.pose.orientation.x;
+    double q1 = msg.pose.pose.orientation.y;
+    double q2 = msg.pose.pose.orientation.z;
+    double q3 = msg.pose.pose.orientation.w;
+
+    double yaw,pitch,roll;
+    btMatrix3x3(msg.pose.pose.orientation).getEulerYPR(yaw,pitch,roll);
+    
+    
+    currentAngle = atan2(2 * (q0*q3 + q1*q2), 1 - 2 * (q2*q2 + q3*q3));
+    ROS_INFO("Current angle: %f", currentAngle);
+    ROS_INFO("Quaternion:    %f, %f, %f, %f", q0, q1, q2, q3);
 }
 
 void updateDesiredLocationCallback(const geometry_msgs::Pose location)
@@ -67,15 +84,29 @@ void normalize(geometry_msgs::Vector3 &vector)
 
 void updateCurrentVelocity()
 {
-    // Calculate Direction to travel
-    currentVelocity.linear.x = desiredLocation.position.x - currentLocation.position.x;
-    currentVelocity.linear.y = desiredLocation.position.y - currentLocation.position.y;
-    currentVelocity.linear.z = desiredLocation.position.z - currentLocation.position.z;
+    // Find the correct angle
+    //geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
 
-    //currentVelocity.angular.z = M_PI;
+    //directionVector.linear.x = desiredLocation.position.x - currentLocation.position.x;
+    //directionVector.linear.y = desiredLocation.position.y - currentLocation.position.y;
+    //directionVector.linear.z = desiredLocation.position.z - currentLocation.position.z;
     
-    // Normalizes direction
-    normalize(currentVelocity.linear);
+    // Thank god we're only doing 2D stuff
+    //double desiredAngle = atan2(directionVector.linear.y, directionVector.linear.x);
+    
+    //if (! doubleEquals(currentAngle, desiredAngle, 0.1)) {
+    //    // Turn towards angle
+    //    currentVelocity.linear.x = 0;
+    //    currentVelocity.linear.y = 0;
+    //    currentVelocity.linear.z = 0;
+    //    currentVelocity.angular.z = currentAngle - 
+    //} else {
+    //    // Go forward
+    //    currentVelocity.linear.x = 1;
+    //    currentVelocity.linear.y = 0;
+    //    currentVelocity.linear.z = 0;
+    //    currentVelocity.angular.z = 0;
+    //}
 }
 
 bool doubleEquals(double a, double b, double difference)
@@ -86,8 +117,8 @@ bool doubleEquals(double a, double b, double difference)
 bool atDesiredLocation()
 {  
     double toleratedDifference = 0.15;
-    logLocation("Current location: ", currentLocation);
-    logLocation("Desired location: ", desiredLocation);
+    //logLocation("Current location: ", currentLocation);
+    //logLocation("Desired location: ", desiredLocation);
     //return false;    
     return doubleEquals(currentLocation.position.x, desiredLocation.position.x, toleratedDifference) &&
            doubleEquals(currentLocation.position.y, desiredLocation.position.y, toleratedDifference) &&
@@ -110,6 +141,8 @@ void initializeRobot(int argc, char **argv)
 
     // Subscribe to the navigate topic
     navigationSubscriber = robotNodeHandle.subscribe("navigation", 1000, updateDesiredLocationCallback);
+
+    currentAngle = 0.0;
 }
 
 int main(int argc, char **argv)
@@ -122,6 +155,7 @@ int main(int argc, char **argv)
         // Tell the robot which way to go
         if (! atDesiredLocation()) {
             updateCurrentVelocity();
+            currentVelocity.angular.z = -1;
             stagePublisher.publish(currentVelocity);
         }
         ros::spinOnce();
