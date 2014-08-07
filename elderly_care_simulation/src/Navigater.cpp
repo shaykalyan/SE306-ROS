@@ -5,7 +5,7 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Quaternion.h>
 #include <nav_msgs/Odometry.h>
-#include <tf2_bullet.h>
+#include <tf/tf.h>
 
 
 #include <sstream>
@@ -47,18 +47,15 @@ void stageOdometryCallback(const nav_msgs::Odometry msg)
 {
     //Update Current Position
     currentLocation = msg.pose.pose;
-    double q0 = msg.pose.pose.orientation.x;
-    double q1 = msg.pose.pose.orientation.y;
-    double q2 = msg.pose.pose.orientation.z;
-    double q3 = msg.pose.pose.orientation.w;
+    double x = msg.pose.pose.orientation.x;
+    double y = msg.pose.pose.orientation.y;
+    double z = msg.pose.pose.orientation.z;
+    double w = msg.pose.pose.orientation.w;
+    
+    double roll, pitch, yaw;
+    tf::Matrix3x3(tf::Quaternion(x, y, z, w)).getRPY(roll, pitch, yaw);
 
-    double yaw,pitch,roll;
-    btMatrix3x3(msg.pose.pose.orientation).getEulerYPR(yaw,pitch,roll);
-    
-    
-    currentAngle = atan2(2 * (q0*q3 + q1*q2), 1 - 2 * (q2*q2 + q3*q3));
-    ROS_INFO("Current angle: %f", currentAngle);
-    ROS_INFO("Quaternion:    %f, %f, %f, %f", q0, q1, q2, q3);
+    currentAngle = yaw;
 }
 
 void updateDesiredLocationCallback(const geometry_msgs::Pose location)
@@ -82,36 +79,44 @@ void normalize(geometry_msgs::Vector3 &vector)
     
 }
 
-void updateCurrentVelocity()
-{
-    // Find the correct angle
-    //geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
-
-    //directionVector.linear.x = desiredLocation.position.x - currentLocation.position.x;
-    //directionVector.linear.y = desiredLocation.position.y - currentLocation.position.y;
-    //directionVector.linear.z = desiredLocation.position.z - currentLocation.position.z;
-    
-    // Thank god we're only doing 2D stuff
-    //double desiredAngle = atan2(directionVector.linear.y, directionVector.linear.x);
-    
-    //if (! doubleEquals(currentAngle, desiredAngle, 0.1)) {
-    //    // Turn towards angle
-    //    currentVelocity.linear.x = 0;
-    //    currentVelocity.linear.y = 0;
-    //    currentVelocity.linear.z = 0;
-    //    currentVelocity.angular.z = currentAngle - 
-    //} else {
-    //    // Go forward
-    //    currentVelocity.linear.x = 1;
-    //    currentVelocity.linear.y = 0;
-    //    currentVelocity.linear.z = 0;
-    //    currentVelocity.angular.z = 0;
-    //}
-}
-
 bool doubleEquals(double a, double b, double difference)
 {
     return std::abs(a - b) < difference;
+}
+
+void updateCurrentVelocity()
+{
+    // Find the correct angle
+    geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
+
+    directionVector.x = desiredLocation.position.x - currentLocation.position.x;
+    directionVector.y = desiredLocation.position.y - currentLocation.position.y;
+    directionVector.z = desiredLocation.position.z - currentLocation.position.z;
+    
+    // Thank god we're only doing 2D stuff
+    double desiredAngle = atan2(directionVector.y, directionVector.x);
+    ROS_INFO("DESIRED ANGLE: %f", desiredAngle);
+    ROS_INFO("CURRENT ANGLE: %f", currentAngle);
+    
+    if (! doubleEquals(currentAngle, desiredAngle, 0.15)) {
+        // Turn towards angle
+        currentVelocity.linear.x = 0;
+        currentVelocity.linear.y = 0;
+        currentVelocity.linear.z = 0;
+        if (directionVector.y < 0) {
+            // Turn anti clockwise
+            currentVelocity.angular.z = 1;
+        } else {
+            // Turn clockwise
+            currentVelocity.angular.z = -1;
+        }
+    } else {
+        // Go forward
+        currentVelocity.linear.x = 1;
+        currentVelocity.linear.y = 0;
+        currentVelocity.linear.z = 0;
+        currentVelocity.angular.z = 0;
+    }
 }
 
 bool atDesiredLocation()
@@ -155,7 +160,6 @@ int main(int argc, char **argv)
         // Tell the robot which way to go
         if (! atDesiredLocation()) {
             updateCurrentVelocity();
-            currentVelocity.angular.z = -1;
             stagePublisher.publish(currentVelocity);
         }
         ros::spinOnce();
