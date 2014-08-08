@@ -1,0 +1,49 @@
+include "include/robot.inc"
+include "include/floorplan.inc"
+
+#resolution of the underline bitmap model in meters.
+resolution 1  
+
+# simulation timestep in milliseconds. length of each simulation update cycle.
+interval_sim 100  
+
+window
+( 
+  #size of the window in pixels
+  size [ 800.000 600.000 ] 
+  scale 20
+)
+
+# load an environment bitmap
+floorplan
+( 
+  name "space"
+  bitmap "space.pgm"
+  size [30 20 0.5]
+  pose [ 0 0 0 0.000 ]
+)
+
+# throw in some robots
+robot(
+  name "Resident"
+  pose [ 0 0 0 0 ]
+  color "black"
+)
+
+robot(
+  name "Scheduler"
+  pose [ 10 10 0 0 ]
+  color "blue"
+)
+
+robot(
+  name "Visitor"
+  pose [ 3 0 0 0 ]
+  color "green"
+)
+
+robot(
+  name "Assistant"
+  pose [ -3 0 0 0 ]
+  color "orange"
+)
