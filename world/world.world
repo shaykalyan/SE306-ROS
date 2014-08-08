@@ -62,6 +62,5 @@ floorplan
 
 # throw in a robot
 myRobot( pose [ 0 0 0 0 ] name "r0" color "black")      # Resident
-myRobot( pose [ 10 10 0 0 ] name "r1" color "blue")   # Scheduler
-myRobot( pose [ 3 0 0 0 ] name "r2" color "green")    # Visitor
-myRobot( pose [ -3 0 0 0 ] name "r3" color "orange")    # Assistant
+myRobot( pose [ 3 0 0 0 ] name "r1" color "green")    # Visitor
+myRobot( pose [ -3 0 0 0 ] name "r2" color "orange")    # Assistant
