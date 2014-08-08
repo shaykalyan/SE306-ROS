@@ -9,7 +9,7 @@
 #include "elderly_care_simulation/DiceRollTrigger.h"
 
 // Number of sides this dice has
-const int DICE_SIDES = 200;
+const int DICE_SIDES = 300;
 
 // Signatures
 ros::Publisher diceTriggerPub;
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
         if (tick % 10 == 0) {
 
             int rolled = rand() % DICE_SIDES + 1;
-            ROS_INFO("ROLLED: %d. NEEDED: %d", rolled, threshold);
+            ROS_INFO("Rolled: %d. Needed: %d", rolled, threshold);
             
             if (rolled >= threshold) {
 
