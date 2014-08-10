@@ -171,6 +171,12 @@ void initializeRobot(int argc, char **argv)
     navigationSubscriber = robotNodeHandle.subscribe("navigation", 1000, updateDesiredLocationCallback);
 
     currentAngle = 0.0;
+    
+    // Set starting location
+    desiredLocation.x = currentLocation.position.x;
+    desiredLocation.y = currentLocation.position.y;
+    desiredLocation.z = currentLocation.position.z;
+    
 }
 
 int main(int argc, char **argv)
