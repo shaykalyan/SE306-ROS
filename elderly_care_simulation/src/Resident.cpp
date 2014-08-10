@@ -10,11 +10,17 @@
 #include <sstream>
 #include "math.h"
 
-//velocity of the robot
-double linear_x;
-double angular_z;
+#include "DiceRollerTypeConstants.h"
+#include "elderly_care_simulation/DiceRollTrigger.h"
+#include "EventTriggerConstants.h"
+#include "elderly_care_simulation/EventTrigger.h"
+#include <unistd.h> // sleep
 
-//pose of the robot
+// Velocity
+double linearX;
+double angularZ;
+
+// Pose
 const double WORLD_POS_X = 0;
 const double WORLD_POS_Y = 0;
 double px;
@@ -29,20 +35,39 @@ const int HEALTHY_THRESHOLD = 50;
 int happiness = 0;
 int amusement = 0;
 
+// Signatures
+ros::Publisher robotNodeStagePub;
+ros::Subscriber stageOdoPub;
+ros::Subscriber diceTriggerSub;
+ros::Publisher residentEvent_pub;
+void stageOdomCallback(nav_msgs::Odometry msg);
+void diceTriggerCallback();
 
-void StageOdom_callback(nav_msgs::Odometry msg)
-{
-	//This is the call back function to process odometry messages coming from Stage. 	
+/**
+    Process odometry messages from Stage
+*/
+void stageOdomCallback(nav_msgs::Odometry msg) {
+	
 	px = WORLD_POS_X + msg.pose.pose.position.x;
 	py = WORLD_POS_Y + msg.pose.pose.position.y;
+	// ROS_INFO("Current x position is: %f", px);
+	// ROS_INFO("Current y position is: %f", py);
 }
 
+void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
+    elderly_care_simulation::EventTrigger msg_out;
+    msg_out.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
+    msg_out.result = EVENT_TRIGGER_RESULT_FAILURE;
 
-void StageLaser_callback(sensor_msgs::LaserScan msg)
-{
-	//This is the callback function to process laser scan messages
-	//you can access the range data from msg.ranges[i]. i = sample number
-	
+    switch(msg.type) {
+        case MORAL_SUPPORT:
+            ROS_INFO("I really need moral support right now ...");
+            msg_out.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
+            break;
+    }
+
+    ROS_INFO("Sending request to scheduler");
+    residentEvent_pub.publish(msg_out);
 }
 
 /**
@@ -126,30 +151,38 @@ bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &re
 
 int main(int argc, char **argv)
 {
+/**
+    Process 
+*/
 
- //initialize robot parameters
-	//Initial pose. This is same as the pose that you used in the world file to set	the robot pose.
+int main(int argc, char **argv) {
+
+    // ROS initialiser calls
+    ros::init(argc, argv, "Resident");
+    ros::NodeHandle n;
+    ros::Rate loop_rate(10);
+    
+    // Initialise pose (must be same as world file)
 	theta = M_PI/2.0;
 	px = WORLD_POS_X;
 	py = WORLD_POS_Y;
 	
-	//Initial velocity
-	linear_x = 0.0;
-	angular_z = 0.0;
+	// Initialise velocity
+	linearX = 0.0;
+	angularZ = 0.0;
 	
-//You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
-ros::init(argc, argv, "Resident");
+    // Initialise publishers
+    robotNodeStagePub = n.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
+    residentEvent_pub = n.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
 
-//NodeHandle is the main access point to communicate with ros.
-ros::NodeHandle n;
+    // Initialise subscribers
+    stageOdoPub = n.subscribe<nav_msgs::Odometry>("robot_0/odom", 1000, stageOdomCallback);
+    diceTriggerSub = n.subscribe<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, diceTriggerCallback);
 
-//advertise() function will tell ROS that you want to publish on a given topic_
-//to stage
-ros::Publisher RobotNode_stage_pub = n.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
+    // Initialise messages
+    geometry_msgs::Twist robotNodeCmdvel;
 
-//subscribe to listen to messages coming from stage
-ros::Subscriber StageOdo_sub = n.subscribe<nav_msgs::Odometry>("robot_0/odom",1000, StageOdom_callback);
-ros::Subscriber StageLaser_sub = n.subscribe<sensor_msgs::LaserScan>("robot_0/base_scan",1000,StageLaser_callback);
+    while (ros::ok()) {
 
 // Advertise that the Resident responds to PerformTask service calls
 ros::ServiceServer service = n.advertiseService("perform_task", performTaskServiceHandler);
@@ -159,36 +192,29 @@ ros::Rate loop_rate(10);
 //a count of howmany messages we have sent
 int count = 0;
 
-////messages
-//velocity of this RobotNode
-geometry_msgs::Twist RobotNode_cmdvel;
-
 while (ros::ok())
 {
-	//messages to stage
-	RobotNode_cmdvel.linear.x = linear_x;
-	RobotNode_cmdvel.angular.z = angular_z;
-        
-	//publish the message
-	RobotNode_stage_pub.publish(RobotNode_cmdvel);
+    // Publish to Stage
+    robotNodeCmdvel.linear.x = linearX;
+    robotNodeCmdvel.angular.z = angularZ;
+    robotNodeStagePub.publish(robotNodeCmdvel);
 	
-	// Every once in a while, decrease health values
-	if (count % 50 == 0) {
-		// Every 5 secs
-		amusement -= 15;
-		ROS_INFO("Amusement level fell to %d", amusement);
+    // Every once in a while, decrease health values
+    if (count % 50 == 0) {
+        // Every 5 secs
+        amusement -= 15;
+        ROS_INFO("Amusement level fell to %d", amusement);
 		
-		//happiness -= 35;
-		//ROS_INFO("Happiness level fell to %d", amusement);
-
-	}
+        //happiness -= 35;
+        //ROS_INFO("Happiness level fell to %d", amusement);
+    }
 	
-	ros::spinOnce();
+    ros::spinOnce();
 
-	loop_rate.sleep();
-	++count;
+    loop_rate.sleep();
+    ++count;
 }
 
-return 0;
+    return 0;
 
 }

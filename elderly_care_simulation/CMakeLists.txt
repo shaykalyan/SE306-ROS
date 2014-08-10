@@ -33,3 +33,6 @@ rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
 rosbuild_add_executable(Scheduler src/Scheduler.cpp)	#R1
 rosbuild_add_executable(Visitor src/Visitor.cpp)		#R2
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
+
+# Invisible
+rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
