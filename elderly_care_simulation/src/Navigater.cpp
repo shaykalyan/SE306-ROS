@@ -11,6 +11,7 @@
 #include <sstream>
 #include <math.h>
 #include <string>
+#include <queue>
 
 // Publisher to stage
 ros::Publisher stagePublisher;
@@ -24,8 +25,8 @@ ros::Subscriber navigationSubscriber;
 // Current location of the robot
 geometry_msgs::Pose currentLocation;
 
-// Desired location of the robot
-geometry_msgs::Point desiredLocation;
+// Locations to go to.
+std::queue<geometry_msgs::Point> locationQueue;
 
 // Current Velocity
 geometry_msgs::Twist currentVelocity;
@@ -59,8 +60,8 @@ void stageOdometryCallback(const nav_msgs::Odometry msg)
 
 void updateDesiredLocationCallback(const geometry_msgs::Point location)
 {   
-    // Update desired location
-    desiredLocation = location;
+    // Add location to the locationQueue queue
+    locationQueue.push(location);
 }
 
 void normalize(geometry_msgs::Vector3 &vector)
@@ -109,6 +110,8 @@ void updateCurrentVelocity()
     // Find the correct angle
     geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
 
+    geometry_msgs::Point desiredLocation = locationQueue.front();
+
     directionVector.x = desiredLocation.x - currentLocation.position.x;
     directionVector.y = desiredLocation.y - currentLocation.position.y;
     directionVector.z = desiredLocation.z - currentLocation.position.z;
@@ -144,13 +147,22 @@ void updateCurrentVelocity()
 
 bool atDesiredLocation()
 {  
-    double toleratedDifference = 0.15;
-    //logLocation("Current location: ", currentLocation);
-    //logLocation("Desired location: ", desiredLocation);
-    //return false;    
-    return doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
-           doubleEquals(currentLocation.position.y, desiredLocation.y, toleratedDifference) &&
-           doubleEquals(currentLocation.position.z, desiredLocation.z, toleratedDifference);
+    if (locationQueue.empty()) {
+        return true;
+    } else {
+        double toleratedDifference = 0.15;
+        geometry_msgs::Point desiredLocation = locationQueue.front();
+        //logLocation("Current location: ", currentLocation);
+        //logLocation("Desired location: ", desiredLocation);
+        //return false;    
+        if( doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
+               doubleEquals(currentLocation.position.y, desiredLocation.y, toleratedDifference) &&
+               doubleEquals(currentLocation.position.z, desiredLocation.z, toleratedDifference)) {
+            locationQueue.pop();
+            return atDesiredLocation();
+        }
+    }
+    return false;
       
 }
 
@@ -169,14 +181,6 @@ void initializeRobot(int argc, char **argv)
 
     // Subscribe to the navigate topic
     navigationSubscriber = robotNodeHandle.subscribe("navigation", 1000, updateDesiredLocationCallback);
-
-    currentAngle = 0.0;
-    
-    // Set starting location
-    desiredLocation.x = currentLocation.position.x;
-    desiredLocation.y = currentLocation.position.y;
-    desiredLocation.z = currentLocation.position.z;
-    
 }
 
 int main(int argc, char **argv)
