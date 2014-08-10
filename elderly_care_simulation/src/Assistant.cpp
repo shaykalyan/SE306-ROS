@@ -7,7 +7,9 @@
 #include <sstream>
 #include "math.h"
 #include "EventTriggerConstants.h"
+#include "PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
+#include "elderly_care_simulation/PerformTask.h"
 #include <unistd.h>
 
 //velocity of the robot
@@ -21,9 +23,17 @@ double px;
 double py;
 double theta;
 
+// Tasks
+const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
+bool performingTask = false;
+
+// Topics
 ros::Publisher RobotNode_stage_pub;
 ros::Publisher EventTrigger_pub;
 ros::Subscriber EventTrigger_sub;
+
+// Services
+ros::ServiceClient performTaskClient;
 
 void StageOdom_callback(nav_msgs::Odometry msg)
 {
@@ -51,30 +61,68 @@ void EventTrigger_reply() {
 	ROS_INFO("Assistant Reply Message Sent");
 }
 
+/**
+ * Send a message to Stage to start rotation of this robot.
+ */
+void startRotating() {
+	geometry_msgs::Twist RobotNode_cmdvel;
+	RobotNode_cmdvel.linear.x = linear_x;
+	RobotNode_cmdvel.angular.z = 2.0;
+	RobotNode_stage_pub.publish(RobotNode_cmdvel);
+}
+
+/**
+ * Send a message to Stage to stop rotation of this robot.
+ */
+void stopRotating() {
+	geometry_msgs::Twist RobotNode_cmdvel;
+	RobotNode_cmdvel.linear.x = linear_x;
+	RobotNode_cmdvel.angular.z = 0.0;
+	RobotNode_stage_pub.publish(RobotNode_cmdvel);
+}
+
 void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
 {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
 			ROS_INFO("Assistant Message Recieved");
 
-			// carry out activity
-			// update angular z and inform stage
-			geometry_msgs::Twist RobotNode_cmdvel;
-			RobotNode_cmdvel.linear.x = linear_x;
-			RobotNode_cmdvel.angular.z = 2.0;
-			RobotNode_stage_pub.publish(RobotNode_cmdvel);
-
-			// stall for 5 seconds to allow robot to spin
-			sleep(4);
-
-			// reset angular z and update stage
-			RobotNode_cmdvel.linear.x = linear_x;
-			RobotNode_cmdvel.angular.z = 0.0;
-			RobotNode_stage_pub.publish(RobotNode_cmdvel);
-
-			// trigger successful reply
-			EventTrigger_reply();
+			performingTask = true;
 		}
+	}
+}
+
+/**
+ * Perform a task on the resident by making a service call to them.
+ */
+void performTask() {
+	
+	// Generate the service call
+	elderly_care_simulation::PerformTask performTaskSrv;
+	performTaskSrv.request.taskType = MY_TASK;
+	
+	// Make the call using the client
+	if (!performTaskClient.call(performTaskSrv)) {
+		throw std::runtime_error("Service call to the initiate task with Resident failed");
+	}
+	
+	switch (performTaskSrv.response.result) {
+		case PERFORM_TASK_RESULT_ACCEPTED:
+			// Resident has accepted the task but keep going
+			ROS_INFO("Resident has accepted the task but says keep going");
+			startRotating();
+			break;
+		case PERFORM_TASK_RESULT_FINISHED:
+			// Resident accepted the task and has had enough
+			ROS_INFO("Resident has accepted the task and has had enough");
+			performingTask = false;
+			stopRotating();
+			EventTrigger_reply();
+			break;
+		case PERFORM_TASK_RESULT_BUSY:
+			// Resident is busy
+			ROS_INFO("Resident is busy");
+			break;
 	}
 }
 
@@ -106,6 +154,9 @@ int main(int argc, char **argv)
 	ros::Subscriber StageOdo_sub = n.subscribe<nav_msgs::Odometry>("robot_3/odom",1000, StageOdom_callback);
 	ros::Subscriber StageLaser_sub = n.subscribe<sensor_msgs::LaserScan>("robot_3/base_scan",1000,StageLaser_callback);
 	EventTrigger_sub = n.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, EventTrigger_callback);
+	
+	// Create a client to make service requests to the Resident
+	performTaskClient = n.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
 	ros::Rate loop_rate(10);
 
@@ -123,9 +174,13 @@ int main(int argc, char **argv)
 		RobotNode_cmdvel.angular.z = angular_z;
 	        
 		//publish the message
-		RobotNode_stage_pub.publish(RobotNode_cmdvel);
+		//RobotNode_stage_pub.publish(RobotNode_cmdvel);
 		
 		ros::spinOnce();
+		
+		if (performingTask) {
+			performTask();
+		}
 
 		loop_rate.sleep();
 		++count;

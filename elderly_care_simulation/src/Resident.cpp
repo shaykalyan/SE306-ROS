@@ -35,8 +35,6 @@ void StageOdom_callback(nav_msgs::Odometry msg)
 	//This is the call back function to process odometry messages coming from Stage. 	
 	px = WORLD_POS_X + msg.pose.pose.position.x;
 	py = WORLD_POS_Y + msg.pose.pose.position.y;
-	ROS_INFO("Current x position is: %f", px);
-	ROS_INFO("Current y position is: %f", py);
 }
 
 
@@ -107,7 +105,10 @@ int handleTask(int taskType) {
  */
 bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
 				   elderly_care_simulation::PerformTask::Response &res) {
-	if (currentTaskType == -1) {
+					   
+	ROS_INFO("Received service call with task type: %d", req.taskType);
+	
+	if (currentTaskType == NO_CURRENT_TASK) {
 		// I don't yet have a task, make this one our current task
 		currentTaskType = req.taskType;
 	}
@@ -150,6 +151,9 @@ ros::Publisher RobotNode_stage_pub = n.advertise<geometry_msgs::Twist>("robot_0/
 ros::Subscriber StageOdo_sub = n.subscribe<nav_msgs::Odometry>("robot_0/odom",1000, StageOdom_callback);
 ros::Subscriber StageLaser_sub = n.subscribe<sensor_msgs::LaserScan>("robot_0/base_scan",1000,StageLaser_callback);
 
+// Advertise that the Resident responds to PerformTask service calls
+ros::ServiceServer service = n.advertiseService("perform_task", performTaskServiceHandler);
+
 ros::Rate loop_rate(10);
 
 //a count of howmany messages we have sent
@@ -167,6 +171,17 @@ while (ros::ok())
         
 	//publish the message
 	RobotNode_stage_pub.publish(RobotNode_cmdvel);
+	
+	// Every once in a while, decrease health values
+	if (count % 50 == 0) {
+		// Every 5 secs
+		amusement -= 15;
+		ROS_INFO("Amusement level fell to %d", amusement);
+		
+		//happiness -= 35;
+		//ROS_INFO("Happiness level fell to %d", amusement);
+
+	}
 	
 	ros::spinOnce();
 
