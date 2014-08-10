@@ -149,8 +149,6 @@ bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &re
 	return true;
 }
 
-int main(int argc, char **argv)
-{
 /**
     Process 
 */
@@ -181,39 +179,35 @@ int main(int argc, char **argv) {
 
     // Initialise messages
     geometry_msgs::Twist robotNodeCmdvel;
+    
+    // Advertise that the Resident responds to PerformTask service calls
+	ros::ServiceServer service = n.advertiseService("perform_task", performTaskServiceHandler);
 
-    while (ros::ok()) {
+	//a count of howmany messages we have sent
+	int count = 0;
 
-// Advertise that the Resident responds to PerformTask service calls
-ros::ServiceServer service = n.advertiseService("perform_task", performTaskServiceHandler);
-
-ros::Rate loop_rate(10);
-
-//a count of howmany messages we have sent
-int count = 0;
-
-while (ros::ok())
-{
-    // Publish to Stage
-    robotNodeCmdvel.linear.x = linearX;
-    robotNodeCmdvel.angular.z = angularZ;
-    robotNodeStagePub.publish(robotNodeCmdvel);
-	
-    // Every once in a while, decrease health values
-    if (count % 50 == 0) {
-        // Every 5 secs
-        amusement -= 15;
-        ROS_INFO("Amusement level fell to %d", amusement);
+	while (ros::ok())
+	{
+		// Publish to Stage
+		robotNodeCmdvel.linear.x = linearX;
+		robotNodeCmdvel.angular.z = angularZ;
+		robotNodeStagePub.publish(robotNodeCmdvel);
 		
-        //happiness -= 35;
-        //ROS_INFO("Happiness level fell to %d", amusement);
-    }
-	
-    ros::spinOnce();
+		// Every once in a while, decrease health values
+		if (count % 50 == 0) {
+			// Every 5 secs
+			amusement -= 15;
+			ROS_INFO("Amusement level fell to %d", amusement);
+			
+			//happiness -= 35;
+			//ROS_INFO("Happiness level fell to %d", amusement);
+		}
+		
+		ros::spinOnce();
 
-    loop_rate.sleep();
-    ++count;
-}
+		loop_rate.sleep();
+		++count;
+	}
 
     return 0;
 
