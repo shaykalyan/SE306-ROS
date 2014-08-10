@@ -1,67 +1,49 @@
-define mylaser ranger
-(
-  sensor(
-  range [ 0.0 30.0 ] # range
-  fov 180       # field of vision
-  samples 180   # samples 
-  )
-  # generic model properties
-  color "black"
-  size [ 0.05 0.05 0.1 ]
-  
-)
+include "include/robot.inc"
+include "include/floorplan.inc"
 
-define myRobot position
-(
-  size [0.5 0.5 0.5]
-  drive "diff"
-  mylaser(pose [ 0.050 0.000 0 0.000 ])
+#resolution of the underline bitmap model in meters.
+resolution 1  
 
-  obstacle_return 0
-)
-
-define floorplan model
-(
-  # sombre, sensible, artistic
-  color "gray30"
-
-  # most maps will need a bounding box
-  boundary 1
-  
-  ranger_return 1
-)
-
-define my_block model
-(
-  size [0.5 0.5 0.5]
-  gui_nose 0
-)
-
-# set the resolution of the underlying raytrace model in meters
-
-resolution 1 #resolution of the underline bitmap model in meters. 
-
-interval_sim 100  # simulation timestep in milliseconds. length of each simulation update cycle.
-
+# simulation timestep in milliseconds. length of each simulation update cycle.
+interval_sim 100  
 
 window
 ( 
-  size [ 800.000 600.000 ] #size of the window in pixels
+  #size of the window in pixels
+  size [ 800.000 600.000 ] 
   scale 20
-  
 )
 
 # load an environment bitmap
 floorplan
 ( 
-  name "swarm"
-  bitmap "swarm_world.pgm"
+  name "space"
+  bitmap "space.pgm"
   size [30 20 0.5]
   pose [ 0 0 0 0.000 ]
 )
 
-# throw in a robot
-myRobot( pose [ 0 0 0 0 ] name "r0" color "black")      # Resident
-myRobot( pose [ 10 10 0 0 ] name "r1" color "blue")   # Scheduler
-myRobot( pose [ 3 0 0 0 ] name "r2" color "green")    # Visitor
-myRobot( pose [ -3 0 0 0 ] name "r3" color "orange")    # Assistant
+# throw in some robots
+robot(
+  name "Resident"
+  pose [ 0 0 0 0 ]
+  color "black"
+)
+
+robot(
+  name "Scheduler"
+  pose [ 10 10 0 0 ]
+  color "blue"
+)
+
+robot(
+  name "Visitor"
+  pose [ 3 0 0 0 ]
+  color "green"
+)
+
+robot(
+  name "Assistant"
+  pose [ -3 0 0 0 ]
+  color "orange"
+)
