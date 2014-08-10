@@ -1,9 +1,8 @@
 <launch>
 	<node name="stage" pkg="stage_ros" type="stageros" args="$(find elderly_care_simulation)/../world/world.world"/>
 	<node name="resident" pkg="elderly_care_simulation" type="Resident" />
-	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
-	<node name="entertainer" pkg="elderly_care_simulation" type="Entertainer" />
-	<node name="assistant" pkg="elderly_care_simulation" type="Assistant" />
 	<node name="scheduler" pkg="elderly_care_simulation" type="Scheduler" />
+	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
+	<node name="assistant" pkg="elderly_care_simulation" type="Assistant" />
 	<node name="console" pkg="rqt_console" type="rqt_console" />
 </launch>
