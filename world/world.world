@@ -25,15 +25,10 @@ floorplan
 
 # throw in some robots
 robot(
+  bitmap "Paranoid_android_with_shadow.png"
   name "Resident"
   pose [ 0 0 0 0 ]
   color "black"
-)
-
-robot(
-  name "Scheduler"
-  pose [ -1 0 0 0 ]
-  color "aqua"
 )
 
 robot(
