@@ -11,6 +11,8 @@
 #include <queue>
 #include <vector>
 #include <utility>
+#include "EventNode.h"
+#include <unistd.h> // sleep
 
 //velocity of the robot
 double linear_x;
@@ -23,43 +25,26 @@ double px;
 double py;
 double theta;
 
-// 0 = VISITOR // 1 = ASSISTANT
-bool robot_switch = true;
+// flag to indicate scheduler's status
 bool readyToSend = true;
 
+// globals
+std::priority_queue<EventNode > eventQueue;
 
-class EventNode {
-public:
-	EventNode(int priority, elderly_care_simulation::EventTrigger msg);
-	int getPriority() const;
-	elderly_care_simulation::EventTrigger getEventTriggerObject() const;
-private:
-	int _priority;
-	elderly_care_simulation::EventTrigger _msg;
-};
-
-EventNode::EventNode(int priority, elderly_care_simulation::EventTrigger msg) {
-	_priority = priority;
-	_msg = msg;
-}
-
-int EventNode::getPriority() const {
-	return _priority;
-}
-
-elderly_care_simulation::EventTrigger EventNode::getEventTriggerObject() const {
-	return _msg;
-}
-
-bool operator<(EventNode lhs, EventNode rhs) {
-	return lhs.getPriority() > rhs.getPriority();
-}
-
-struct EventPriorityComparator : public std::binary_function<EventNode*, EventNode*, bool> {
-	bool operator() (const EventNode* a, const EventNode* b){
-		return a->getPriority() > b->getPriority(); 
+void ResidentEvent_callback(elderly_care_simulation::EventTrigger msg) {
+	ROS_INFO("Received Message from Resident");
+	int priority = 2; // default
+	switch(msg.event_type) {
+		case EVENT_TRIGGER_EVENT_TYPE_VISITOR:
+			priority = 2;
+			break;
+		case EVENT_TRIGGER_EVENT_TYPE_ASSISTANT:
+			priority = 2;
+			break;
 	}
-};
+	ROS_INFO("Adding request to queue");
+	eventQueue.push(EventNode(priority, msg));
+}
 
 void EventTrigger_callback(elderly_care_simulation::EventTrigger msg) {
 	
@@ -88,39 +73,6 @@ int main(int argc, char **argv) {
 	linear_x = 0.0;
 	angular_z = 0.0;
 
-	std::priority_queue<EventNode > eventQueue;
-
-	elderly_care_simulation::EventTrigger m1;
-	m1.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-	m1.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
-	m1.result = EVENT_TRIGGER_RESULT_FAILURE;
-
-	elderly_care_simulation::EventTrigger m2;
-	m2.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-	m2.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
-	m2.result = EVENT_TRIGGER_RESULT_FAILURE;
-
-	elderly_care_simulation::EventTrigger m3;
-	m3.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-	m3.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
-	m3.result = EVENT_TRIGGER_RESULT_FAILURE;
-
-	elderly_care_simulation::EventTrigger m4;
-	m4.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-	m4.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
-	m4.result = EVENT_TRIGGER_RESULT_FAILURE;
-
-	elderly_care_simulation::EventTrigger m5;
-	m5.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-	m5.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
-	m5.result = EVENT_TRIGGER_RESULT_FAILURE;
-
-	eventQueue.push(EventNode(1, m1));
-	eventQueue.push(EventNode(2, m2));
-	eventQueue.push(EventNode(3, m3));
-	eventQueue.push(EventNode(4, m4));
-	eventQueue.push(EventNode(5, m5));
-	
 	//You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
 	ros::init(argc, argv, "Scheduler");
 
@@ -132,7 +84,8 @@ int main(int argc, char **argv) {
 
 	// subscribe to event_trigger topic
 	ros::Subscriber EventTrigger_sub = n.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, EventTrigger_callback);
-
+	ros::Subscriber ResidentEvent_sub = n.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, ResidentEvent_callback);
+	
 	ros::Rate loop_rate(10);
 
 	//a count of howmany messages we have sent
@@ -146,25 +99,23 @@ int main(int argc, char **argv) {
 
 		if (readyToSend) {
 
-			if(eventQueue.size() <= 0) {
-				ROS_INFO("No more tasks to do.");
-				continue;
+			if(eventQueue.size() > 0) {
+				// ROS_INFO("No more tasks trigger.");
+
+				// block scheduler
+				readyToSend = false;
+
+				elderly_care_simulation::EventTrigger msg;
+				msg = eventQueue.top().getEventTriggerMessage();
+				eventQueue.pop();
+
+				if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
+					ROS_INFO("Publishing to Visitor");
+				} else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
+					ROS_INFO("Publishing to Assitant");
+				}
+				EventTrigger_pub.publish(msg);
 			}
-
-			// block scheduler
-			readyToSend = false;
-
-			elderly_care_simulation::EventTrigger msg;
-			msg = eventQueue.top().getEventTriggerObject();
-			eventQueue.pop();
-
-			if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-				ROS_INFO("Publishing to Visitor");
-			} else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-				ROS_INFO("Publishing to Assitant");
-			}
-			
-			EventTrigger_pub.publish(msg);
 		}
 
 		ros::spinOnce();

@@ -31,12 +31,6 @@ robot(
 )
 
 robot(
-  name "Scheduler"
-  pose [ 10 10 0 0 ]
-  color "blue"
-)
-
-robot(
   name "Visitor"
   pose [ 3 0 0 0 ]
   color "green"

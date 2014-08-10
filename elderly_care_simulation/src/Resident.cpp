@@ -9,6 +9,9 @@
 
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
+#include "EventTriggerConstants.h"
+#include "elderly_care_simulation/EventTrigger.h"
+#include <unistd.h> // sleep
 
 // Velocity
 double linearX;
@@ -25,6 +28,7 @@ double theta;
 ros::Publisher robotNodeStagePub;
 ros::Subscriber stageOdoPub;
 ros::Subscriber diceTriggerSub;
+ros::Publisher residentEvent_pub;
 void stageOdomCallback(nav_msgs::Odometry msg);
 void diceTriggerCallback();
 
@@ -40,12 +44,19 @@ void stageOdomCallback(nav_msgs::Odometry msg) {
 }
 
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
-    
+    elderly_care_simulation::EventTrigger msg_out;
+    msg_out.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
+    msg_out.result = EVENT_TRIGGER_RESULT_FAILURE;
+
     switch(msg.type) {
         case MORAL_SUPPORT:
             ROS_INFO("I really need moral support right now ...");
+            msg_out.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
             break;
     }
+
+    ROS_INFO("Sending request to scheduler");
+    residentEvent_pub.publish(msg_out);
 }
 
 /**
@@ -70,6 +81,7 @@ int main(int argc, char **argv) {
 	
     // Initialise publishers
     robotNodeStagePub = n.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
+    residentEvent_pub = n.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
 
     // Initialise subscribers
     stageOdoPub = n.subscribe<nav_msgs::Odometry>("robot_0/odom", 1000, stageOdomCallback);

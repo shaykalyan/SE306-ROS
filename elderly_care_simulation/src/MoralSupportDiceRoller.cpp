@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     ros::Rate loop_rate(10);
 
     // Declare publishers
-    diceTriggerPub = n.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000);
+    diceTriggerPub = n.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, true);
 
     int tick = 1;
     int threshold = DICE_SIDES;
