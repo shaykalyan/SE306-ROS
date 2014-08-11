@@ -3,6 +3,8 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
+#include <tf/tf.h>
+#include <queue>
 
 #include <sstream>
 #include "math.h"
@@ -12,17 +14,6 @@
 #include "elderly_care_simulation/PerformTask.h"
 #include <unistd.h>
 
-//velocity of the robot
-double linear_x;
-double angular_z;
-
-//pose of the robot
-const double WORLD_POS_X = -3;
-const double WORLD_POS_Y = 0;
-double px;
-double py;
-double theta;
-
 // Tasks
 const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
 bool performingTask = false;
@@ -31,23 +22,129 @@ bool performingTask = false;
 ros::Publisher RobotNode_stage_pub;
 ros::Publisher EventTrigger_pub;
 ros::Subscriber EventTrigger_sub;
+ros::Subscriber Stage_sub;
+ros::Subscriber LocationInstructions_sub;
 
 // Services
 ros::ServiceClient performTaskClient;
 
-void StageOdom_callback(nav_msgs::Odometry msg)
+/*************************
+ * Location variables
+ ************************/
+
+double currentAngle;
+
+// Current velocity of the Robot
+geometry_msgs::Twist currentVelocity;
+
+// Current location of the robot
+geometry_msgs::Pose currentLocation;
+
+// Locations to visit
+std::queue<geometry_msgs::Point> locationQueue;
+
+
+void stageOdometryCallback(const nav_msgs::Odometry msg)
 {
-	//This is the call back function to process odometry messages coming from Stage. 	
-	px = WORLD_POS_X + msg.pose.pose.position.x;
-	py = WORLD_POS_Y + msg.pose.pose.position.y;
+    //Update Current Position
+    currentLocation = msg.pose.pose;
+    double x = currentLocation.orientation.x;
+    double y = currentLocation.orientation.y;
+    double z = currentLocation.orientation.z;
+    double w = currentLocation.orientation.w;
+    
+    double roll, pitch, yaw;
+    tf::Matrix3x3(tf::Quaternion(x, y, z, w)).getRPY(roll, pitch, yaw);
+    currentAngle = yaw;
 }
 
+void updateDesiredLocationCallback(const geometry_msgs::Point location)
+{   
+    // Add location to the locationQueue queue
+    locationQueue.push(location);
+}
 
-void StageLaser_callback(sensor_msgs::LaserScan msg)
+bool doubleEquals(double a, double b, double difference)
 {
-	//This is the callback function to process laser scan messages
-	//you can access the range data from msg.ranges[i]. i = sample number
-	
+    return std::abs(a - b) < difference;
+}
+
+double normalizeAngle(double angle)
+{
+    while (angle < 0) {
+        angle += 2 * M_PI;
+    }
+    while (angle > 2 * M_PI) {
+        angle -= 2 * M_PI;
+    }
+    return angle;
+}
+
+bool turnAnticlockwise(double currentAngle, double desiredAngle)
+{   
+    if (currentAngle < 0) {
+        currentAngle = 2 * M_PI + currentAngle;
+    }
+    if (desiredAngle < 0) {
+        desiredAngle = 2 * M_PI + desiredAngle;
+    }
+    desiredAngle = normalizeAngle(desiredAngle - currentAngle);
+    return desiredAngle < M_PI;
+    
+}
+
+void updateCurrentVelocity()
+{
+    // Find the correct angle
+    geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
+
+    geometry_msgs::Point desiredLocation = locationQueue.front();
+
+    directionVector.x = desiredLocation.x - currentLocation.position.x;
+    directionVector.y = desiredLocation.y - currentLocation.position.y;
+    directionVector.z = desiredLocation.z - currentLocation.position.z;
+    
+    // Thank god we're only doing 2D stuff
+    double desiredAngle = atan2(directionVector.y, directionVector.x);
+
+    if (! doubleEquals(currentAngle, desiredAngle, 0.2)) {
+        // Turn towards angle
+        currentVelocity.linear.x = 0;
+        currentVelocity.linear.y = 0;
+        currentVelocity.linear.z = 0;
+        
+        if (turnAnticlockwise(currentAngle, desiredAngle)) {
+            // Turn anti clockwise
+            currentVelocity.angular.z = 1;
+        } else {
+            // Turn clockwise
+            currentVelocity.angular.z = -1;
+        }
+    } else {
+        // Go forward
+        currentVelocity.linear.x = 1;
+        currentVelocity.linear.y = 0;
+        currentVelocity.linear.z = 0;
+        currentVelocity.angular.z = 0;
+    }
+}
+
+bool atDesiredLocation()
+{  
+    if (locationQueue.empty()) {
+        return true;
+    } else {
+        double toleratedDifference = 0.15;
+        geometry_msgs::Point desiredLocation = locationQueue.front();
+
+        if( doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
+            doubleEquals(currentLocation.position.y, desiredLocation.y, toleratedDifference)) {
+            locationQueue.pop();
+            return atDesiredLocation();
+        }
+    }
+    return false;
+      
 }
 
 void EventTrigger_reply() {
@@ -66,7 +163,7 @@ void EventTrigger_reply() {
  */
 void startRotating() {
 	geometry_msgs::Twist RobotNode_cmdvel;
-	RobotNode_cmdvel.linear.x = linear_x;
+	RobotNode_cmdvel.linear.x = 0;
 	RobotNode_cmdvel.angular.z = 2.0;
 	RobotNode_stage_pub.publish(RobotNode_cmdvel);
 }
@@ -76,7 +173,7 @@ void startRotating() {
  */
 void stopRotating() {
 	geometry_msgs::Twist RobotNode_cmdvel;
-	RobotNode_cmdvel.linear.x = linear_x;
+	RobotNode_cmdvel.linear.x = 0;
 	RobotNode_cmdvel.angular.z = 0.0;
 	RobotNode_stage_pub.publish(RobotNode_cmdvel);
 }
@@ -127,18 +224,7 @@ void performTask() {
 }
 
 int main(int argc, char **argv)
-{
-
- 	//initialize robot parameters
-	//Initial pose. This is same as the pose that you used in the world file to set	the robot pose.
-	theta = M_PI/2.0;
-	px = WORLD_POS_X;
-	py = WORLD_POS_Y;
-	
-	//Initial velocity
-	linear_x = 0.0;
-	angular_z = 0.0;
-	
+{	
 	//You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
 	ros::init(argc, argv, "Assistant");
 
@@ -148,42 +234,34 @@ int main(int argc, char **argv)
 	//advertise() function will tell ROS that you want to publish on a given topic_
 	//to stage
 	RobotNode_stage_pub = n.advertise<geometry_msgs::Twist>("robot_2/cmd_vel",1000);
-	EventTrigger_pub = n.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
+	EventTrigger_pub = n.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
 	//subscribe to listen to messages coming from stage
-	ros::Subscriber StageOdo_sub = n.subscribe<nav_msgs::Odometry>("robot_2/odom",1000, StageOdom_callback);
-	ros::Subscriber StageLaser_sub = n.subscribe<sensor_msgs::LaserScan>("robot_2/base_scan",1000,StageLaser_callback);
+	Stage_sub = n.subscribe<nav_msgs::Odometry>("robot_2/base_pose_ground_truth",1000, stageOdometryCallback);
 	EventTrigger_sub = n.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, EventTrigger_callback);
+    LocationInstructions_sub = n.subscribe<geometry_msgs::Point>("robot_2/location", 1000, updateDesiredLocationCallback);
 	
 	// Create a client to make service requests to the Resident
 	performTaskClient = n.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
 	ros::Rate loop_rate(10);
 
-	//a count of howmany messages we have sent
-	int count = 0;
-
-	////messages
-	//velocity of this RobotNode
-	geometry_msgs::Twist RobotNode_cmdvel;
-
 	while (ros::ok())
 	{
-		//messages to stage
-		RobotNode_cmdvel.linear.x = linear_x;
-		RobotNode_cmdvel.angular.z = angular_z;
-	        
-		//publish the message
-		//RobotNode_stage_pub.publish(RobotNode_cmdvel);
-		
-		ros::spinOnce();
-		
-		if (performingTask) {
+        	        
+		if (! atDesiredLocation()) {
+            ROS_INFO("HELLO");
+            updateCurrentVelocity();
+            RobotNode_stage_pub.publish(currentVelocity);
+        } /*else if (performingTask) {
+            ROS_INFO("Performing task");
 			performTask();
-		}
-
+		} else {
+            ROS_INFO("DOING NOTHING");
+        }*/
+        
+        ros::spinOnce();
 		loop_rate.sleep();
-		++count;
 	}
 
 	return 0;

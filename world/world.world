@@ -2,7 +2,7 @@ include "include/robot.inc"
 include "include/floorplan.inc"
 
 #resolution of the underline bitmap model in meters.
-resolution 1  
+resolution 0.02 
 
 # simulation timestep in milliseconds. length of each simulation update cycle.
 interval_sim 100  
