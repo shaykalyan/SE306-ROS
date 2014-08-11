@@ -118,7 +118,7 @@ bool atDesiredLocation()
     if (locationQueue.empty()) {
         return true;
     } else {
-        double toleratedDifference = 0.15;
+        double toleratedDifference = 0.05;
         geometry_msgs::Point desiredLocation = locationQueue.front();
 
         if( doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
@@ -135,7 +135,7 @@ void updateCurrentVelocity()
 {
     if (atDesiredLocation()) {
         currentVelocity.linear.x = 0;
-        currentVelocity.angular.x = 0;
+        currentVelocity.angular.z = 0;
         return;
     }
     // Find the correct angle
@@ -150,7 +150,7 @@ void updateCurrentVelocity()
     // Thank god we're only doing 2D stuff
     double desiredAngle = atan2(directionVector.y, directionVector.x);
 
-    if (! doubleEquals(currentAngle, desiredAngle, 0.2)) {
+    if (! doubleEquals(currentAngle, desiredAngle, 0.1)) {
         // Turn towards angle
         currentVelocity.linear.x = 0;
         
@@ -270,13 +270,12 @@ int main(int argc, char **argv)
 	performTaskClient = n.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
 
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(25);
 
 	while (ros::ok())
 	{
         	        
         updateCurrentVelocity();
-        ROS_DEBUG("ANGULAR %f", currentVelocity.angular.x);
         RobotNode_stage_pub.publish(currentVelocity);
         
         if (atDesiredLocation() && performingTask) {
