@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "std_msgs/String.h"
+#include "std_msgs/Empty.h"
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
@@ -22,6 +22,8 @@ bool performingTask = false;
 ros::Publisher RobotNode_stage_pub;
 ros::Publisher EventTrigger_pub;
 ros::Subscriber EventTrigger_sub;
+ros::Subscriber PathToRobot_sub;
+ros::Subscriber PathToHome_sub;
 ros::Subscriber Stage_sub;
 ros::Subscriber LocationInstructions_sub;
 
@@ -43,6 +45,24 @@ geometry_msgs::Pose currentLocation;
 // Locations to visit
 std::queue<geometry_msgs::Point> locationQueue;
 
+void goToResident(const std_msgs::Empty) {
+    geometry_msgs::Point locationOne;
+    locationOne.y = -7.5;
+    geometry_msgs::Point locationTwo;
+    locationTwo.y = -1;
+    locationQueue.push(locationOne);
+    locationQueue.push(locationTwo);
+}
+
+void goToHome(const std_msgs::Empty) {
+    geometry_msgs::Point locationOne;
+    locationOne.y = -7.5;
+    geometry_msgs::Point locationTwo;
+    locationTwo.x = -7.5;
+    locationTwo.y = -7.5;
+    locationQueue.push(locationOne);
+    locationQueue.push(locationTwo);
+}
 
 void stageOdometryCallback(const nav_msgs::Odometry msg)
 {
@@ -93,42 +113,6 @@ bool turnAnticlockwise(double currentAngle, double desiredAngle)
     
 }
 
-void updateCurrentVelocity()
-{
-    // Find the correct angle
-    geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
-
-    geometry_msgs::Point desiredLocation = locationQueue.front();
-
-    directionVector.x = desiredLocation.x - currentLocation.position.x;
-    directionVector.y = desiredLocation.y - currentLocation.position.y;
-    directionVector.z = desiredLocation.z - currentLocation.position.z;
-    
-    // Thank god we're only doing 2D stuff
-    double desiredAngle = atan2(directionVector.y, directionVector.x);
-
-    if (! doubleEquals(currentAngle, desiredAngle, 0.2)) {
-        // Turn towards angle
-        currentVelocity.linear.x = 0;
-        currentVelocity.linear.y = 0;
-        currentVelocity.linear.z = 0;
-        
-        if (turnAnticlockwise(currentAngle, desiredAngle)) {
-            // Turn anti clockwise
-            currentVelocity.angular.z = 1;
-        } else {
-            // Turn clockwise
-            currentVelocity.angular.z = -1;
-        }
-    } else {
-        // Go forward
-        currentVelocity.linear.x = 1;
-        currentVelocity.linear.y = 0;
-        currentVelocity.linear.z = 0;
-        currentVelocity.angular.z = 0;
-    }
-}
-
 bool atDesiredLocation()
 {  
     if (locationQueue.empty()) {
@@ -147,6 +131,43 @@ bool atDesiredLocation()
       
 }
 
+void updateCurrentVelocity()
+{
+    if (atDesiredLocation()) {
+        currentVelocity.linear.x = 0;
+        currentVelocity.angular.x = 0;
+        return;
+    }
+    // Find the correct angle
+    geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
+
+    geometry_msgs::Point desiredLocation = locationQueue.front();
+
+    directionVector.x = desiredLocation.x - currentLocation.position.x;
+    directionVector.y = desiredLocation.y - currentLocation.position.y;
+    directionVector.z = desiredLocation.z - currentLocation.position.z;
+    
+    // Thank god we're only doing 2D stuff
+    double desiredAngle = atan2(directionVector.y, directionVector.x);
+
+    if (! doubleEquals(currentAngle, desiredAngle, 0.2)) {
+        // Turn towards angle
+        currentVelocity.linear.x = 0;
+        
+        if (turnAnticlockwise(currentAngle, desiredAngle)) {
+            // Turn anti clockwise
+            currentVelocity.angular.z = 1;
+        } else {
+            // Turn clockwise
+            currentVelocity.angular.z = -1;
+        }
+    } else {
+        // Go forward
+        currentVelocity.linear.x = 1;
+        currentVelocity.angular.z = 0;
+    }
+}
+
 void EventTrigger_reply() {
 	// create response message
 	elderly_care_simulation::EventTrigger msg;
@@ -162,6 +183,7 @@ void EventTrigger_reply() {
  * Send a message to Stage to start rotation of this robot.
  */
 void startRotating() {
+    ROS_INFO("START ROTATING");
 	geometry_msgs::Twist RobotNode_cmdvel;
 	RobotNode_cmdvel.linear.x = 0;
 	RobotNode_cmdvel.angular.z = 2.0;
@@ -240,25 +262,26 @@ int main(int argc, char **argv)
 	Stage_sub = n.subscribe<nav_msgs::Odometry>("robot_2/base_pose_ground_truth",1000, stageOdometryCallback);
 	EventTrigger_sub = n.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, EventTrigger_callback);
     LocationInstructions_sub = n.subscribe<geometry_msgs::Point>("robot_2/location", 1000, updateDesiredLocationCallback);
+    PathToRobot_sub = n.subscribe<std_msgs::Empty>("robot_2/toResident", 1000, goToResident);
+    PathToHome_sub = n.subscribe<std_msgs::Empty>("robot_2/toHome", 1000, goToHome);
+    
 	
 	// Create a client to make service requests to the Resident
 	performTaskClient = n.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
+
 
 	ros::Rate loop_rate(10);
 
 	while (ros::ok())
 	{
         	        
-		if (! atDesiredLocation()) {
-            ROS_INFO("HELLO");
-            updateCurrentVelocity();
-            RobotNode_stage_pub.publish(currentVelocity);
-        } /*else if (performingTask) {
-            ROS_INFO("Performing task");
-			performTask();
-		} else {
-            ROS_INFO("DOING NOTHING");
-        }*/
+        updateCurrentVelocity();
+        ROS_DEBUG("ANGULAR %f", currentVelocity.angular.x);
+        RobotNode_stage_pub.publish(currentVelocity);
+        
+        if (atDesiredLocation() && performingTask) {
+            performTask();
+        }
         
         ros::spinOnce();
 		loop_rate.sleep();
