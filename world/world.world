@@ -17,15 +17,14 @@ window
 # load an environment bitmap
 floorplan
 ( 
-  name "alpha-hallway"
-  bitmap "alpha-hallway.pgm"
+  name "alpha-house"
+  bitmap "alpha-house.png"
   size [20 20 0.1]
   pose [ 0 0 0 0.000 ]
 )
 
 # throw in some robots
 robot(
-  bitmap "Paranoid_android_with_shadow.png"
   name "Resident"
   pose [ 0 0 0 0 ]
   color "black"
