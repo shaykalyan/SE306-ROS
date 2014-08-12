@@ -201,7 +201,13 @@ int main(int argc, char **argv) {
 		if (count % 50 == 0) {
 			// Every 5 secs
 			amusement -= 15;
+			
+			if (amusement < 0) {
+				amusement = 0;
+			}
+			
 			ROS_INFO("Amusement level fell to %d", amusement);
+
 			
 			//happiness -= 35;
 			//ROS_INFO("Happiness level fell to %d", amusement);
