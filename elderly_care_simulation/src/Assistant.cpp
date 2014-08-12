@@ -30,6 +30,11 @@ ros::Subscriber LocationInstructions_sub;
 // Services
 ros::ServiceClient performTaskClient;
 
+// Location State
+enum LocationState {
+	AT_HOME, AT_RESIDENT, GOING_TO_RESIDENT, GOING_HOME
+};
+
 /*************************
  * Location variables
  ************************/
@@ -45,6 +50,9 @@ geometry_msgs::Pose currentLocation;
 // Locations to visit
 std::queue<geometry_msgs::Point> locationQueue;
 
+// Current state
+LocationState currentLocationState = AT_HOME;
+
 void goToResident(const std_msgs::Empty) {
     geometry_msgs::Point locationOne;
     locationOne.y = -7.5;
@@ -52,6 +60,7 @@ void goToResident(const std_msgs::Empty) {
     locationTwo.y = -1;
     locationQueue.push(locationOne);
     locationQueue.push(locationTwo);
+    currentLocationState = GOING_TO_RESIDENT;
 }
 
 void goToHome(const std_msgs::Empty) {
@@ -62,6 +71,8 @@ void goToHome(const std_msgs::Empty) {
     locationTwo.y = -7.5;
     locationQueue.push(locationOne);
     locationQueue.push(locationTwo);
+    currentLocationState = GOING_HOME;
+
 }
 
 void stageOdometryCallback(const nav_msgs::Odometry msg)
@@ -129,6 +140,14 @@ bool atDesiredLocation()
     }
     return false;
       
+}
+
+void notifyAtLocation() {
+	if (currentLocationState == GOING_TO_RESIDENT) {
+		currentLocationState = AT_RESIDENT;
+	} else if (currentLocationState == GOING_HOME) {
+		currentLocationState = AT_HOME;
+	}
 }
 
 void updateCurrentVelocity()
@@ -205,7 +224,10 @@ void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
 			ROS_INFO("Assistant Message Recieved");
-
+			
+			std_msgs::Empty emptyMessage;
+			goToResident(emptyMessage);
+			
 			performingTask = true;
 		}
 	}
@@ -227,21 +249,32 @@ void performTask() {
 	
 	switch (performTaskSrv.response.result) {
 		case PERFORM_TASK_RESULT_ACCEPTED:
+		{
 			// Resident has accepted the task but keep going
 			ROS_INFO("Resident has accepted the task but says keep going");
 			startRotating();
 			break;
+		}
 		case PERFORM_TASK_RESULT_FINISHED:
+		{
 			// Resident accepted the task and has had enough
 			ROS_INFO("Resident has accepted the task and has had enough");
+			
 			performingTask = false;
+			
+			std_msgs::Empty emptyMessage;
+			goToHome(emptyMessage);
+			
 			stopRotating();
 			EventTrigger_reply();
 			break;
+		}
 		case PERFORM_TASK_RESULT_BUSY:
+		{
 			// Resident is busy
 			ROS_INFO("Resident is busy");
 			break;
+		}
 	}
 }
 
@@ -278,7 +311,11 @@ int main(int argc, char **argv)
         updateCurrentVelocity();
         RobotNode_stage_pub.publish(currentVelocity);
         
-        if (atDesiredLocation() && performingTask) {
+        if (atDesiredLocation()) {
+			notifyAtLocation();
+		}
+        
+        if (currentLocationState == AT_RESIDENT && performingTask) {
             performTask();
         }
         
