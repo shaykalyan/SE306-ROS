@@ -64,6 +64,10 @@ void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
             ROS_INFO("I really need moral support right now ...");
             msg_out.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
             break;
+        case ENTERTAINMENT:
+			ROS_INFO("I really need some entertainment ...");
+			msg_out.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
+			break;
     }
 
     ROS_INFO("Sending request to scheduler");

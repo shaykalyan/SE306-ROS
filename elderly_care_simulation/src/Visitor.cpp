@@ -172,7 +172,7 @@ void EventTrigger_reply() {
 	// create response message
 	elderly_care_simulation::EventTrigger msg;
 	msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
-	msg.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
+	msg.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
 	msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
 	EventTrigger_pub.publish(msg);
@@ -278,9 +278,9 @@ int main(int argc, char **argv)
         updateCurrentVelocity();
         RobotNode_stage_pub.publish(currentVelocity);
         
-        if (atDesiredLocation() && performingTask) {
-            performTask();
-        }
+        //if (atDesiredLocation() && performingTask) {
+        //    performTask();
+        //}
         
         ros::spinOnce();
 		loop_rate.sleep();

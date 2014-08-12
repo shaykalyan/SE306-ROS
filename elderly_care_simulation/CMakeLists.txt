@@ -36,3 +36,5 @@ rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
 
 # Invisible
 rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
+rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
+

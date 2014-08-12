@@ -9,7 +9,7 @@
 #include "elderly_care_simulation/DiceRollTrigger.h"
 
 // Number of sides this dice has
-const int DICE_SIDES = 300;
+const int DICE_SIDES = 200;
 
 // Signatures
 ros::Publisher diceTriggerPub;
@@ -18,7 +18,7 @@ elderly_care_simulation::DiceRollTrigger diceRollTrigger;
 int main(int argc, char **argv) {
 	
     // ROS initialiser calls
-    ros::init(argc, argv, "MoralSupportDiceRoller");
+    ros::init(argc, argv, "EntertainmentDiceRoller");
     ros::NodeHandle n;
     ros::Rate loop_rate(10);
 
@@ -38,9 +38,9 @@ int main(int argc, char **argv) {
             
             if (rolled >= threshold) {
 
-                ROS_INFO("YOUR MORALE NEEDS REPLENISHING.");
-                diceRollTrigger.type = MORAL_SUPPORT;
-                //diceTriggerPub.publish(diceRollTrigger);
+                ROS_INFO("YOUR ENTERTAINMENT/AMUSEMENT NEEDS REPLENISHING.");
+                diceRollTrigger.type = ENTERTAINMENT;
+                diceTriggerPub.publish(diceRollTrigger);
 
                 // Reset threshold
                 threshold = DICE_SIDES;

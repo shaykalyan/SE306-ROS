@@ -142,19 +142,19 @@ bool atDesiredLocation()
       
 }
 
-void notifyAtLocation() {
-	if (currentLocationState == GOING_TO_RESIDENT) {
-		currentLocationState = AT_RESIDENT;
-	} else if (currentLocationState == GOING_HOME) {
-		currentLocationState = AT_HOME;
-	}
-}
-
 void updateCurrentVelocity()
 {
     if (atDesiredLocation()) {
         currentVelocity.linear.x = 0;
         currentVelocity.angular.z = 0;
+        
+        // Bad place for this, but need to get it working..
+        if (currentLocationState == GOING_TO_RESIDENT) {
+			currentLocationState = AT_RESIDENT;
+		} else if (currentLocationState == GOING_HOME) {
+			currentLocationState = AT_HOME;
+		}
+        
         return;
     }
     // Find the correct angle
@@ -225,10 +225,11 @@ void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
 		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
 			ROS_INFO("Assistant Message Recieved");
 			
+			performingTask = true;
+			
 			std_msgs::Empty emptyMessage;
 			goToResident(emptyMessage);
 			
-			performingTask = true;
 		}
 	}
 }
@@ -306,16 +307,11 @@ int main(int argc, char **argv)
 	ros::Rate loop_rate(25);
 
 	while (ros::ok())
-	{
-        	        
+	{        	        
         updateCurrentVelocity();
         RobotNode_stage_pub.publish(currentVelocity);
-        
-        if (atDesiredLocation()) {
-			notifyAtLocation();
-		}
-        
-        if (currentLocationState == AT_RESIDENT && performingTask) {
+                
+        if ((currentLocationState == AT_RESIDENT) && performingTask) {
             performTask();
         }
         

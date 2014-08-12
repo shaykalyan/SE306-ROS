@@ -94,13 +94,14 @@ int main(int argc, char **argv) {
 	////messages
 	//velocity of this RobotNode
 	geometry_msgs::Twist RobotNode_cmdvel;
+	
+	ROS_INFO("Testing that info messages work...");
 
 	while (ros::ok()) {
 
 		if (readyToSend) {
 
 			if(eventQueue.size() > 0) {
-				// ROS_INFO("No more tasks trigger.");
 
 				// block scheduler
 				readyToSend = false;
@@ -116,6 +117,8 @@ int main(int argc, char **argv) {
 				}
 				EventTrigger_pub.publish(msg);
 			}
+			
+			
 		}
 
 		ros::spinOnce();
