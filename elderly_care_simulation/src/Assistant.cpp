@@ -55,22 +55,41 @@ LocationState currentLocationState = AT_HOME;
 
 void goToResident(const std_msgs::Empty) {
     geometry_msgs::Point locationOne;
-    locationOne.y = -7.5;
+    locationOne.x = -4;
+    locationOne.y = 2;
+    
     geometry_msgs::Point locationTwo;
-    locationTwo.y = -1;
+    locationTwo.x = 0;
+    locationTwo.y = 2;
+    
+    geometry_msgs::Point locationThree;
+    locationThree.x = 0;
+    locationThree.y = 1;
+    
     locationQueue.push(locationOne);
     locationQueue.push(locationTwo);
+    locationQueue.push(locationThree);
+    
     currentLocationState = GOING_TO_RESIDENT;
 }
 
 void goToHome(const std_msgs::Empty) {
-    geometry_msgs::Point locationOne;
-    locationOne.y = -7.5;
+	geometry_msgs::Point locationOne;
+    locationOne.x = 0;
+    locationOne.y = 2;
+    
     geometry_msgs::Point locationTwo;
-    locationTwo.x = -7.5;
-    locationTwo.y = -7.5;
+    locationTwo.x = -4;
+    locationTwo.y = 2;
+	
+    geometry_msgs::Point locationThree;
+    locationThree.x = -7.5;
+    locationThree.y = -7.5;
+    
     locationQueue.push(locationOne);
     locationQueue.push(locationTwo);
+    locationQueue.push(locationThree);
+    
     currentLocationState = GOING_HOME;
 
 }
