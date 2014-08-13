@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 // Tasks
-const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
+const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
 bool performingTask = false;
 
 // Topics
@@ -29,6 +29,11 @@ ros::Subscriber LocationInstructions_sub;
 
 // Services
 ros::ServiceClient performTaskClient;
+
+// Location State
+enum LocationState {
+	AT_HOME, AT_RESIDENT, GOING_TO_RESIDENT, GOING_HOME
+};
 
 /*************************
  * Location variables
@@ -45,23 +50,58 @@ geometry_msgs::Pose currentLocation;
 // Locations to visit
 std::queue<geometry_msgs::Point> locationQueue;
 
+// Current state
+LocationState currentLocationState = AT_HOME;
+
 void goToResident(const std_msgs::Empty) {
     geometry_msgs::Point locationOne;
-    locationOne.y = 7.5;
+    locationOne.x = -8;
+    locationOne.y = 5;
+    
     geometry_msgs::Point locationTwo;
-    locationTwo.y = 1;
+    locationTwo.x = -8;
+    locationTwo.y = 3;
+    
+    geometry_msgs::Point locationThree;
+    locationThree.x = 0;
+    locationThree.y = 2;
+    
+    geometry_msgs::Point locationFour;
+    locationFour.x = 0;
+    locationFour.y = 1;
+    
     locationQueue.push(locationOne);
     locationQueue.push(locationTwo);
+    locationQueue.push(locationThree);
+    locationQueue.push(locationFour);
+    
+    currentLocationState = GOING_TO_RESIDENT;
 }
 
 void goToHome(const std_msgs::Empty) {
-    geometry_msgs::Point locationOne;
-    locationOne.y = 7.5;
+	geometry_msgs::Point locationOne;
+    locationOne.x = 0;
+    locationOne.y = 2;
+    
     geometry_msgs::Point locationTwo;
-    locationTwo.x = 7.5;
-    locationTwo.y = 7.5;
+    locationTwo.x = -8;
+    locationTwo.y = 3;
+    
+    geometry_msgs::Point locationThree;
+    locationThree.x = -8;
+    locationThree.y = 5;
+    
+    geometry_msgs::Point locationFour;
+    locationFour.x = 7.5;
+    locationFour.y = 7.5;
+    
     locationQueue.push(locationOne);
     locationQueue.push(locationTwo);
+    locationQueue.push(locationThree);
+    locationQueue.push(locationFour);
+    
+    currentLocationState = GOING_HOME;
+
 }
 
 void stageOdometryCallback(const nav_msgs::Odometry msg)
@@ -136,6 +176,14 @@ void updateCurrentVelocity()
     if (atDesiredLocation()) {
         currentVelocity.linear.x = 0;
         currentVelocity.angular.z = 0;
+        
+        // Bad place for this, but need to get it working..
+        if (currentLocationState == GOING_TO_RESIDENT) {
+			currentLocationState = AT_RESIDENT;
+		} else if (currentLocationState == GOING_HOME) {
+			currentLocationState = AT_HOME;
+		}
+        
         return;
     }
     // Find the correct angle
@@ -176,7 +224,7 @@ void EventTrigger_reply() {
 	msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
 	EventTrigger_pub.publish(msg);
-	ROS_INFO("Assistant Reply Message Sent");
+	ROS_INFO("Visitor Reply Message Sent");
 }
 
 /**
@@ -184,10 +232,8 @@ void EventTrigger_reply() {
  */
 void startRotating() {
     ROS_INFO("START ROTATING");
-	geometry_msgs::Twist RobotNode_cmdvel;
-	RobotNode_cmdvel.linear.x = 0;
-	RobotNode_cmdvel.angular.z = 2.0;
-	RobotNode_stage_pub.publish(RobotNode_cmdvel);
+	currentVelocity.linear.x = 0;
+	currentVelocity.angular.z = -2.0;
 }
 
 /**
@@ -195,18 +241,21 @@ void startRotating() {
  */
 void stopRotating() {
 	geometry_msgs::Twist RobotNode_cmdvel;
-	RobotNode_cmdvel.linear.x = 0;
-	RobotNode_cmdvel.angular.z = 0.0;
-	RobotNode_stage_pub.publish(RobotNode_cmdvel);
+	currentVelocity.linear.x = 0;
+	currentVelocity.angular.z = 0.0;
 }
 
 void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
 {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
-		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-			ROS_INFO("Assistant Message Recieved");
-
+		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
+			ROS_INFO("Visitor Message Recieved");
+			
 			performingTask = true;
+			
+			std_msgs::Empty emptyMessage;
+			goToResident(emptyMessage);
+			
 		}
 	}
 }
@@ -227,28 +276,39 @@ void performTask() {
 	
 	switch (performTaskSrv.response.result) {
 		case PERFORM_TASK_RESULT_ACCEPTED:
+		{
 			// Resident has accepted the task but keep going
 			ROS_INFO("Resident has accepted the task but says keep going");
 			startRotating();
 			break;
+		}
 		case PERFORM_TASK_RESULT_FINISHED:
+		{
 			// Resident accepted the task and has had enough
 			ROS_INFO("Resident has accepted the task and has had enough");
+			
 			performingTask = false;
+			
+			std_msgs::Empty emptyMessage;
+			goToHome(emptyMessage);
+			
 			stopRotating();
 			EventTrigger_reply();
 			break;
+		}
 		case PERFORM_TASK_RESULT_BUSY:
+		{
 			// Resident is busy
 			ROS_INFO("Resident is busy");
 			break;
+		}
 	}
 }
 
 int main(int argc, char **argv)
 {	
 	//You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
-	ros::init(argc, argv, "Visitor");
+	ros::init(argc, argv, "Assistant");
 
 	//NodeHandle is the main access point to communicate with ros.
 	ros::NodeHandle n;
@@ -273,15 +333,15 @@ int main(int argc, char **argv)
 	ros::Rate loop_rate(25);
 
 	while (ros::ok())
-	{
-        	        
+	{        	        
         updateCurrentVelocity();
-        RobotNode_stage_pub.publish(currentVelocity);
-        
-        //if (atDesiredLocation() && performingTask) {
-        //    performTask();
-        //}
-        
+                
+        if ((currentLocationState == AT_RESIDENT) && performingTask) {
+            performTask();
+        }
+
+		RobotNode_stage_pub.publish(currentVelocity);
+		
         ros::spinOnce();
 		loop_rate.sleep();
 	}

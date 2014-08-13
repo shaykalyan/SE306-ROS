@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 
                 ROS_INFO("YOUR MORALE NEEDS REPLENISHING.");
                 diceRollTrigger.type = MORAL_SUPPORT;
-                //diceTriggerPub.publish(diceRollTrigger);
+                diceTriggerPub.publish(diceRollTrigger);
 
                 // Reset threshold
                 threshold = DICE_SIDES;
