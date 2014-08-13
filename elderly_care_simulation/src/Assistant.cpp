@@ -203,10 +203,8 @@ void EventTrigger_reply() {
  */
 void startRotating() {
     ROS_INFO("START ROTATING");
-	geometry_msgs::Twist RobotNode_cmdvel;
-	RobotNode_cmdvel.linear.x = 0;
-	RobotNode_cmdvel.angular.z = 2.0;
-	RobotNode_stage_pub.publish(RobotNode_cmdvel);
+	currentVelocity.linear.x = 0;
+	currentVelocity.angular.z = 2.0;
 }
 
 /**
@@ -214,9 +212,8 @@ void startRotating() {
  */
 void stopRotating() {
 	geometry_msgs::Twist RobotNode_cmdvel;
-	RobotNode_cmdvel.linear.x = 0;
-	RobotNode_cmdvel.angular.z = 0.0;
-	RobotNode_stage_pub.publish(RobotNode_cmdvel);
+	currentVelocity.linear.x = 0;
+	currentVelocity.angular.z = 0.0;
 }
 
 void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
@@ -309,12 +306,13 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{        	        
         updateCurrentVelocity();
-        RobotNode_stage_pub.publish(currentVelocity);
                 
         if ((currentLocationState == AT_RESIDENT) && performingTask) {
             performTask();
         }
-        
+
+		RobotNode_stage_pub.publish(currentVelocity);
+		
         ros::spinOnce();
 		loop_rate.sleep();
 	}
