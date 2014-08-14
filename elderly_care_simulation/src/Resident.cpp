@@ -120,6 +120,23 @@ bool turnAnticlockwise(double currentAngle, double desiredAngle)
     
 }
 
+bool atDesiredLocation()
+{  
+    if (locationQueue.empty()) {
+        return true;
+    } else {
+        double toleratedDifference = 0.15;
+        geometry_msgs::Point desiredLocation = locationQueue.front();
+
+        if( doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
+            doubleEquals(currentLocation.position.y, desiredLocation.y, toleratedDifference)) {
+            locationQueue.pop();
+            return atDesiredLocation();
+        }
+    }
+    return false;
+      
+}
 
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
     elderly_care_simulation::EventTrigger msgOut;
