@@ -138,6 +138,43 @@ bool atDesiredLocation()
       
 }
 
+void updateCurrentVelocity()
+{
+    if (atDesiredLocation()) {
+        currentVelocity.linear.x = 0;
+        currentVelocity.angular.z = 0;
+    }
+    // Find the correct angle
+    geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
+
+    geometry_msgs::Point desiredLocation = locationQueue.front();
+
+    directionVector.x = desiredLocation.x - currentLocation.position.x;
+    directionVector.y = desiredLocation.y - currentLocation.position.y;
+    directionVector.z = desiredLocation.z - currentLocation.position.z;
+    
+    // Thank god we're only doing 2D stuff
+    double desiredAngle = atan2(directionVector.y, directionVector.x);
+
+    if (! doubleEquals(currentAngle, desiredAngle, 0.15)) {
+        // Turn towards angle
+        currentVelocity.linear.x = 0;
+        
+        if (turnAnticlockwise(currentAngle, desiredAngle)) {
+            // Turn anti clockwise
+            currentVelocity.angular.z = 1;
+        } else {
+            // Turn clockwise
+            currentVelocity.angular.z = -1;
+        }
+    } else {
+        // Go forward
+        currentVelocity.linear.x = 1;
+        currentVelocity.angular.z = 0;
+    }
+}
+
+
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
     elderly_care_simulation::EventTrigger msgOut;
     msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
