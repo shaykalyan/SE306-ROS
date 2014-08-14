@@ -49,18 +49,22 @@ std::queue<geometry_msgs::Point> locationQueue;
 void stageOdomCallback(nav_msgs::Odometry msg);
 void diceTriggerCallback();
 
-void taskGetPerformed(const std_msgs::Empty){
+/**
+ * Method to perform after a task has been performed on this resident.
+ * Moves the robot to the left and right to acknowledge his task has been performed.
+ */
+void taskCompleted(const std_msgs::Empty){
 	geometry_msgs::Point locationOne;
-    locationOne.x = 1;
-    locationOne.y = 0;
+    locationOne.x = currentLocation.position.x + 1;
+    locationOne.y = currentLocation.position.y;
 
     geometry_msgs::Point locationTwo;
-    locationTwo.x = -1;
-    locationTwo.y = 0;
+    locationTwo.x = currentLocation.position.x - 1;
+    locationTwo.y = currentLocation.position.y;
 
     geometry_msgs::Point locationThree;
-    locationThree.x = 0;
-    locationThree.y = 0;
+    locationThree.x = currentLocation.position.x;
+    locationThree.y = currentLocation.position.y;
 
     locationQueue.push(locationOne);
     locationQueue.push(locationTwo);
@@ -220,7 +224,7 @@ int handleTask(int taskType) {
 				currentTaskType = NO_CURRENT_TASK;
 
 				std_msgs::Empty emptyMessage;
-				taskGetPerformed(emptyMessage);
+				taskCompleted(emptyMessage);
 			} else {
 				ROS_INFO("Happiness raised to %d, but I could still do with some more consoling...", happiness);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
@@ -235,7 +239,7 @@ int handleTask(int taskType) {
 				currentTaskType = NO_CURRENT_TASK;
 
 				std_msgs::Empty emptyMessage;
-				taskGetPerformed(emptyMessage);
+				taskCompleted(emptyMessage);
 			} else {
 				ROS_INFO("Amusement raised to %d, keep being funny.", amusement);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
@@ -301,7 +305,7 @@ int main(int argc, char **argv) {
 
     locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_0/location", 1000, updateDesiredLocationCallback);
 
-    pathOfResidentSub = nodeHandle.subscribe<std_msgs::Empty>("robot_0/resident_respond", 1000, taskGetPerformed);
+    pathOfResidentSub = nodeHandle.subscribe<std_msgs::Empty>("robot_0/resident_respond", 1000, taskCompleted);
     // Initialise messages
     geometry_msgs::Twist robotNodeCmdvel;
     
