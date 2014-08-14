@@ -1,0 +1,124 @@
+include "include/robot.inc"
+include "include/floorplan.inc"
+include "include/appliances.inc"
+
+#resolution of the underline bitmap model in meters.
+resolution 0.02 
+
+# simulation timestep in milliseconds. length of each simulation update cycle.
+interval_sim 100  
+
+window
+( 
+  #size of the window in pixels
+  size [ 800.000 600.000 ] 
+  scale 20
+)
+
+# load an environment bitmap
+floorplan
+( 
+  name "alpha-house"
+  bitmap "alpha-house.png"
+  size [20 20 0.1]
+  pose [ 0 0 0 0.000 ]
+)
+
+# load an bed bitmap
+appliances
+( 
+  name "bed"
+  bitmap "Bed.png"
+  size [2 3 0.1]
+  pose [ -3.1 -8 0 0.000 ]
+  color "black"
+)
+
+# load an couch bitmap
+appliances
+( 
+  name "couch"
+  bitmap "Couch.png"
+  size [2 3 0.1]
+  pose [ -8.5 -1 0 0.000 ]
+  color "black"
+)
+
+# load an table bitmap
+appliances
+( 
+  name "comfyChair"
+  bitmap "ComfyChair.png"
+  size [2 2 0.1]
+  pose [ -8.5 -4 0 0.000 ]
+  color "black"
+)
+
+# load an table bitmap
+appliances
+( 
+  name "table"
+  bitmap "Table.png"
+  size [3.5  2.0 0.1]
+  pose [ 5 3 0 0.000 ]
+  color "black"
+)
+
+# load an chair bitmap
+appliances
+( 
+  name "chair"
+  bitmap "Chair.png"
+  size [.8 .8 0.1]
+  pose [ 5 4.5 0 0.000 ]
+  color "black"
+)
+
+# load an chair bitmap
+appliances
+( 
+  name "chair"
+  bitmap "Chair.png"
+  size [.8 .8 0.1]
+  pose [ 5 1.55 0 0.000 ]
+  color "black"
+)
+
+# load an chair bitmap
+appliances
+( 
+  name "chair"
+  bitmap "Chair.png"
+  size [.8 .8 0.1]
+  pose [ 2.7 2.9 0 0.000 ]
+  color "black"
+)
+
+# load an chair bitmap
+appliances
+( 
+  name "chair"
+  bitmap "Chair.png"
+  size [.8 .8 0.1]
+  pose [ 7.3 2.9 0 0.000 ]
+  color "black"
+)
+
+# throw in some robots
+robot(
+  name "Resident"
+  pose [ 0 0 0 0 ]
+  color "black"
+)
+
+robot(
+  name "Visitor"
+  pose [ 7.5 7.5 0 0 ]
+  color "green"
+)
+
+robot(
+  name "Assistant"
+  pose [ -7.5 -7.5 0 0 ]
+  color "orange"
+)

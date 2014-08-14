@@ -30,3 +30,7 @@ setup.*sh
 *.exe
 *.out
 *.app
+
+# Python
+*.pyc
+*.py

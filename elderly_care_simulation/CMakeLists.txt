@@ -17,9 +17,9 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
@@ -28,3 +28,13 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
+rosbuild_add_executable(Scheduler src/Scheduler.cpp)	#R1
+rosbuild_add_executable(Visitor src/Visitor.cpp)		#R2
+rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
+
+# Invisible
+rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
+rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
+
