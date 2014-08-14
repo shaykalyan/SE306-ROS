@@ -1,0 +1,32 @@
+# ROS Specific files/folders
+build/
+bin/
+lib/
+msg_gen/
+srv_gen/
+
+# Hardware Specific files
+.rosinstall
+setup.*sh
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
