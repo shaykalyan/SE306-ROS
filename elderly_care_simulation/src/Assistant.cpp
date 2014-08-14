@@ -239,7 +239,7 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-			//ROS_INFO("Assistant: Message Recieved");
+			ROS_INFO("Assistant: Message Recieved");
 			
 			performingTask = true;
 			
