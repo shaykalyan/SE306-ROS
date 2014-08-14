@@ -4,4 +4,4 @@
 const int MORAL_SUPPORT = 0;
 const int ENTERTAINMENT = 1;
 
-#endif DICE_ROLLER_TYPE_INCLUDE
+#endif
