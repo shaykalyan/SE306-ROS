@@ -61,16 +61,16 @@ void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
 
     switch(msg.type) {
         case MORAL_SUPPORT:
-            //ROS_INFO("I really need moral support right now ...");
+            ROS_INFO("Resident: I want moral support");
             msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
             break;
         case ENTERTAINMENT:
-			//ROS_INFO("I really need some entertainment ...");
+			ROS_INFO("Resident: I need entertainment");
 			msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
 			break;
     }
 
-    ROS_INFO("Sending request to scheduler");
+    ROS_INFO("Resident: Sending request to scheduler");
     residentEventPub.publish(msgOut);
 }
 
@@ -94,11 +94,11 @@ int handleTask(int taskType) {
 			// The visitor is consoling us
 			happiness += 1;
 			if (happiness > HEALTHY_THRESHOLD) {
-				ROS_INFO("Happiness raised to %d and I'm now happy as can be!", happiness);
+				ROS_INFO("Resident: Happiness raised to %d and I'm now happy enough!", happiness);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
 			} else {
-				ROS_INFO("Happiness raised to %d, but I could still do with some more consoling...", happiness);
+				ROS_INFO("Resident: Happiness raised to %d, continue consoling", happiness);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 			break;
@@ -106,11 +106,11 @@ int handleTask(int taskType) {
 			// The assistant is entertaining us
 			amusement += 1;
 			if (amusement > HEALTHY_THRESHOLD) {
-				ROS_INFO("Amusement raised to %d and I've had enough!", amusement);
+				ROS_INFO("Resident: Amusement raised to %d and I've had enough!", amusement);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
 			} else {
-				ROS_INFO("Amusement raised to %d, keep being funny.", amusement);
+				ROS_INFO("Resident: Amusement raised to %d, keep being funny.", amusement);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 		    break;
@@ -202,10 +202,10 @@ int main(int argc, char **argv) {
 			// Every 5 secs
 			
 			amusement = (amusement - 15) > 0 ? amusement - 15 : 0;
-			//ROS_INFO("Amusement level fell to %d", amusement);
+			ROS_INFO("Amusement level fell to %d", amusement);
 
 			happiness = (happiness - 10) > 0 ? happiness - 10 : 0;
-			//ROS_INFO("Happiness level fell to %d", happiness);
+			ROS_INFO("Happiness level fell to %d", happiness);
 		}
 		
 		ros::spinOnce();

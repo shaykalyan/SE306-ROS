@@ -221,7 +221,7 @@ void eventTriggerReply() {
  * Send a message to Stage to start rotation of this robot.
  */
 void startRotating() {
-    //ROS_INFO("Assistant: Started Rotating");
+    ROS_INFO("Assistant: Started Rotating");
 	currentVelocity.linear.x = 0;
 	currentVelocity.angular.z = 2.0;
 }
@@ -230,7 +230,7 @@ void startRotating() {
  * Send a message to Stage to stop rotation of this robot.
  */
 void stopRotating() {
-	//ROS_INFO("Assistant: Stopped Rotating");
+	ROS_INFO("Assistant: Stopped Rotating");
 	currentVelocity.linear.x = 0;
 	currentVelocity.angular.z = 0.0;
 }
@@ -239,7 +239,7 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-			//ROS_INFO("Assistant Message Recieved");
+			//ROS_INFO("Assistant: Message Recieved");
 			
 			performingTask = true;
 			
@@ -268,7 +268,7 @@ void performTask() {
 		case PERFORM_TASK_RESULT_ACCEPTED:
 		{
 			// Resident has accepted the task but keep going
-			//ROS_INFO("Resident has accepted the task but says keep going");
+			ROS_INFO("Assistant: Resident has accepted the task but says keep going");
 			startRotating();
 			break;
 		}

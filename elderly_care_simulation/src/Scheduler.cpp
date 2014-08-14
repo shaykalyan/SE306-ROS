@@ -31,7 +31,7 @@ void residentEventCallback(elderly_care_simulation::EventTrigger msg) {
 			priority = 2;
 			break;
 	}
-	//ROS_INFO("Scheduler: Adding request to queue");
+	ROS_INFO("Scheduler: Adding request to queue");
 	eventQueue.push(EventNode(priority, msg));
 }
 

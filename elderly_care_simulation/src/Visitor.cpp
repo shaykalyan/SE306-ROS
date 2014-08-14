@@ -231,7 +231,7 @@ void eventTriggerReply() {
  * Send a message to Stage to start rotation of this robot.
  */
 void startRotating() {
-    //ROS_INFO("Visitor: Started Rotating");
+    ROS_INFO("Visitor: Started Rotating");
 	currentVelocity.linear.x = 0;
 	currentVelocity.angular.z = -2.0;
 }
@@ -240,7 +240,7 @@ void startRotating() {
  * Send a message to Stage to stop rotation of this robot.
  */
 void stopRotating() {
-    //ROS_INFO("Visitor: Stopped Rotating");
+    ROS_INFO("Visitor: Stopped Rotating");
 	currentVelocity.linear.x = 0;
 	currentVelocity.angular.z = 0.0;
 }
@@ -278,7 +278,7 @@ void performTask() {
 		case PERFORM_TASK_RESULT_ACCEPTED:
 		{
 			// Resident has accepted the task but keep going
-			//ROS_INFO("Resident has accepted the task but says keep going");
+			ROS_INFO("Visitor: Resident has accepted the task but says keep going");
 			startRotating();
 			break;
 		}
