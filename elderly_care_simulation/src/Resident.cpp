@@ -290,15 +290,6 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "Resident");
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(10);
-    
-    // Initialise pose (must be same as world file)
-	theta = M_PI/2.0;
-	px = WORLD_POS_X;
-	py = WORLD_POS_Y;
-	
-	// Initialise velocity
-	linearX = 0.0;
-	angularZ = 0.0;
 	
     // Initialise publishers
     robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
