@@ -39,4 +39,4 @@ rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
 rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
 
 # Testing
-rosbuild_add_executable(test/AssistantTest test/TestAssistant.cpp)
+rosbuild_add_gtest(test/AssistantTest test/TestAssistant.cpp)
