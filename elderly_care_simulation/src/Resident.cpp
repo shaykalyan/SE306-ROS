@@ -85,6 +85,13 @@ void stageOdomCallback(const nav_msgs::Odometry msg) {
 
 }
 
+void updateDesiredLocationCallback(const geometry_msgs::Point location)
+{   
+    // Add location to the locationQueue queue
+    locationQueue.push(location);
+}
+
+
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
     elderly_care_simulation::EventTrigger msgOut;
     msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
