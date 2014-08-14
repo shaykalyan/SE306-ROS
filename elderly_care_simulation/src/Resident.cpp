@@ -305,9 +305,12 @@ int main(int argc, char **argv) {
     residentEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
 
     // Initialise subscribers
-    stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/odom", 1000, stageOdomCallback);
+    stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, stageOdomCallback);
     diceTriggerSub = nodeHandle.subscribe<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, diceTriggerCallback);
 
+    locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_0/location", 1000, updateDesiredLocationCallback);
+
+    pathOfResidentSub = nodeHandle.subscribe<std_msgs::Empty>("robot_0/resident_respond", 1000, taskGetPerformed);
     // Initialise messages
     geometry_msgs::Twist robotNodeCmdvel;
     
@@ -319,11 +322,8 @@ int main(int argc, char **argv) {
 
 	while (ros::ok())
 	{
-		// Publish to Stage
-		robotNodeCmdvel.linear.x = linearX;
-		robotNodeCmdvel.angular.z = angularZ;
-		robotNodeStagePub.publish(robotNodeCmdvel);
-		
+		updateCurrentVelocity();
+
 		// Every once in a while, decrease health values
 		if (count % 50 == 0) {
 			// Every 5 secs
@@ -334,9 +334,10 @@ int main(int argc, char **argv) {
 			happiness = (happiness - 10) > 0 ? happiness - 10 : 0;
 			ROS_INFO("Happiness level fell to %d", happiness);
 		}
+
+		robotNodeStagePub.publish(currentVelocity);
 		
 		ros::spinOnce();
-
 		loop_rate.sleep();
 		++count;
 	}
