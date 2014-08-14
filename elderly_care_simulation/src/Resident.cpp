@@ -6,6 +6,9 @@
 #include "EventTriggerConstants.h"
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/PerformTask.h"
+#include <queue>
+#include <tf/tf.h>
+#include "std_msgs/Empty.h"
 
 #include <sstream>
 #include "math.h"
@@ -15,17 +18,6 @@
 #include "EventTriggerConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include <unistd.h> // sleep
-
-// Velocity
-double linearX;
-double angularZ;
-
-// Pose
-const double WORLD_POS_X = 0;
-const double WORLD_POS_Y = 0;
-double px;
-double py;
-double theta;
 
 // Current task type: -1 corresponds to no task
 int currentTaskType = -1;
@@ -40,6 +32,16 @@ ros::Publisher robotNodeStagePub;
 ros::Subscriber stageOdoSub;
 ros::Subscriber diceTriggerSub;
 ros::Publisher residentEventPub;
+ros::Subscriber locationInstructionsSub;
+ros::Subscriber pathOfResidentSub;
+
+double currentAngle;
+
+// Current velocity of the Robot
+geometry_msgs::Twist currentVelocity;
+
+// Current location of the robot
+geometry_msgs::Pose currentLocation;
 
 // Locations to visit
 std::queue<geometry_msgs::Point> locationQueue;
@@ -68,12 +70,19 @@ void taskGetPerformed(const std_msgs::Empty){
 /**
     Process odometry messages from Stage
 */
-void stageOdomCallback(nav_msgs::Odometry msg) {
+void stageOdomCallback(const nav_msgs::Odometry msg) {
 	
-	px = WORLD_POS_X + msg.pose.pose.position.x;
-	py = WORLD_POS_Y + msg.pose.pose.position.y;
-	// ROS_INFO("Current x position is: %f", px);
-	// ROS_INFO("Current y position is: %f", py);
+	 //Update Current Position
+    currentLocation = msg.pose.pose;
+    double x = currentLocation.orientation.x;
+    double y = currentLocation.orientation.y;
+    double z = currentLocation.orientation.z;
+    double w = currentLocation.orientation.w;
+    ROS_INFO("THE LOCATION IS: %f, %f", currentLocation.position.x, currentLocation.position.y);
+    double roll, pitch, yaw;
+    tf::Matrix3x3(tf::Quaternion(x, y, z, w)).getRPY(roll, pitch, yaw);
+    currentAngle = yaw;
+
 }
 
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
