@@ -107,6 +107,19 @@ double normalizeAngle(double angle)
     return angle;
 }
 
+bool turnAnticlockwise(double currentAngle, double desiredAngle)
+{   
+    if (currentAngle < 0) {
+        currentAngle = 2 * M_PI + currentAngle;
+    }
+    if (desiredAngle < 0) {
+        desiredAngle = 2 * M_PI + desiredAngle;
+    }
+    desiredAngle = normalizeAngle(desiredAngle - currentAngle);
+    return desiredAngle < M_PI;
+    
+}
+
 
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
     elderly_care_simulation::EventTrigger msgOut;
