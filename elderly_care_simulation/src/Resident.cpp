@@ -91,6 +91,10 @@ void updateDesiredLocationCallback(const geometry_msgs::Point location)
     locationQueue.push(location);
 }
 
+bool doubleEquals(double a, double b, double difference)
+{
+    return std::abs(a - b) < difference;
+}
 
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
     elderly_care_simulation::EventTrigger msgOut;
