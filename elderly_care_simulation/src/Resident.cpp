@@ -37,9 +37,9 @@ int amusement = 0;
 
 // Signatures
 ros::Publisher robotNodeStagePub;
-ros::Subscriber stageOdoPub;
+ros::Subscriber stageOdoSub;
 ros::Subscriber diceTriggerSub;
-ros::Publisher residentEvent_pub;
+ros::Publisher residentEventPub;
 void stageOdomCallback(nav_msgs::Odometry msg);
 void diceTriggerCallback();
 
@@ -55,23 +55,23 @@ void stageOdomCallback(nav_msgs::Odometry msg) {
 }
 
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
-    elderly_care_simulation::EventTrigger msg_out;
-    msg_out.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-    msg_out.result = EVENT_TRIGGER_RESULT_FAILURE;
+    elderly_care_simulation::EventTrigger msgOut;
+    msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
+    msgOut.result = EVENT_TRIGGER_RESULT_FAILURE;
 
     switch(msg.type) {
         case MORAL_SUPPORT:
             ROS_INFO("I really need moral support right now ...");
-            msg_out.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
             break;
         case ENTERTAINMENT:
 			ROS_INFO("I really need some entertainment ...");
-			msg_out.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
+			msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
 			break;
     }
 
     ROS_INFO("Sending request to scheduler");
-    residentEvent_pub.publish(msg_out);
+    residentEventPub.publish(msgOut);
 }
 
 /**
@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
 
     // ROS initialiser calls
     ros::init(argc, argv, "Resident");
-    ros::NodeHandle n;
+    ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(10);
     
     // Initialise pose (must be same as world file)
@@ -174,18 +174,18 @@ int main(int argc, char **argv) {
 	angularZ = 0.0;
 	
     // Initialise publishers
-    robotNodeStagePub = n.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
-    residentEvent_pub = n.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
+    robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
+    residentEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
 
     // Initialise subscribers
-    stageOdoPub = n.subscribe<nav_msgs::Odometry>("robot_0/odom", 1000, stageOdomCallback);
-    diceTriggerSub = n.subscribe<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, diceTriggerCallback);
+    stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/odom", 1000, stageOdomCallback);
+    diceTriggerSub = nodeHandle.subscribe<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, diceTriggerCallback);
 
     // Initialise messages
     geometry_msgs::Twist robotNodeCmdvel;
     
     // Advertise that the Resident responds to PerformTask service calls
-	ros::ServiceServer service = n.advertiseService("perform_task", performTaskServiceHandler);
+	ros::ServiceServer service = nodeHandle.advertiseService("perform_task", performTaskServiceHandler);
 
 	//a count of howmany messages we have sent
 	int count = 0;

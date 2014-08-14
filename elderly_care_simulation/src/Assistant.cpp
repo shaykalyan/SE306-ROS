@@ -19,13 +19,13 @@ const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
 bool performingTask = false;
 
 // Topics
-ros::Publisher RobotNode_stage_pub;
-ros::Publisher EventTrigger_pub;
-ros::Subscriber EventTrigger_sub;
-ros::Subscriber PathToRobot_sub;
-ros::Subscriber PathToHome_sub;
-ros::Subscriber Stage_sub;
-ros::Subscriber LocationInstructions_sub;
+ros::Publisher robotNodeStagePub;
+ros::Publisher eventTriggerPub;
+ros::Subscriber eventTriggerSub;
+ros::Subscriber pathToRobotSub;
+ros::Subscriber pathToHomeSub;
+ros::Subscriber stageOdoSub;
+ros::Subscriber locationInstructionsSub;
 
 // Services
 ros::ServiceClient performTaskClient;
@@ -206,14 +206,14 @@ void updateCurrentVelocity()
     }
 }
 
-void EventTrigger_reply() {
+void eventTriggerReply() {
 	// create response message
 	elderly_care_simulation::EventTrigger msg;
 	msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
 	msg.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
 	msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
-	EventTrigger_pub.publish(msg);
+	eventTriggerPub.publish(msg);
 	ROS_INFO("Assistant Reply Message Sent");
 }
 
@@ -230,12 +230,12 @@ void startRotating() {
  * Send a message to Stage to stop rotation of this robot.
  */
 void stopRotating() {
-	geometry_msgs::Twist RobotNode_cmdvel;
+    ROS_INFO("STOP ROTATING");
 	currentVelocity.linear.x = 0;
 	currentVelocity.angular.z = 0.0;
 }
 
-void EventTrigger_callback(elderly_care_simulation::EventTrigger msg)
+void eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
@@ -283,7 +283,7 @@ void performTask() {
 			goToHome(emptyMessage);
 			
 			stopRotating();
-			EventTrigger_reply();
+			eventTriggerReply();
 			break;
 		}
 		case PERFORM_TASK_RESULT_BUSY:
@@ -301,23 +301,23 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "Assistant");
 
 	//NodeHandle is the main access point to communicate with ros.
-	ros::NodeHandle n;
+	ros::NodeHandle nodeHandle;
 
 	//advertise() function will tell ROS that you want to publish on a given topic_
 	//to stage
-	RobotNode_stage_pub = n.advertise<geometry_msgs::Twist>("robot_2/cmd_vel",1000);
-	EventTrigger_pub = n.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
+	robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_2/cmd_vel",1000);
+	eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
 	//subscribe to listen to messages coming from stage
-	Stage_sub = n.subscribe<nav_msgs::Odometry>("robot_2/base_pose_ground_truth",1000, stageOdometryCallback);
-	EventTrigger_sub = n.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, EventTrigger_callback);
-    LocationInstructions_sub = n.subscribe<geometry_msgs::Point>("robot_2/location", 1000, updateDesiredLocationCallback);
-    PathToRobot_sub = n.subscribe<std_msgs::Empty>("robot_2/toResident", 1000, goToResident);
-    PathToHome_sub = n.subscribe<std_msgs::Empty>("robot_2/toHome", 1000, goToHome);
+	stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_2/base_pose_ground_truth",1000, stageOdometryCallback);
+	eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
+    locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_2/location", 1000, updateDesiredLocationCallback);
+    pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_2/toResident", 1000, goToResident);
+    pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_2/toHome", 1000, goToHome);
     
 	
 	// Create a client to make service requests to the Resident
-	performTaskClient = n.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
+	performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
 
 	ros::Rate loop_rate(25);
@@ -330,7 +330,7 @@ int main(int argc, char **argv)
             performTask();
         }
 
-		RobotNode_stage_pub.publish(currentVelocity);
+		robotNodeStagePub.publish(currentVelocity);
 		
         ros::spinOnce();
 		loop_rate.sleep();

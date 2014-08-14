@@ -19,11 +19,11 @@ int main(int argc, char **argv) {
 	
     // ROS initialiser calls
     ros::init(argc, argv, "MoralSupportDiceRoller");
-    ros::NodeHandle n;
+    ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(10);
 
     // Declare publishers
-    diceTriggerPub = n.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, true);
+    diceTriggerPub = nodeHandle.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, true);
 
     int tick = 1;
     int threshold = DICE_SIDES;
