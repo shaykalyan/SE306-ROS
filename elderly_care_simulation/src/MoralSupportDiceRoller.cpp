@@ -34,11 +34,11 @@ int main(int argc, char **argv) {
         if (tick % 10 == 0) {
 
             int rolled = rand() % DICE_SIDES + 1;
-            ROS_INFO("Rolled: %d. Needed: %d", rolled, threshold);
+            //ROS_INFO("Rolled: %d. Needed: %d", rolled, threshold);
             
             if (rolled >= threshold) {
 
-                ROS_INFO("YOUR MORALE NEEDS REPLENISHING.");
+                ROS_INFO("Resident requests moral support");
                 diceRollTrigger.type = MORAL_SUPPORT;
                 diceTriggerPub.publish(diceRollTrigger);
 

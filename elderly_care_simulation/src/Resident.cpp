@@ -61,11 +61,11 @@ void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
 
     switch(msg.type) {
         case MORAL_SUPPORT:
-            ROS_INFO("I really need moral support right now ...");
+            //ROS_INFO("I really need moral support right now ...");
             msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
             break;
         case ENTERTAINMENT:
-			ROS_INFO("I really need some entertainment ...");
+			//ROS_INFO("I really need some entertainment ...");
 			msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
 			break;
     }
@@ -135,7 +135,7 @@ int handleTask(int taskType) {
 bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
 				   elderly_care_simulation::PerformTask::Response &res) {
 					   
-	ROS_INFO("Received service call with task type: %d", req.taskType);
+	//ROS_INFO("Received service call with task type: %d", req.taskType);
 	
 	if (currentTaskType == NO_CURRENT_TASK) {
 		// I don't yet have a task, make this one our current task
@@ -202,10 +202,10 @@ int main(int argc, char **argv) {
 			// Every 5 secs
 			
 			amusement = (amusement - 15) > 0 ? amusement - 15 : 0;
-			ROS_INFO("Amusement level fell to %d", amusement);
+			//ROS_INFO("Amusement level fell to %d", amusement);
 
 			happiness = (happiness - 10) > 0 ? happiness - 10 : 0;
-			ROS_INFO("Happiness level fell to %d", happiness);
+			//ROS_INFO("Happiness level fell to %d", happiness);
 		}
 		
 		ros::spinOnce();

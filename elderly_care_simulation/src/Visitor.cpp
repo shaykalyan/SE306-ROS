@@ -224,14 +224,14 @@ void eventTriggerReply() {
 	msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
 	eventTriggerPub.publish(msg);
-	ROS_INFO("Visitor Reply Message Sent");
+	ROS_INFO("Visitor: Reply Message Sent");
 }
 
 /**
  * Send a message to Stage to start rotation of this robot.
  */
 void startRotating() {
-    ROS_INFO("START ROTATING");
+    //ROS_INFO("Visitor: Started Rotating");
 	currentVelocity.linear.x = 0;
 	currentVelocity.angular.z = -2.0;
 }
@@ -240,7 +240,7 @@ void startRotating() {
  * Send a message to Stage to stop rotation of this robot.
  */
 void stopRotating() {
-    ROS_INFO("STOP ROTATING");
+    //ROS_INFO("Visitor: Stopped Rotating");
 	currentVelocity.linear.x = 0;
 	currentVelocity.angular.z = 0.0;
 }
@@ -249,7 +249,7 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-			ROS_INFO("Visitor Message Recieved");
+			ROS_INFO("Visitor: Message Recieved");
 			
 			performingTask = true;
 			
@@ -271,21 +271,21 @@ void performTask() {
 	
 	// Make the call using the client
 	if (!performTaskClient.call(performTaskSrv)) {
-		throw std::runtime_error("Service call to the initiate task with Resident failed");
+		throw std::runtime_error("Visitor: Service call to the initiate task with Resident failed");
 	}
 	
 	switch (performTaskSrv.response.result) {
 		case PERFORM_TASK_RESULT_ACCEPTED:
 		{
 			// Resident has accepted the task but keep going
-			ROS_INFO("Resident has accepted the task but says keep going");
+			//ROS_INFO("Resident has accepted the task but says keep going");
 			startRotating();
 			break;
 		}
 		case PERFORM_TASK_RESULT_FINISHED:
 		{
 			// Resident accepted the task and has had enough
-			ROS_INFO("Resident has accepted the task and has had enough");
+			ROS_INFO("Visitor: Resident has accepted the task and has had enough");
 			
 			performingTask = false;
 			
@@ -299,7 +299,7 @@ void performTask() {
 		case PERFORM_TASK_RESULT_BUSY:
 		{
 			// Resident is busy
-			ROS_INFO("Resident is busy");
+			ROS_INFO("Visitor: Resident is busy");
 			break;
 		}
 	}
