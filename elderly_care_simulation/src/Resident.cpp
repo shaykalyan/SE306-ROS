@@ -218,6 +218,9 @@ int handleTask(int taskType) {
 				ROS_INFO("Happiness raised to %d and I'm now happy as can be!", happiness);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
+
+				std_msgs::Empty emptyMessage;
+				taskGetPerformed(emptyMessage);
 			} else {
 				ROS_INFO("Happiness raised to %d, but I could still do with some more consoling...", happiness);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
@@ -230,6 +233,9 @@ int handleTask(int taskType) {
 				ROS_INFO("Amusement raised to %d and I've had enough!", amusement);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
+
+				std_msgs::Empty emptyMessage;
+				taskGetPerformed(emptyMessage);
 			} else {
 				ROS_INFO("Amusement raised to %d, keep being funny.", amusement);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
