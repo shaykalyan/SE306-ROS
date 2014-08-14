@@ -96,6 +96,18 @@ bool doubleEquals(double a, double b, double difference)
     return std::abs(a - b) < difference;
 }
 
+double normalizeAngle(double angle)
+{
+    while (angle < 0) {
+        angle += 2 * M_PI;
+    }
+    while (angle > 2 * M_PI) {
+        angle -= 2 * M_PI;
+    }
+    return angle;
+}
+
+
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
     elderly_care_simulation::EventTrigger msgOut;
     msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
