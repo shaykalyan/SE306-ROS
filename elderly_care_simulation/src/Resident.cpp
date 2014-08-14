@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
     // ROS initialiser calls
     ros::init(argc, argv, "Resident");
     ros::NodeHandle nodeHandle;
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(25);
 	
     // Initialise publishers
     robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
