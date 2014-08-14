@@ -40,8 +40,30 @@ ros::Publisher robotNodeStagePub;
 ros::Subscriber stageOdoSub;
 ros::Subscriber diceTriggerSub;
 ros::Publisher residentEventPub;
+
+// Locations to visit
+std::queue<geometry_msgs::Point> locationQueue;
+
 void stageOdomCallback(nav_msgs::Odometry msg);
 void diceTriggerCallback();
+
+void taskGetPerformed(const std_msgs::Empty){
+	geometry_msgs::Point locationOne;
+    locationOne.x = 0;
+    locationOne.y = -2;
+
+    geometry_msgs::Point locationTwo;
+    locationTwo.x = 0;
+    locationTwo.y = 2;
+
+    geometry_msgs::Point locationThree;
+    locationThree.x = 0;
+    locationThree.y = 0;
+
+    locationQueue.push(locationOne);
+    locationQueue.push(locationTwo);
+    locationQueue.push(locationThree);
+}
 
 /**
     Process odometry messages from Stage
