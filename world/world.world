@@ -30,7 +30,7 @@ appliances
   name "bed"
   bitmap "Bed.png"
   size [2 3 0.1]
-  pose [ -3.1 -8 0 0.000 ]
+  pose [ -3.1 -8 0 180.000 ]
   color "black"
 )
 
@@ -109,6 +109,14 @@ robot(
   name "Resident"
   pose [ 0 0 0 0 ]
   color "black"
+  block
+  (
+    points [3]
+    point[0] [1 0.5]
+    point[1] [2 1]
+    point[2] [2 0]
+    z [0 1]
+  )
 )
 
 robot(
