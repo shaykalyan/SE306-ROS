@@ -186,16 +186,16 @@ void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
 
     switch(msg.type) {
         case MORAL_SUPPORT:
-            ROS_INFO("I really need moral support right now ...");
+            ROS_INFO("Resident: I want moral support");
             msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
             break;
         case ENTERTAINMENT:
-			ROS_INFO("I really need some entertainment ...");
+			ROS_INFO("Resident: I need entertainment");
 			msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
 			break;
     }
 
-    ROS_INFO("Sending request to scheduler");
+    ROS_INFO("Resident: Sending request to scheduler");
     residentEventPub.publish(msgOut);
 }
 
@@ -219,14 +219,14 @@ int handleTask(int taskType) {
 			// The visitor is consoling us
 			happiness += 1;
 			if (happiness > HEALTHY_THRESHOLD) {
-				ROS_INFO("Happiness raised to %d and I'm now happy as can be!", happiness);
+				ROS_INFO("Resident: Happiness raised to %d and I'm now happy enough!", happiness);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
 
 				std_msgs::Empty emptyMessage;
 				taskCompleted(emptyMessage);
 			} else {
-				ROS_INFO("Happiness raised to %d, but I could still do with some more consoling...", happiness);
+				ROS_INFO("Resident: Happiness raised to %d, continue consoling", happiness);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 			break;
@@ -234,14 +234,14 @@ int handleTask(int taskType) {
 			// The assistant is entertaining us
 			amusement += 1;
 			if (amusement > HEALTHY_THRESHOLD) {
-				ROS_INFO("Amusement raised to %d and I've had enough!", amusement);
+				ROS_INFO("Resident: Amusement raised to %d and I've had enough!", amusement);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
 
 				std_msgs::Empty emptyMessage;
 				taskCompleted(emptyMessage);
 			} else {
-				ROS_INFO("Amusement raised to %d, keep being funny.", amusement);
+				ROS_INFO("Resident: Amusement raised to %d, keep being funny.", amusement);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 		    break;
@@ -266,7 +266,7 @@ int handleTask(int taskType) {
 bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
 				   elderly_care_simulation::PerformTask::Response &res) {
 					   
-	ROS_INFO("Received service call with task type: %d", req.taskType);
+	//ROS_INFO("Received service call with task type: %d", req.taskType);
 	
 	if (currentTaskType == NO_CURRENT_TASK) {
 		// I don't yet have a task, make this one our current task

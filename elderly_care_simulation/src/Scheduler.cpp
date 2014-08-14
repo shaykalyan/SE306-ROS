@@ -21,7 +21,7 @@ bool readyToSend = true;
 std::priority_queue<EventNode > eventQueue;
 
 void residentEventCallback(elderly_care_simulation::EventTrigger msg) {
-	ROS_INFO("Received Message from Resident");
+	ROS_INFO("Scheduler: Received Message from Resident");
 	int priority = 2; // default
 	switch(msg.event_type) {
 		case EVENT_TRIGGER_EVENT_TYPE_VISITOR:
@@ -31,7 +31,7 @@ void residentEventCallback(elderly_care_simulation::EventTrigger msg) {
 			priority = 2;
 			break;
 	}
-	ROS_INFO("Adding request to queue");
+	ROS_INFO("Scheduler: Adding request to queue");
 	eventQueue.push(EventNode(priority, msg));
 }
 
@@ -40,9 +40,9 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
 		if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
 			if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-				ROS_INFO("Response from Visitor");
+				ROS_INFO("Scheduler: Response from Visitor");
 			} else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-				ROS_INFO("Response from Assitant");
+				ROS_INFO("Scheduler: Response from Assitant");
 			}
 			// reset ability to send
 			readyToSend = true;
@@ -84,9 +84,9 @@ int main(int argc, char **argv) {
 				eventQueue.pop();
 
 				if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-					ROS_INFO("Publishing to Visitor");
+					ROS_INFO("Scheduler: Publishing to Visitor");
 				} else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-					ROS_INFO("Publishing to Assitant");
+					ROS_INFO("Scheduler: Publishing to Assitant");
 				}
 				eventTriggerPub.publish(msg);
 			}

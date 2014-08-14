@@ -34,11 +34,11 @@ int main(int argc, char **argv) {
         if (tick % 10 == 0) {
 
             int rolled = rand() % DICE_SIDES + 1;
-            ROS_INFO("Rolled: %d. Needed: %d", rolled, threshold);
+            ROS_INFO("Entertainment Roller Rolled: %d. Needed: %d", rolled, threshold);
             
             if (rolled >= threshold) {
 
-                ROS_INFO("YOUR ENTERTAINMENT/AMUSEMENT NEEDS REPLENISHING.");
+                ROS_INFO("Entertainment Roller: Resident Requests Entertainment");
                 diceRollTrigger.type = ENTERTAINMENT;
                 diceTriggerPub.publish(diceRollTrigger);
 
