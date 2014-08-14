@@ -6,6 +6,9 @@
 #include "EventTriggerConstants.h"
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/PerformTask.h"
+#include <queue>
+#include <tf/tf.h>
+#include "std_msgs/Empty.h"
 
 #include <sstream>
 #include "math.h"
@@ -15,17 +18,6 @@
 #include "EventTriggerConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include <unistd.h> // sleep
-
-// Velocity
-double linearX;
-double angularZ;
-
-// Pose
-const double WORLD_POS_X = 0;
-const double WORLD_POS_Y = 0;
-double px;
-double py;
-double theta;
 
 // Current task type: -1 corresponds to no task
 int currentTaskType = -1;
@@ -40,19 +32,152 @@ ros::Publisher robotNodeStagePub;
 ros::Subscriber stageOdoSub;
 ros::Subscriber diceTriggerSub;
 ros::Publisher residentEventPub;
+ros::Subscriber locationInstructionsSub;
+ros::Subscriber pathOfResidentSub;
+
+double currentAngle;
+
+// Current velocity of the Robot
+geometry_msgs::Twist currentVelocity;
+
+// Current location of the robot
+geometry_msgs::Pose currentLocation;
+
+// Locations to visit
+std::queue<geometry_msgs::Point> locationQueue;
+
 void stageOdomCallback(nav_msgs::Odometry msg);
 void diceTriggerCallback();
 
 /**
+ * Method to perform after a task has been performed on this resident.
+ * Moves the robot to the left and right to acknowledge his task has been performed.
+ */
+void taskCompleted(const std_msgs::Empty){
+	geometry_msgs::Point locationOne;
+    locationOne.x = currentLocation.position.x + 1;
+    locationOne.y = currentLocation.position.y;
+
+    geometry_msgs::Point locationTwo;
+    locationTwo.x = currentLocation.position.x - 1;
+    locationTwo.y = currentLocation.position.y;
+
+    geometry_msgs::Point locationThree;
+    locationThree.x = currentLocation.position.x;
+    locationThree.y = currentLocation.position.y;
+
+    locationQueue.push(locationOne);
+    locationQueue.push(locationTwo);
+    locationQueue.push(locationThree);
+}
+
+/**
     Process odometry messages from Stage
 */
-void stageOdomCallback(nav_msgs::Odometry msg) {
+void stageOdomCallback(const nav_msgs::Odometry msg) {
 	
-	px = WORLD_POS_X + msg.pose.pose.position.x;
-	py = WORLD_POS_Y + msg.pose.pose.position.y;
-	// ROS_INFO("Current x position is: %f", px);
-	// ROS_INFO("Current y position is: %f", py);
+	 //Update Current Position
+    currentLocation = msg.pose.pose;
+    double x = currentLocation.orientation.x;
+    double y = currentLocation.orientation.y;
+    double z = currentLocation.orientation.z;
+    double w = currentLocation.orientation.w;
+  	double roll, pitch, yaw;
+    tf::Matrix3x3(tf::Quaternion(x, y, z, w)).getRPY(roll, pitch, yaw);
+    currentAngle = yaw;
+
 }
+
+void updateDesiredLocationCallback(const geometry_msgs::Point location)
+{   
+    // Add location to the locationQueue queue
+    locationQueue.push(location);
+}
+
+bool doubleEquals(double a, double b, double difference)
+{
+    return std::abs(a - b) < difference;
+}
+
+double normalizeAngle(double angle)
+{
+    while (angle < 0) {
+        angle += 2 * M_PI;
+    }
+    while (angle > 2 * M_PI) {
+        angle -= 2 * M_PI;
+    }
+    return angle;
+}
+
+bool turnAnticlockwise(double currentAngle, double desiredAngle)
+{   
+    if (currentAngle < 0) {
+        currentAngle = 2 * M_PI + currentAngle;
+    }
+    if (desiredAngle < 0) {
+        desiredAngle = 2 * M_PI + desiredAngle;
+    }
+    desiredAngle = normalizeAngle(desiredAngle - currentAngle);
+    return desiredAngle < M_PI;
+    
+}
+
+bool atDesiredLocation()
+{  
+    if (locationQueue.empty()) {
+        return true;
+    } else {
+        double toleratedDifference = 0.05;
+        geometry_msgs::Point desiredLocation = locationQueue.front();
+
+        if( doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
+            doubleEquals(currentLocation.position.y, desiredLocation.y, toleratedDifference)) {
+            locationQueue.pop();
+            return atDesiredLocation();
+        }
+    }
+    return false;
+      
+}
+
+void updateCurrentVelocity()
+{
+    if (atDesiredLocation()) {
+        currentVelocity.linear.x = 0;
+        currentVelocity.angular.z = 0;
+        return;
+    }
+    // Find the correct angle
+    geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
+
+    geometry_msgs::Point desiredLocation = locationQueue.front();
+
+    directionVector.x = desiredLocation.x - currentLocation.position.x;
+    directionVector.y = desiredLocation.y - currentLocation.position.y;
+    directionVector.z = desiredLocation.z - currentLocation.position.z;
+    
+    // Thank god we're only doing 2D stuff
+    double desiredAngle = atan2(directionVector.y, directionVector.x);
+
+    if (! doubleEquals(currentAngle, desiredAngle, 0.1)) {
+        // Turn towards angle
+        currentVelocity.linear.x = 0;
+        
+        if (turnAnticlockwise(currentAngle, desiredAngle)) {
+            // Turn anti clockwise
+            currentVelocity.angular.z = 1;
+        } else {
+            // Turn clockwise
+            currentVelocity.angular.z = -1;
+        }
+    } else {
+        // Go forward
+        currentVelocity.linear.x = 1;
+        currentVelocity.angular.z = 0;
+    }
+}
+
 
 void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
     elderly_care_simulation::EventTrigger msgOut;
@@ -97,6 +222,9 @@ int handleTask(int taskType) {
 				ROS_INFO("Happiness raised to %d and I'm now happy as can be!", happiness);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
+
+				std_msgs::Empty emptyMessage;
+				taskCompleted(emptyMessage);
 			} else {
 				ROS_INFO("Happiness raised to %d, but I could still do with some more consoling...", happiness);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
@@ -109,6 +237,9 @@ int handleTask(int taskType) {
 				ROS_INFO("Amusement raised to %d and I've had enough!", amusement);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
+
+				std_msgs::Empty emptyMessage;
+				taskCompleted(emptyMessage);
 			} else {
 				ROS_INFO("Amusement raised to %d, keep being funny.", amusement);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
@@ -162,25 +293,19 @@ int main(int argc, char **argv) {
     // ROS initialiser calls
     ros::init(argc, argv, "Resident");
     ros::NodeHandle nodeHandle;
-    ros::Rate loop_rate(10);
-    
-    // Initialise pose (must be same as world file)
-	theta = M_PI/2.0;
-	px = WORLD_POS_X;
-	py = WORLD_POS_Y;
-	
-	// Initialise velocity
-	linearX = 0.0;
-	angularZ = 0.0;
+    ros::Rate loop_rate(25);
 	
     // Initialise publishers
     robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
     residentEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
 
     // Initialise subscribers
-    stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/odom", 1000, stageOdomCallback);
+    stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, stageOdomCallback);
     diceTriggerSub = nodeHandle.subscribe<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, diceTriggerCallback);
 
+    locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_0/location", 1000, updateDesiredLocationCallback);
+
+    pathOfResidentSub = nodeHandle.subscribe<std_msgs::Empty>("robot_0/resident_respond", 1000, taskCompleted);
     // Initialise messages
     geometry_msgs::Twist robotNodeCmdvel;
     
@@ -192,11 +317,8 @@ int main(int argc, char **argv) {
 
 	while (ros::ok())
 	{
-		// Publish to Stage
-		robotNodeCmdvel.linear.x = linearX;
-		robotNodeCmdvel.angular.z = angularZ;
-		robotNodeStagePub.publish(robotNodeCmdvel);
-		
+		updateCurrentVelocity();
+
 		// Every once in a while, decrease health values
 		if (count % 50 == 0) {
 			// Every 5 secs
@@ -207,9 +329,10 @@ int main(int argc, char **argv) {
 			happiness = (happiness - 10) > 0 ? happiness - 10 : 0;
 			ROS_INFO("Happiness level fell to %d", happiness);
 		}
+
+		robotNodeStagePub.publish(currentVelocity);
 		
 		ros::spinOnce();
-
 		loop_rate.sleep();
 		++count;
 	}
