@@ -51,12 +51,12 @@ void diceTriggerCallback();
 
 void taskGetPerformed(const std_msgs::Empty){
 	geometry_msgs::Point locationOne;
-    locationOne.x = 0;
-    locationOne.y = -2;
+    locationOne.x = 1;
+    locationOne.y = 0;
 
     geometry_msgs::Point locationTwo;
-    locationTwo.x = 0;
-    locationTwo.y = 2;
+    locationTwo.x = -1;
+    locationTwo.y = 0;
 
     geometry_msgs::Point locationThree;
     locationThree.x = 0;
@@ -78,8 +78,7 @@ void stageOdomCallback(const nav_msgs::Odometry msg) {
     double y = currentLocation.orientation.y;
     double z = currentLocation.orientation.z;
     double w = currentLocation.orientation.w;
-    ROS_INFO("THE LOCATION IS: %f, %f", currentLocation.position.x, currentLocation.position.y);
-    double roll, pitch, yaw;
+  	double roll, pitch, yaw;
     tf::Matrix3x3(tf::Quaternion(x, y, z, w)).getRPY(roll, pitch, yaw);
     currentAngle = yaw;
 
@@ -125,7 +124,7 @@ bool atDesiredLocation()
     if (locationQueue.empty()) {
         return true;
     } else {
-        double toleratedDifference = 0.15;
+        double toleratedDifference = 0.05;
         geometry_msgs::Point desiredLocation = locationQueue.front();
 
         if( doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
@@ -143,6 +142,7 @@ void updateCurrentVelocity()
     if (atDesiredLocation()) {
         currentVelocity.linear.x = 0;
         currentVelocity.angular.z = 0;
+        return;
     }
     // Find the correct angle
     geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
@@ -156,7 +156,7 @@ void updateCurrentVelocity()
     // Thank god we're only doing 2D stuff
     double desiredAngle = atan2(directionVector.y, directionVector.x);
 
-    if (! doubleEquals(currentAngle, desiredAngle, 0.15)) {
+    if (! doubleEquals(currentAngle, desiredAngle, 0.1)) {
         // Turn towards angle
         currentVelocity.linear.x = 0;
         
