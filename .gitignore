@@ -4,6 +4,7 @@ bin/
 lib/
 msg_gen/
 srv_gen/
+elderly_care_simulation/src/elderly_care_simulation/
 
 # Hardware Specific files
 .rosinstall
@@ -33,4 +34,3 @@ setup.*sh
 
 # Python
 *.pyc
-*.py
