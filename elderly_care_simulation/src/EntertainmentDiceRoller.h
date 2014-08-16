@@ -22,6 +22,7 @@ class EntertainmentDiceRoller {
 
         const int DICE_SIDES = 200;
         int threshold;
+        int rolled;
 };
 
 #endif

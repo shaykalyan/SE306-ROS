@@ -24,7 +24,7 @@ EntertainmentDiceRoller::~EntertainmentDiceRoller() {
  */
 bool EntertainmentDiceRoller::roll() {
 
-    int rolled = rand() % DICE_SIDES + 1;
+    rolled = rand() % DICE_SIDES + 1;
     ROS_INFO("Rolled: %d. Needed: %d", rolled, threshold);
     
     if (rolled >= threshold) {
@@ -35,11 +35,12 @@ bool EntertainmentDiceRoller::roll() {
     else {
         threshold--;
         return false;
-    }   
+    }
 }
 
 // Signatures
 ros::Publisher diceTriggerPub;
+ros::Publisher diceRollPub;
 elderly_care_simulation::DiceRollTrigger diceRollTrigger;
 
 int main(int argc, char **argv) {
@@ -51,9 +52,13 @@ int main(int argc, char **argv) {
 
     // Declare publishers
     diceTriggerPub = nodeHandle.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, true);
+    diceRollPub = nodeHandle.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll", 1000, true);
 
     // Create diceroller
     EntertainmentDiceRoller roller = EntertainmentDiceRoller();
+
+    // Set DiceRollTrigger type
+    diceRollTrigger.type = ENTERTAINMENT;
 
     int tick = 1;
 
@@ -62,11 +67,13 @@ int main(int argc, char **argv) {
         if (tick % 10 == 0) {
             // Roll dice
             bool result = roller.roll();
+            diceRollTrigger.rolled = roller.rolled;
+            diceRollTrigger.threshold = roller.threshold;
             if (result) {
-                ROS_INFO("YOUR ENTERTAINMENT/AMUSEMENT NEEDS REPLENISHING.");
-                diceRollTrigger.type = ENTERTAINMENT;
+                ROS_INFO("YOUR ENTERTAINMENT/AMUSEMENT NEEDS REPLENISHING.");            
                 diceTriggerPub.publish(diceRollTrigger);
             }
+            diceRollPub.publish(diceRollTrigger);
             tick = 1;
         }
         else {
