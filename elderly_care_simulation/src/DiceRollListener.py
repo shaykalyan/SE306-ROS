@@ -4,7 +4,7 @@ import roslib; roslib.load_manifest('elderly_care_simulation')
 from elderly_care_simulation.msg import DiceRollTrigger
 
 def dice_roll_callback(msg):
-    rospy.loginfo("Dice Type: %d Threshold: %4d Rolled: %4d",msg.type, msg.rolled, msg.threshold)
+    rospy.loginfo("Dice Type: %d Threshold: %4d Rolled: %4d",msg.type, msg.threshold, msg.rolled)
     
 def listener():
 
