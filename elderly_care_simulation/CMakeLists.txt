@@ -38,3 +38,8 @@ rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
 rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
 rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
 
+rosbuild_add_library(Robot src/Robot.cpp)
+target_link_libraries(Resident Robot)
+
+
+
