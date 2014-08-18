@@ -4,6 +4,7 @@ bin/
 lib/
 msg_gen/
 srv_gen/
+src/elderly_care_simulation/
 
 # Hardware Specific files
 .rosinstall
