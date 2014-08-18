@@ -4,13 +4,10 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
 
-#include <sstream>
 #include "math.h"
 #include "EventTriggerConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include <queue>
-#include <vector>
-#include <utility>
 #include "EventNode.h"
 #include <unistd.h> // sleep
 
@@ -50,6 +47,81 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 	}
 }
 
+
+/*
+    07:00   WAKE
+    07:00   COOK ---> EAT
+    07:00   MEDICATION
+    08:00   EXERCISE
+    09:00   SHOWER
+    10:00   ENTERTAINMENT
+    12:00   COOK ---> EAT
+    12:00   MEDICATION
+    13:00   CONVERSATION
+    14:00   FRIEND & RELATIVE
+    16:00   ENTERTAINMENT
+    18:00   COOK ---> EAT
+    18:00   MEDICATION
+    19:00   COMPANIONSHIP
+    20:00   SLEEP
+
+    #PAUSE FOR 30 SEC
+    #CLEAR LIST & REPOPULATE LIST
+*/
+void populateDailyTasks(void) {
+    elderly_care_simulation::EventTrigger msg;
+    msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
+    msg.result = EVENT_TRIGGER_RESULT_FAILURE;
+
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_WAKE;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_COOK;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_MEDICATION;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_EXERCISE;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_COOK;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_MEDICATION;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_CONVERSATION;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_COOK;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_MEDICATION;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP;
+    eventQueue.push(EventNode(3, msg));
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_SLEEP;
+    eventQueue.push(EventNode(3, msg));
+
+}
+
+
 int main(int argc, char **argv) {
 
 	//You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
@@ -78,6 +150,8 @@ int main(int argc, char **argv) {
 
 				// block scheduler
 				readyToSend = false;
+
+                // dequeueEvent();
 
 				elderly_care_simulation::EventTrigger msg;
 				msg = eventQueue.top().getEventTriggerMessage();
