@@ -12,6 +12,7 @@
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include "elderly_care_simulation/PerformTask.h"
+#include "Assistant.h"
 #include <unistd.h>
 
 // Tasks

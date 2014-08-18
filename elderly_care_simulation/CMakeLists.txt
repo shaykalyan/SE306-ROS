@@ -21,6 +21,8 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
 
+include_directories(include)
+
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
@@ -39,4 +41,7 @@ rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
 rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
 
 # Testing
-rosbuild_add_gtest(test/AssistantTest test/TestAssistant.cpp)
+#rosbuild_test_results_dir(test/results)
+rosbuild_add_gtest(test/TestAssistant test/TestAssistant.cpp)
+rosbuild_add_library(AssistantLib src/Assistant.cpp)
+target_link_libraries(test/TestAssistant AssistantLib)
