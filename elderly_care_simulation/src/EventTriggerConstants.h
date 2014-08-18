@@ -28,6 +28,10 @@ const int EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP        = 11;
 const int EVENT_TRIGGER_EVENT_TYPE_WAKE                 = 12;
 const int EVENT_TRIGGER_EVENT_TYPE_SLEEP                = 13;
 
+// DEPRICATED
+const int EVENT_TRIGGER_EVENT_TYPE_VISITOR                 = 14;
+const int EVENT_TRIGGER_EVENT_TYPE_ASSISTANT               = 15;
+
 
 const int EVENT_TRIGGER_RESULT_FAILURE = 0;
 const int EVENT_TRIGGER_RESULT_SUCCESS = 1;

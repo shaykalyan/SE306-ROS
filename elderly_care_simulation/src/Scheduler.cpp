@@ -11,22 +11,28 @@
 #include "EventNode.h"
 #include <unistd.h> // sleep
 
-// flag to indicate scheduler's status
-bool readyToSend = true;
+
+int ongoingEvents = 0;
+const int MAX_CONCURRENT_EVENTS = 2;
 
 // globals
 std::priority_queue<EventNode > eventQueue;
+ros::Publisher eventTriggerPub;
+ros::Subscriber eventTriggerSub;
 
 void residentEventCallback(elderly_care_simulation::EventTrigger msg) {
 	ROS_INFO("Scheduler: Received Message from Resident");
 	int priority = 2; // default
 	switch(msg.event_type) {
-		case EVENT_TRIGGER_EVENT_TYPE_VISITOR:
+		case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT
 			priority = 2;
 			break;
-		case EVENT_TRIGGER_EVENT_TYPE_ASSISTANT:
-			priority = 2;
+		case EVENT_TRIGGER_EVENT_TYPE_ILL:
+			priority = 0;
 			break;
+        case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
+            priority = 0;
+            break;
 	}
 	ROS_INFO("Scheduler: Adding request to queue");
 	eventQueue.push(EventNode(priority, msg));
@@ -36,13 +42,19 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 	
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
 		if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
-			if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-				ROS_INFO("Scheduler: Response from Visitor");
-			} else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-				ROS_INFO("Scheduler: Response from Assitant");
-			}
 			// reset ability to send
-			readyToSend = true;
+            if (msg.event_type != EVENT_TRIGGER_EVENT_TYPE_COOK) {
+                ROS_INFO("Scheduler: Tasks reported done. Decreasing ongoingEvents");
+                ongoingEvents--;
+            }else{
+                elderly_care_simulation::EventTrigger msg;
+                msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
+                msg.result = EVENT_TRIGGER_RESULT_FAILURE;
+                msg.event_type = EVENT_TRIGGER_EVENT_TYPE_EAT;
+
+                ROS_INFO("Scheduler: Adding EAT event to queue.");
+                eventQueue.push(EventNode(1, msg));
+            }
 		}
 	}
 }
@@ -72,7 +84,6 @@ void populateDailyTasks(void) {
     elderly_care_simulation::EventTrigger msg;
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
     msg.result = EVENT_TRIGGER_RESULT_FAILURE;
-
 
     msg.event_type = EVENT_TRIGGER_EVENT_TYPE_WAKE;
     eventQueue.push(EventNode(3, msg));
@@ -121,6 +132,52 @@ void populateDailyTasks(void) {
 
 }
 
+/**
+ * Dequeues an event and publishes to the event_trigger topic.
+ * Allows concurrent events to be triggered up to the limit
+ * set in MAX_CONCURRENT_EVENTS
+ *
+ * COOK event is not affected as it acts independently of the 
+ * Resident 
+ */
+void dequeueEvent(void) {
+    if (eventQueue.size() < 1) {
+        return;
+    }
+
+    elderly_care_simulation::EventTrigger msg;
+    msg = eventQueue.top().getEventTriggerMessage();
+
+    // cooking event type is published immediately
+    if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
+        eventQueue.pop();
+        eventTriggerPub.publish(msg);
+        ROS_INFO("Scheduler: Publishing event type: COOK");
+    } else {
+        // publish new event only if less than two events are ongoing
+        if (ongoingEvents < MAX_CONCURRENT_EVENTS) {
+            eventQueue.pop();
+            eventTriggerPub.publish(msg);
+            ROS_INFO("Scheduler: Publishing event type: OTHER");
+            ongoingEvents++;
+        }       
+    }
+
+    // ===============================================================
+    // ONE AT A TIME!
+    /*
+    elderly_care_simulation::EventTrigger msg;
+    msg = eventQueue.top().getEventTriggerMessage();
+    eventQueue.pop();
+
+    if (msg.event_type != EVENT_TRIGGER_EVENT_TYPE_COOK) {
+        readyToSend = true;
+    }
+    eventTriggerPub.publish(msg);
+    */
+
+}
+
 
 int main(int argc, char **argv) {
 
@@ -131,42 +188,22 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nodeHandle;
 
 	// advertise to event_trigger topic
-	ros::Publisher eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
+	eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
 
 	// subscribe to event_trigger topic
-	ros::Subscriber eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
-	ros::Subscriber residentEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, residentEventCallback);
+	eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
+	// ros::Subscriber residentEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, residentEventCallback);
 	
 	ros::Rate loop_rate(10);
+
+    // populate queue with day's events
+    populateDailyTasks();
 
 	//a count of howmany messages we have sent
 	int count = 0;
 
 	while (ros::ok()) {
-
-		if (readyToSend) {
-
-			if(eventQueue.size() > 0) {
-
-				// block scheduler
-				readyToSend = false;
-
-                // dequeueEvent();
-
-				elderly_care_simulation::EventTrigger msg;
-				msg = eventQueue.top().getEventTriggerMessage();
-				eventQueue.pop();
-
-				if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-					ROS_INFO("Scheduler: Publishing to Visitor");
-				} else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-					ROS_INFO("Scheduler: Publishing to Assitant");
-				}
-				eventTriggerPub.publish(msg);
-			}
-			
-			
-		}
+        dequeueEvent(); 
 
 		ros::spinOnce();
 
