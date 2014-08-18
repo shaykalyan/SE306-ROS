@@ -35,6 +35,9 @@ rosbuild_add_executable(Visitor src/Visitor.cpp)		#R2
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
 
 # Invisible
+rosbuild_add_library(DiceRoller src/DiceRoller.cpp)
 rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
+target_link_libraries(MoralSupportDiceRoller DiceRoller)
 rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
+target_link_libraries(EntertainmentDiceRoller DiceRoller)
 

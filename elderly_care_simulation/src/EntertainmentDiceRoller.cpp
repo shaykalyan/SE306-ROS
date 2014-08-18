@@ -5,37 +5,12 @@
 #include <cstdlib>
 #include "math.h"
 
+#include "DiceRoller.h"
 #include "EntertainmentDiceRoller.h"
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
 
-EntertainmentDiceRoller::EntertainmentDiceRoller() {
-    threshold = DICE_SIDES;
-}
-
 EntertainmentDiceRoller::~EntertainmentDiceRoller() {
-}
-
-/**
- * Rolls the dice. If the roll meets the threshold,
- * the threshold is reset to the worst probability
- * and true is returned, otherwise probability is 
- * increased and false is returned.
- */
-bool EntertainmentDiceRoller::roll() {
-
-    int rolled = rand() % DICE_SIDES + 1;
-    ROS_INFO("Rolled: %d. Needed: %d", rolled, threshold);
-    
-    if (rolled >= threshold) {
-        // Reset threshold
-        threshold = DICE_SIDES;
-        return true;
-    } 
-    else {
-        threshold--;
-        return false;
-    }   
 }
 
 // Signatures
@@ -53,14 +28,16 @@ int main(int argc, char **argv) {
     diceTriggerPub = nodeHandle.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, true);
 
     // Create diceroller
-    EntertainmentDiceRoller roller = EntertainmentDiceRoller();
+    DiceRoller roller = EntertainmentDiceRoller();
 
     int tick = 1;
 
     while (ros::ok()) {
-        
+    
+        // Every 10 ticks ...        
         if (tick % 10 == 0) {
-            // Roll dice
+
+            // ... roll dice
             bool result = roller.roll();
             if (result) {
                 ROS_INFO("YOUR ENTERTAINMENT/AMUSEMENT NEEDS REPLENISHING.");

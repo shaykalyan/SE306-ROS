@@ -8,20 +8,18 @@
 #include <cstdlib>
 #include "math.h"
 
+#include "DiceRoller.h"
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
 
-class MoralSupportDiceRoller {
+class MoralSupportDiceRoller : public DiceRoller {
 
     public:
 
-        MoralSupportDiceRoller();
+        MoralSupportDiceRoller() : DiceRoller(300) {}
         ~MoralSupportDiceRoller();
-
-        bool roll();
-
-        const int DICE_SIDES = 300;
-        int threshold;
 };
 
 #endif
+
+
