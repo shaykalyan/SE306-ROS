@@ -194,8 +194,22 @@ void dequeueEvent(void) {
     }
 
     // Disable random events from being added to queue after SLEEP event
+    // Also prevent the SLEEP event until all tasks are finished.
     if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP){
         allowRandomEvents = false;
+
+        // If no more tasks, then publish SLEEP event
+        if(ongoingEvents == 0) {
+            eventQueue.pop();
+            eventTriggerPub.publish(msg);
+            ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+            ongoingEvents++;
+
+        // If tasks still ongoing, do not allow SLEEP
+        }else{
+            ROS_INFO("Scheduler: Target still busy, cannot do event: [%s]", eventTypeToString(msg.event_type));
+            return;
+        }
 
     // cooking event type is published immediately
     } else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
@@ -241,7 +255,13 @@ int main(int argc, char **argv) {
 
 	while (ros::ok()) {
 
-        dequeueEvent();
+        if(eventQueue.size() == 0 && ongoingEvents == 0) {
+            sleep(10);
+            clearEventQueue();
+            populateDailyTasks();
+        }else {
+            dequeueEvent();
+        }
 
 		ros::spinOnce();
 		loop_rate.sleep();
