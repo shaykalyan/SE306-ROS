@@ -1,5 +1,6 @@
 <launch>
 	<node name="stage" pkg="stage_ros" type="stageros" args="$(find elderly_care_simulation)/../world/world.world"/>
+
 	<node name="resident" pkg="elderly_care_simulation" type="Resident" />
 	<node name="scheduler" pkg="elderly_care_simulation" type="Scheduler" />
 	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
@@ -7,4 +8,7 @@
 	<node name="moralSupportDiceRoller" pkg="elderly_care_simulation" type="MoralSupportDiceRoller" />	
 	<node name="entertainmentDiceRoller" pkg="elderly_care_simulation" type="EntertainmentDiceRoller" />
 	<node name="console" pkg="rqt_console" type="rqt_console" />
+
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find elderly_care_simulation)/../world/alpha-house.yaml" />
+	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer" />
 </launch>

@@ -41,3 +41,5 @@ target_link_libraries(MoralSupportDiceRoller DiceRoller)
 rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
 target_link_libraries(EntertainmentDiceRoller DiceRoller)
 
+# Path finder server
+rosbuild_add_executable(PathServer src/PathServer.cpp)
