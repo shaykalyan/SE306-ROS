@@ -66,6 +66,8 @@ int main(int argc, char **argv) {
 	ros::Subscriber residentEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, residentEventCallback);
 	
 	ros::Rate loop_rate(10);
+	
+	ROS_INFO("Initializing Scheduler");
 
 	//a count of howmany messages we have sent
 	int count = 0;

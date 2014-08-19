@@ -41,3 +41,13 @@ target_link_libraries(MoralSupportDiceRoller DiceRoller)
 rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
 target_link_libraries(EntertainmentDiceRoller DiceRoller)
 
+# ROSTEST
+# add the test executable, keep it from being built by "make all"
+rosbuild_add_executable(TestScheduler EXCLUDE_FROM_ALL src/test/TestScheduler.cpp)
+
+# Link TestScheduler against gtest
+rosbuild_add_gtest_build_flags(TestScheduler)
+
+# Make sure rostest launches test/TestScheduler.test during "make test"
+rosbuild_add_rostest(test/TestScheduler.test)
+
