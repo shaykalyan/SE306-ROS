@@ -1,8 +1,5 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include <geometry_msgs/Twist.h>
-#include <nav_msgs/Odometry.h>
-#include <sensor_msgs/LaserScan.h>
 
 #include "math.h"
 #include "EventTriggerConstants.h"
@@ -20,11 +17,14 @@ std::priority_queue<EventNode > eventQueue;
 ros::Publisher eventTriggerPub;
 ros::Subscriber eventTriggerSub;
 
+/**
+ * 
+ */
 void residentEventCallback(elderly_care_simulation::EventTrigger msg) {
 	ROS_INFO("Scheduler: Received Message from Resident");
 	int priority = 2; // default
 	switch(msg.event_type) {
-		case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT
+		case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
 			priority = 2;
 			break;
 		case EVENT_TRIGGER_EVENT_TYPE_ILL:
@@ -38,6 +38,9 @@ void residentEventCallback(elderly_care_simulation::EventTrigger msg) {
 	eventQueue.push(EventNode(priority, msg));
 }
 
+/**
+ *
+ */
 void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 	
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
@@ -60,26 +63,32 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 }
 
 
-/*
-    07:00   WAKE
-    07:00   COOK ---> EAT
-    07:00   MEDICATION
-    08:00   EXERCISE
-    09:00   SHOWER
-    10:00   ENTERTAINMENT
-    12:00   COOK ---> EAT
-    12:00   MEDICATION
-    13:00   CONVERSATION
-    14:00   FRIEND & RELATIVE
-    16:00   ENTERTAINMENT
-    18:00   COOK ---> EAT
-    18:00   MEDICATION
-    19:00   COMPANIONSHIP
-    20:00   SLEEP
-
-    #PAUSE FOR 30 SEC
-    #CLEAR LIST & REPOPULATE LIST
-*/
+/**
+ * Populates daily scheduled tasks into the event queue.
+ * 
+ * Daily Schedule will be queued in the following sequence:
+ * NOTE: The timestamp is just for referencing purpose.
+ *
+ *  07:00   WAKE
+ *  07:00   COOK ---> EAT
+ *  07:00   MEDICATION
+ *  08:00   EXERCISE
+ *  09:00   SHOWER
+ *  10:00   ENTERTAINMENT
+ *  12:00   COOK ---> EAT
+ *  12:00   MEDICATION
+ *  13:00   CONVERSATION
+ *  14:00   FRIEND & RELATIVE
+ *  16:00   ENTERTAINMENT
+ *  18:00   COOK ---> EAT
+ *  18:00   MEDICATION
+ *  19:00   COMPANIONSHIP
+ *  20:00   SLEEP
+ *  
+ *  PAUSE FOR 20 SEC
+ *  CLEAR LIST & REPOPULATE DAILY TASKS
+ *
+ */
 void populateDailyTasks(void) {
     elderly_care_simulation::EventTrigger msg;
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
@@ -133,12 +142,35 @@ void populateDailyTasks(void) {
 }
 
 /**
+ * Returns a string representation of the coresponding event type
+ */
+const char * eventTypeToString(int event_type) {
+    switch(event_type){
+
+        case EVENT_TRIGGER_EVENT_TYPE_EAT:              return "EAT";
+        case EVENT_TRIGGER_EVENT_TYPE_SHOWER:           return "SHOWER";
+        case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:         return "EXERCISE";
+        case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:     return "CONVERSATION";
+        case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:    return "MORAL_SUPPORT";
+        case EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE:  return "FRIEND_RELATIVE";
+        case EVENT_TRIGGER_EVENT_TYPE_ILL:              return "ILL";
+        case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:         return "VERY_ILL";
+        case EVENT_TRIGGER_EVENT_TYPE_MEDICATION:       return "MEDICATION";
+        case EVENT_TRIGGER_EVENT_TYPE_COOK:             return "COOK";
+        case EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT:    return "ENTERTAINMENT";
+        case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:    return "COMPANIONSHIP";
+        case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return "WAKE";
+        case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return "SLEEP";
+    }
+}
+
+/**
  * Dequeues an event and publishes to the event_trigger topic.
  * Allows concurrent events to be triggered up to the limit
  * set in MAX_CONCURRENT_EVENTS
  *
  * COOK event is not affected as it acts independently of the 
- * Resident 
+ * Resident.
  */
 void dequeueEvent(void) {
     if (eventQueue.size() < 1) {
@@ -152,30 +184,16 @@ void dequeueEvent(void) {
     if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
         eventQueue.pop();
         eventTriggerPub.publish(msg);
-        ROS_INFO("Scheduler: Publishing event type: COOK");
+        ROS_INFO("Scheduler: Publishing event type: %s", eventTypeToString(msg.event_type));
     } else {
         // publish new event only if less than two events are ongoing
         if (ongoingEvents < MAX_CONCURRENT_EVENTS) {
             eventQueue.pop();
             eventTriggerPub.publish(msg);
-            ROS_INFO("Scheduler: Publishing event type: OTHER");
+            ROS_INFO("Scheduler: Publishing event type: %s", eventTypeToString(msg.event_type));
             ongoingEvents++;
         }       
     }
-
-    // ===============================================================
-    // ONE AT A TIME!
-    /*
-    elderly_care_simulation::EventTrigger msg;
-    msg = eventQueue.top().getEventTriggerMessage();
-    eventQueue.pop();
-
-    if (msg.event_type != EVENT_TRIGGER_EVENT_TYPE_COOK) {
-        readyToSend = true;
-    }
-    eventTriggerPub.publish(msg);
-    */
-
 }
 
 
@@ -192,7 +210,7 @@ int main(int argc, char **argv) {
 
 	// subscribe to event_trigger topic
 	eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
-	// ros::Subscriber residentEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, residentEventCallback);
+	ros::Subscriber residentEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, residentEventCallback);
 	
 	ros::Rate loop_rate(10);
 
@@ -203,6 +221,7 @@ int main(int argc, char **argv) {
 	int count = 0;
 
 	while (ros::ok()) {
+
         dequeueEvent(); 
 
 		ros::spinOnce();
