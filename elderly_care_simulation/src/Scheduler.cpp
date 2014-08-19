@@ -1,7 +1,6 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
-#include "math.h"
 #include "EventTriggerConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include <queue>
@@ -64,7 +63,7 @@ void clearEventQueue() {
 }
 
 /**
- * 
+ * Callback function to deal with random events published by the resident
  */
 void randomEventInterceptCallback(elderly_care_simulation::EventTrigger msg) {
 	ROS_INFO("Scheduler: Received Message from Resident");
@@ -80,10 +79,20 @@ void randomEventInterceptCallback(elderly_care_simulation::EventTrigger msg) {
             priority = 0;
             break;
 	}
+
+    // Only allows random events to be added to event queue in the allowed
+    // timeframe (between WAKE and SLEEP)
+    if (allowRandomEvents){
+        ROS_INFO("Scheduler: Adding random event: [%s] to queue.", eventTypeToString(msg.event_type));
+        eventQueue.push(EventNode(priority, msg));
+    }else{
+        ROS_INFO("Scheduler: Random events are not allowed at this time.");
+    }
+
 }
 
 /**
- *
+ * Callback function to deal with events replied from service provider robots
  */
 void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 	
@@ -116,11 +125,13 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
  *  08:00   EXERCISE
  *  09:00   SHOWER
  *  10:00   ENTERTAINMENT
+ *
  *  12:00   COOK ---> EAT
  *  12:00   MEDICATION
  *  13:00   CONVERSATION
  *  14:00   FRIEND & RELATIVE
  *  16:00   ENTERTAINMENT
+ *
  *  18:00   COOK ---> EAT
  *  18:00   MEDICATION
  *  19:00   COMPANIONSHIP
@@ -133,17 +144,23 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 void populateDailyTasks(void) {
 
     int eventSequence[] = {
+
+        // Morning
         EVENT_TRIGGER_EVENT_TYPE_WAKE,
         EVENT_TRIGGER_EVENT_TYPE_COOK,
         EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
         EVENT_TRIGGER_EVENT_TYPE_EXERCISE,
         EVENT_TRIGGER_EVENT_TYPE_SHOWER,
         EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,
+
+        // Noon
         EVENT_TRIGGER_EVENT_TYPE_COOK,
         EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
         EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,
         EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE,
         EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,
+
+        // Evening
         EVENT_TRIGGER_EVENT_TYPE_COOK,
         EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
         EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,
@@ -171,8 +188,17 @@ void dequeueEvent(void) {
     elderly_care_simulation::EventTrigger msg;
     msg = eventQueue.top().getEventTriggerMessage();
 
+    // Enable random events to be added to queue only after WAKE event
+    if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_WAKE){
+        allowRandomEvents = true;
+    }
+
+    // Disable random events from being added to queue after SLEEP event
+    if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP){
+        allowRandomEvents = false;
+
     // cooking event type is published immediately
-    if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
+    } else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
         eventQueue.pop();
         eventTriggerPub.publish(msg);
         ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
@@ -215,7 +241,7 @@ int main(int argc, char **argv) {
 
 	while (ros::ok()) {
 
-        dequeueEvent(); 
+        dequeueEvent();
 
 		ros::spinOnce();
 		loop_rate.sleep();
