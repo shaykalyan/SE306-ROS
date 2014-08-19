@@ -20,6 +20,7 @@
   <depend package="rospy"/>
   <depend package="roscpp"/>
   <depend package="tf"/>
+  <depend package="map_server"/>
 
 </package>
 
