@@ -1,21 +1,34 @@
 #!/usr/bin/env python
 import rospy
-import roslib; roslib.load_manifest('elderly_care_simulation')
+import roslib
+import roslib.load_manifest('elderly_care_simulation')
 from elderly_care_simulation.msg import DiceRollTrigger
 from Tkinter import *
-import threading
-import Queue
-from time import sleep
-import random
 
-class ROSThread(threading.Thread):
+class DiceRollerGUI:
+    """
+    TkInter GUI for the visualisation of dice rolls carried out by the 
+    various *DiceRoller implementations
+    """
     def __init__(self):
-        threading.Thread.__init__(self)
+        """
+        Initialises tkInter elements and subscribes to relevant ROS Topics
+        """
+        # create root element with fixed size
+        self.root = Tk()
+        self.root.geometry('400x200+1+1')
 
-    def run(self):
-        self.listener()
+        # create frame element to host labels and graphics
+        self.frame = Frame(self.root)        
+        self.frame.pack()
 
-    def listener(self):
+        # create variable label
+        self.dice_label = StringVar()
+
+        # create and assign dice label to label widget. Updating dice_label will
+        # automatically update the widget's text
+        self.dice_label_widget = Label(self.frame, textvariable=self.dice_label)
+        self.dice_label_widget.pack(side=LEFT)
 
         # initialise listener node
         # anonymous ensures a unique listeners allowing multiple instances
@@ -23,51 +36,24 @@ class ROSThread(threading.Thread):
         rospy.init_node('DiceRollListener', anonymous=True)
 
         # subscribe to topic
-        rospy.Subscriber("dice_roll", DiceRollTrigger, dice_roll_callback)
-
-        # prevent python from exiting
-        rospy.spin()
-
-    def dice_roll_callback(msg):
-        rospy.loginfo("Dice Type: %d Threshold: %4d Rolled: %4d",msg.type, msg.threshold, msg.rolled)
-        tkThread.thread_0_update(msg.rolled)
-
-class tkinterThread:
-    def __init__(self):
-        self.master=Tk()
-        self.master.geometry('200x200+1+1')
-
-        f=Frame(self.master)
-        f.pack()
-
-        self.l0=Label(f)
-        self.l0.pack()
-
-        self.q0=Queue.Queue()
-
-        self.master.bind("<<Thread_0_Label_Update>>",self.thread_0_update_e)
-
-    def start(self):
-        self.master.mainloop()
-        #self.master.destroy()
+        rospy.Subscriber("dice_roll", DiceRollTrigger, self.dice_roll_callback)
 
 
-    def thread_0_update(self,val):
-        self.q0.put(val)
-        self.master.event_generate('<<Thread_0_Label_Update>>',when='tail')
+    def run(self):
+        """
+        Initiate tkInter's main loop. This will populate the root window
+        with widgets as declared in __init__
+        """
+        self.root.mainloop()
 
-    def thread_0_update_e(self,e):
-        while self.q0.qsize():
-            try:
-                val=self.q0.get()
-                self.l0.config(text=str(val))
-            except Queue.Empty:
-                pass
+    def update_dice_label(self, data):
+        self.dice_label.set(data)
 
-
+    def dice_roll_callback(self, msg):
+        data = 'Dice Type: %d Threshold: %4d Rolled: %4d' % (msg.type, msg.threshold, msg.rolled)
+        # rospy.loginfo("Dice Type: %d Threshold: %4d Rolled: %4d",msg.type, msg.threshold, msg.rolled)
+        self.update_dice_label(data)
 
 if __name__=='__main__':
-    tkThread=tkinterThread()
-    rThread=ROSThread()
-    rThread.start()
-    tkThread.start()
+    gui = DiceRollerGUI()
+    gui.run()
