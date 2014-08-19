@@ -11,6 +11,11 @@
 // constants
 const int MAX_CONCURRENT_EVENTS = 2;
 
+const int CRITICAL_PRIORITY = 0;
+const int HIGH_PRIORITY = 1;
+const int MEDIUM_PRIORITY = 2;
+const int LOW_PRIORITY = 3;
+
 // globals
 std::priority_queue<EventNode > eventQueue;
 ros::Publisher eventTriggerPub;
@@ -39,6 +44,7 @@ const char * eventTypeToString(int eventType) {
         case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:    return "COMPANIONSHIP";
         case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return "WAKE";
         case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return "SLEEP";
+        default:                                        return "-ERROR-";
     }
 }
 
@@ -65,40 +71,40 @@ void clearEventQueue() {
 /**
  * Callback function to deal with random events published by the resident
  */
-void randomEventInterceptCallback(elderly_care_simulation::EventTrigger msg) {
-	ROS_INFO("Scheduler: Received Message from Resident");
-	int priority = 2; // default
-	switch(msg.event_type) {
-		case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
-			priority = 2;
-			break;
-		case EVENT_TRIGGER_EVENT_TYPE_ILL:
-			priority = 0;
-			break;
-        case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
-            priority = 0;
-            break;
-	}
+void randomEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
 
     // Only allows random events to be added to event queue in the allowed
     // timeframe (between WAKE and SLEEP)
-    if (allowRandomEvents){
-        ROS_INFO("Scheduler: Adding random event: [%s] to queue.", eventTypeToString(msg.event_type));
-        eventQueue.push(EventNode(priority, msg));
-    }else{
+    if(!allowRandomEvents) {
         ROS_INFO("Scheduler: Random events are not allowed at this time.");
+        return;
     }
 
+    int priority = MEDIUM_PRIORITY; // default
+    switch(msg.event_type) {
+        case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
+            priority = MEDIUM_PRIORITY;
+            break;
+        case EVENT_TRIGGER_EVENT_TYPE_ILL:
+            priority = CRITICAL_PRIORITY;
+            break;
+        case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
+            priority = CRITICAL_PRIORITY;
+            break;
+    }
+
+    ROS_INFO("Scheduler: Adding random event: [%s] to queue.", eventTypeToString(msg.event_type));
+    eventQueue.push(EventNode(priority, msg));
 }
 
 /**
  * Callback function to deal with events replied from service provider robots
  */
 void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
-	
-	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
-		if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
-			// reset ability to send
+    
+    if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
+        if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
+            // reset ability to send
             if (msg.event_type != EVENT_TRIGGER_EVENT_TYPE_COOK) {
                 elderly_care_simulation::EventTrigger msg;
                 msg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT);
@@ -109,8 +115,8 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
                 ongoingEvents--;
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
             }
-		}
-	}
+        }
+    }
 }
 
 /**
@@ -167,8 +173,8 @@ void populateDailyTasks(void) {
         EVENT_TRIGGER_EVENT_TYPE_SLEEP
     };
 
-    for(int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
-        eventQueue.push(EventNode(3, createEventRequestMsg(eventSequence[i])));
+    for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
+        eventQueue.push(EventNode(LOW_PRIORITY, createEventRequestMsg(eventSequence[i])));
     }
 }
 
@@ -232,28 +238,28 @@ void dequeueEvent(void) {
  */
 int main(int argc, char **argv) {
 
-	//You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
-	ros::init(argc, argv, "Scheduler");
+    //You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
+    ros::init(argc, argv, "Scheduler");
 
-	//NodeHandle is the main access point to communicate with ros.
-	ros::NodeHandle nodeHandle;
+    //NodeHandle is the main access point to communicate with ros.
+    ros::NodeHandle nodeHandle;
 
-	// advertise to event_trigger topic
-	eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
+    // advertise to event_trigger topic
+    eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
 
-	// subscribe to event_trigger topic
-	eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
-	randomEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, randomEventInterceptCallback);
-	
-	ros::Rate loop_rate(10);
+    // subscribe to event_trigger topic
+    eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
+    randomEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, randomEventReceivedCallback);
+    
+    ros::Rate loop_rate(10);
 
     // populate queue with day's events
     populateDailyTasks();
 
-	//a count of howmany messages we have sent
-	int count = 0;
+    //a count of howmany messages we have sent
+    int count = 0;
 
-	while (ros::ok()) {
+    while (ros::ok()) {
 
         if(eventQueue.size() == 0 && ongoingEvents == 0) {
             sleep(10);
@@ -263,9 +269,9 @@ int main(int argc, char **argv) {
             dequeueEvent();
         }
 
-		ros::spinOnce();
-		loop_rate.sleep();
-		++count;
-	}
-	return 0;
+        ros::spinOnce();
+        loop_rate.sleep();
+        ++count;
+    }
+    return 0;
 }
