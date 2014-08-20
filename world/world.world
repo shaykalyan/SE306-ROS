@@ -13,8 +13,8 @@ interval_sim 100
 window
 ( 
   #size of the window in pixels
-  size [ 800.000 600.000 ] 
-  scale 20
+  size [ 800 600 ] 
+  scale 57.062
 )
 
 # load an environment bitmap
@@ -22,20 +22,26 @@ floorplan
 ( 
   name "alpha-house"
   bitmap "alpha-house.png"
-  size [20 20 0.1]
-  pose [ 0 0 0 0.000 ]
+  size [20.000 20.000 0.100]
+  pose [ 0.000 0.000 0.000 0.000 ]
 )
 
 bed
 ( 
   name "bed"
-  pose [-3.1 -8 0 0]
+  pose [-3.100 -8.000 0.000 0.000]
 )
 
 shower
 (
   name "shower"
-  pose [8.85 -3.65 0 0]
+  pose [8.850 -3.650 0.000 0.000]
+)
+
+oven
+(
+  name "oven"
+  pose [8.850 8.850 0.000 0.000]
 )
 
 # load an couch bitmap
@@ -43,8 +49,8 @@ appliances
 ( 
   name "couch"
   bitmap "Couch.png"
-  size [2 3 0.1]
-  pose [ -8.5 -1 0 0.000 ]
+  size [2.000 3.000 0.100]
+  pose [ -8.500 -1.000 0.000 0.000 ]
   color "black"
 )
 
@@ -53,8 +59,8 @@ appliances
 ( 
   name "comfyChair"
   bitmap "ComfyChair.png"
-  size [2 2 0.1]
-  pose [ -8.5 -4 0 0.000 ]
+  size [2.000 2.000 0.100]
+  pose [ -8.500 -4.000 0.000 0.000 ]
   color "black"
 )
 
@@ -63,8 +69,8 @@ appliances
 ( 
   name "table"
   bitmap "Table.png"
-  size [3.5  2.0 0.1]
-  pose [ 5 3 0 0.000 ]
+  size [3.500  2.000 0.100]
+  pose [ 5.000 3.000 0.000 0.000 ]
   color "black"
 )
 
@@ -73,8 +79,8 @@ appliances
 ( 
   name "chair"
   bitmap "Chair.png"
-  size [.8 .8 0.1]
-  pose [ 5 4.5 0 0.000 ]
+  size [0.800 0.800 0.100]
+  pose [ 5.000 4.500 0.000 0.000 ]
   color "black"
 )
 
@@ -83,8 +89,8 @@ appliances
 ( 
   name "chair"
   bitmap "Chair.png"
-  size [.8 .8 0.1]
-  pose [ 5 1.55 0 0.000 ]
+  size [0.800 0.800 0.100]
+  pose [ 5.000 1.550 0.000 0.000 ]
   color "black"
 )
 
@@ -93,8 +99,8 @@ appliances
 ( 
   name "chair"
   bitmap "Chair.png"
-  size [.8 .8 0.1]
-  pose [ 2.7 2.9 0 0.000 ]
+  size [0.800 0.800 0.100]
+  pose [ 2.700 2.900 0.000 0.000 ]
   color "black"
 )
 
@@ -103,23 +109,23 @@ appliances
 ( 
   name "chair"
   bitmap "Chair.png"
-  size [.8 .8 0.1]
-  pose [ 7.3 2.9 0 0.000 ]
+  size [0.800 0.800 0.100]
+  pose [ 7.300 2.900 0.000 0.000 ]
   color "black"
 )
 
 # throw in some robots
 resident(
   name "Resident"
-  pose [ 0 0 0 0 ]
+  pose [ 0.000 0.000 0.000 0.000 ]
 )
 
 robot(
   name "Visitor"
-  pose [ 7.5 7.5 0 0 ]
+  pose [ 5.000 6.000 0.000 0.000 ]
 )
 
 robot(
   name "Assistant"
-  pose [ -7.5 -7.5 0 0 ]
+  pose [ -7.500 -7.500 0.000 0.000 ]
 )
