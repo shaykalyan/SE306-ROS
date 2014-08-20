@@ -25,61 +25,63 @@ class DiceRollerGUI:
         # create variable label
         self.dice_label = StringVar()
 
+        #grid.columnconfigure(frame,0,weight=1)
+
         # Creates Labels which will eventually contain information about robots and their tasks
         # :Column Names
-        Label(self.frame, text="Robot Name").grid(row=0, column=0)
-        Label(self.frame, text="Current Task").grid(row=0, column=1)
-        Label(self.frame, text="Queued Task").grid(row=0, column=2)
+        Label(self.frame, text="Robot Name", anchor=W, relief=RIDGE, width=15, bg='ivory4').grid(row=0, column=0)
+        Label(self.frame, text="Current Task", anchor=W, relief=RIDGE, width=15, bg='ivory4').grid(row=0, column=1)
+        Label(self.frame, text="Queued Task", anchor=W, relief=RIDGE, width=15, bg='ivory4').grid(row=0, column=2)
 
         # : Row 1: Resident
-        Label(self.frame, text="Resident").grid(row=1, column=0)
-        Label(self.frame, text="Sleep").grid(row=1, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=1, column=2)
+        Label(self.frame, text="Resident", anchor=W, relief=RIDGE, width=15).grid(row=1, column=0)
+        Label(self.frame, text="Sleep", anchor=W, relief=RIDGE, width=15).grid(row=1, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=1, column=2)
 
         # : Row 1: Cook
-        Label(self.frame, text="Cook").grid(row=2, column=0)
-        Label(self.frame, text="None").grid(row=2, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=2, column=2)
+        Label(self.frame, text="Cook", anchor=W, relief=RIDGE, width=15).grid(row=2, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=2, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=2, column=2)
 
         # : Row 1: Medication
-        Label(self.frame, text="Medication").grid(row=3, column=0)
-        Label(self.frame, text="None").grid(row=3, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=3, column=2)
+        Label(self.frame, text="Medication", anchor=W, relief=RIDGE, width=15).grid(row=3, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=3, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=3, column=2)
 
         # : Row 1: Entertainment
-        Label(self.frame, text="Entertainment").grid(row=4, column=0)
-        Label(self.frame, text="None").grid(row=4, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=4, column=2)
+        Label(self.frame, text="Entertainment", anchor=W, relief=RIDGE, width=15).grid(row=4, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=4, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=4, column=2)
 
         # : Row 1: Companionship
-        Label(self.frame, text="Companionship").grid(row=5, column=0)
-        Label(self.frame, text="None").grid(row=5, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=5, column=2)
+        Label(self.frame, text="Companionship", anchor=W, relief=RIDGE, width=15).grid(row=5, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=5, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=5, column=2)
 
         # : Row 1: Friend
-        Label(self.frame, text="Friend").grid(row=6, column=0)
-        Label(self.frame, text="None").grid(row=6, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=6, column=2)
+        Label(self.frame, text="Friend", anchor=W, relief=RIDGE, width=15).grid(row=6, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=6, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=6, column=2)
 
         # : Row 1: Relative
-        Label(self.frame, text="Relative").grid(row=7, column=0)
-        Label(self.frame, text="None").grid(row=7, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=7, column=2)
+        Label(self.frame, text="Relative", anchor=W, relief=RIDGE, width=15).grid(row=7, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=7, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=7, column=2)
 
         # : Row 1: Doctor
-        Label(self.frame, text="Doctor").grid(row=8, column=0)
-        Label(self.frame, text="None").grid(row=8, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=8, column=2)
+        Label(self.frame, text="Doctor", anchor=W, relief=RIDGE, width=15).grid(row=8, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=8, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=8, column=2)
 
         # : Row 1: Nurse
-        Label(self.frame, text="Nurse").grid(row=9, column=0)
-        Label(self.frame, text="None").grid(row=9, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=9, column=2)
+        Label(self.frame, text="Nurse", anchor=W, relief=RIDGE, width=15).grid(row=9, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=9, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=9, column=2)
 
         # : Row 1: Caregivier
-        Label(self.frame, text="Caregivier").grid(row=10, column=0)
-        Label(self.frame, text="None").grid(row=10, column=1)
-        Label(self.frame, text="None Scheduled").grid(row=10, column=2)
+        Label(self.frame, text="Caregivier", anchor=W, relief=RIDGE, width=15).grid(row=10, column=0)
+        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=10, column=1)
+        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=10, column=2)
 
         # create and assign dice label to label widget. Updating dice_label will
         # automatically update the widget's text
