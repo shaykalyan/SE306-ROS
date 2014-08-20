@@ -1,6 +1,6 @@
 define robot position
 (
-  size [1 1 1]
+  size [0.75 0.75 0.75]
   drive "diff"
   obstacle_return 0
   block
