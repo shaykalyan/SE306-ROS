@@ -1,6 +1,6 @@
 define resident position
 (
-  size [1 1 2]
+  size [1.1 1.1 2.4]
   drive "diff"
   obstacle_return 0
   block
