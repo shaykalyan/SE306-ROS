@@ -6,12 +6,13 @@
 #include <nav_msgs/GetMap.h>
 #include <geometry_msgs/Point.h>
 
-// The map of this 
+// The map to find paths on
 nav_msgs::OccupancyGrid occupancyGrid;
 
+
 // Width and Height of the map in pixels
-int width;
-int height;
+int pixelWidth;
+int pixelHeight;
 
 // Bottom Left position
 float bottom;
@@ -19,10 +20,12 @@ float top;
 float left;
 float right;
 
+// Width height
+float width;
+float height;
+
 // The number of pixels per meter in stage
 float resolution;
-
-
 
 /**
  * Helper function to return the int value 
@@ -42,23 +45,73 @@ bool findPath(elderly_care_simulation::FindPath::Request  &req,
 {
     // Find path
     ROS_WARN("Finding the path not implemented yet");
+
+ //   int startingX = getXLocation(req.from.x);
+  //  int startingY = getYLocation(req.from.y);
+
+  //  int finishingX = getXLocation(req.to.x);
+//    int finishingY = getYLocation(req.to.y);
+
+
+
     return true;
 }
 
 /**
- * TODO: Remove
- */ 
+ * Converts a x location on the map to the x index in the occupancyGrid
+ */
+int getXLocation(float x)
+{
+    return int(pixelWidth  * (x - left)   / width);
+}
+
+/**
+ * Converts a y location on the map to the y index in the occupancyGrid
+ */
+int getYLocation(float y)
+{
+    return int(pixelHeight * (y - bottom) / height);
+}
+
+/**
+ * True if that point is empty
+ */
 void is_vacant(geometry_msgs::Point point)
 {
+    int x = getXLocation(point.x);
+    int y = getYLocation(point.y);
+    if (x < 0 || x >= width ||
+        y < 0 || y >= height) {
+        ROS_INFO("OUT OF BOUNDS at position %f, %f", point.x, point.y);
+        return;
+        //return false;
+    }
 
-    if (point.x < left || point.x > right ||
+    if (occupancyAtPoint(x, y) > 0) {
+        ROS_INFO("Wall at position %f, %f", point.x, point.y);
+        //return true;
+    } else {
+        ROS_INFO("Empty at position %f, %f", point.x, point.y);
+        //return false;
+    }
+    //return true;
+}
+
+/**
+ * TODO: Remove
+ *
+void is_vacanty(geometry_msgs::Point point)
+{
+
+    if (point.x < left   || point.x > right ||
         point.y < bottom || point.y > top) {
         ROS_INFO("OUT OF BOUNDS at position %f, %f", point.x, point.y);
         return;
     }
 
-    int x = round((resolution / (right - left)) * (point.x - left)   * width  / resolution);
-    int y = round((resolution / (top - bottom)) * (point.y - bottom) * height / resolution);
+    // Find the x and y position of this coordinate on the map
+    int x = round(pixelWidth  * (point.x - left)   / width);
+    int y = round(pixelHeight * (point.y - bottom) / height);
 
     ROS_INFO("X: %d", x);
     ROS_INFO("Y: %d", y);
@@ -68,17 +121,19 @@ void is_vacant(geometry_msgs::Point point)
     } else {
         ROS_INFO("Empty at position %f, %f", point.x, point.y);
     }
-}
+}*/
+
+
 
 void printFirst()
 {
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+
+    for (int y = bottom; y < top; ++y) {
+        for (int x = height; x < left; ++x) {
              if (occupancyGrid.data[y * width + x] > 0) {
                 ROS_INFO("X: %d", x);
                 ROS_INFO("Y: %d", y);
                 ROS_INFO("Value: %d", occupancyGrid.data[y * width + x]);
-                return;
              } 
         }
     }
@@ -86,22 +141,29 @@ void printFirst()
 
 void initializeHelperVariables()
 {
-    width      = occupancyGrid.info.width;
-    height     = occupancyGrid.info.height;
-    bottom     = occupancyGrid.info.origin.position.y;
-    left       = occupancyGrid.info.origin.position.x;
-    resolution = occupancyGrid.info.resolution;
+    pixelWidth  = occupancyGrid.info.width;
+    pixelHeight = occupancyGrid.info.height;
+    resolution  = occupancyGrid.info.resolution;
 
-    top        = bottom + (height / resolution);
-    right      = left + (width / resolution);
+    bottom      = occupancyGrid.info.origin.position.y;
+    left        = occupancyGrid.info.origin.position.x;
+    top         = bottom + (pixelHeight / resolution);
+    right       = left   + (pixelWidth  / resolution);
 
-    ROS_INFO("Width: %d", width);
-    ROS_INFO("Height: %d", height);
-    ROS_INFO("Bottom: %f", bottom);
-    ROS_INFO("Top: %f", top);
-    ROS_INFO("Left: %f", left);
-    ROS_INFO("Right: %f", right);
-    ROS_INFO("Resolution: %f", resolution);
+    width       = right - left;
+    height      = top - bottom;
+
+    ROS_INFO("Pixel width:  %d", pixelWidth);
+    ROS_INFO("Pixel height: %d", pixelHeight);
+    ROS_INFO("Resolution:   %f", resolution);
+
+    ROS_INFO("Bottom:       %f", bottom);
+    ROS_INFO("Left:         %f", left);
+    ROS_INFO("Top:          %f", top);
+    ROS_INFO("Right:        %f", right);
+    
+    ROS_INFO("Width:        %f", width);
+    ROS_INFO("Height:       %f", height);
 }
 
 int main(int argc, char **argv)
