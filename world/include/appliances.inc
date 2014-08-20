@@ -1,17 +1,8 @@
-define appliances model
-(
-# sombre, sensible, artistic
-color "Black"
-# most maps will need a bounding box
-boundary 0
-gui_move 0
-ranger_return 1
-)
-
 define shower model
 (
   size [1.5 1.5 3]
   obstacle_return 0
+  gui_move 0
   block
   (
     color "GhostWhite"
@@ -68,6 +59,7 @@ define oven model
 (
   size [1.5 1.5 1.5]
   obstacle_return 0
+  gui_move 0
   block
   (
     color "OrangeRed1"

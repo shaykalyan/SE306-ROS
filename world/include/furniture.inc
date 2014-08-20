@@ -2,6 +2,7 @@ define bed model
 (
   size [2 3 1.25]
   obstacle_return 0
+  gui_move 0
   block
   (
     color "PeachPuff"
