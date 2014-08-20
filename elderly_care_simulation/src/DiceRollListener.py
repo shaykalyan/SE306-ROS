@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import roslib
-import roslib.load_manifest('elderly_care_simulation')
+import roslib; roslib.load_manifest('elderly_care_simulation')
 from elderly_care_simulation.msg import DiceRollTrigger
 from Tkinter import *
 
@@ -16,7 +16,7 @@ class DiceRollerGUI:
         """
         # create root element with fixed size
         self.root = Tk()
-        self.root.geometry('400x200+1+1')
+        self.root.geometry('400x250+1+1')
 
         # create frame element to host labels and graphics
         self.frame = Frame(self.root)        
@@ -25,9 +25,65 @@ class DiceRollerGUI:
         # create variable label
         self.dice_label = StringVar()
 
+        # Creates Labels which will eventually contain information about robots and their tasks
+        # :Column Names
+        Label(self.frame, text="Robot Name").grid(row=0, column=0)
+        Label(self.frame, text="Current Task").grid(row=0, column=1)
+        Label(self.frame, text="Queued Task").grid(row=0, column=2)
+
+        # : Row 1: Resident
+        Label(self.frame, text="Resident").grid(row=1, column=0)
+        Label(self.frame, text="Sleep").grid(row=1, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=1, column=2)
+
+        # : Row 1: Cook
+        Label(self.frame, text="Cook").grid(row=2, column=0)
+        Label(self.frame, text="None").grid(row=2, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=2, column=2)
+
+        # : Row 1: Medication
+        Label(self.frame, text="Medication").grid(row=3, column=0)
+        Label(self.frame, text="None").grid(row=3, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=3, column=2)
+
+        # : Row 1: Entertainment
+        Label(self.frame, text="Entertainment").grid(row=4, column=0)
+        Label(self.frame, text="None").grid(row=4, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=4, column=2)
+
+        # : Row 1: Companionship
+        Label(self.frame, text="Companionship").grid(row=5, column=0)
+        Label(self.frame, text="None").grid(row=5, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=5, column=2)
+
+        # : Row 1: Friend
+        Label(self.frame, text="Friend").grid(row=6, column=0)
+        Label(self.frame, text="None").grid(row=6, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=6, column=2)
+
+        # : Row 1: Relative
+        Label(self.frame, text="Relative").grid(row=7, column=0)
+        Label(self.frame, text="None").grid(row=7, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=7, column=2)
+
+        # : Row 1: Doctor
+        Label(self.frame, text="Doctor").grid(row=8, column=0)
+        Label(self.frame, text="None").grid(row=8, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=8, column=2)
+
+        # : Row 1: Nurse
+        Label(self.frame, text="Nurse").grid(row=9, column=0)
+        Label(self.frame, text="None").grid(row=9, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=9, column=2)
+
+        # : Row 1: Caregivier
+        Label(self.frame, text="Caregivier").grid(row=10, column=0)
+        Label(self.frame, text="None").grid(row=10, column=1)
+        Label(self.frame, text="None Scheduled").grid(row=10, column=2)
+
         # create and assign dice label to label widget. Updating dice_label will
         # automatically update the widget's text
-        self.dice_label_widget = Label(self.frame, textvariable=self.dice_label)
+        self.dice_label_widget = Label(self.root, textvariable=self.dice_label)
         self.dice_label_widget.pack(side=LEFT)
 
         # initialise listener node
