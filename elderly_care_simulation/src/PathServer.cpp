@@ -9,7 +9,6 @@
 // The map to find paths on
 nav_msgs::OccupancyGrid occupancyGrid;
 
-
 // Width and Height of the map in pixels
 int pixelWidth;
 int pixelHeight;
@@ -33,28 +32,7 @@ float resolution;
  */
 int occupancyAtPoint(int x, int y)
 {
-    return occupancyGrid.data[y * width + x];
-}
-
-/**
- * Returns a vector of geometry_msgs::Point objects that indicate the best path to take
- * from point 'from' to point 'to'.
- */
-bool findPath(elderly_care_simulation::FindPath::Request  &req,
-               elderly_care_simulation::FindPath::Response &res)
-{
-    // Find path
-    ROS_WARN("Finding the path not implemented yet");
-
- //   int startingX = getXLocation(req.from.x);
-  //  int startingY = getYLocation(req.from.y);
-
-  //  int finishingX = getXLocation(req.to.x);
-//    int finishingY = getYLocation(req.to.y);
-
-
-
-    return true;
+    return occupancyGrid.data[y * width + x] > 0 ? 0 : 1;
 }
 
 /**
@@ -62,7 +40,7 @@ bool findPath(elderly_care_simulation::FindPath::Request  &req,
  */
 int getXLocation(float x)
 {
-    return int(pixelWidth  * (x - left)   / width);
+    return int(floor(x + 10));
 }
 
 /**
@@ -70,73 +48,57 @@ int getXLocation(float x)
  */
 int getYLocation(float y)
 {
-    return int(pixelHeight * (y - bottom) / height);
+    return int(floor(y + 10));
 }
 
 /**
- * True if that point is empty
+ * Returns a vector of geometry_msgs::Point objects that indicate the best path to take
+ * from point 'from' to point 'to'.
  */
-void is_vacant(geometry_msgs::Point point)
+bool findPath(elderly_care_simulation::FindPath::Request& req,
+              elderly_care_simulation::FindPath::Response& res)
 {
+    // Find path
+    ROS_WARN("Finding the path not implemented yet");
+
+    geometry_msgs::Point from = req.from;
+    int startingX = getXLocation(from.x);
+    int startingY = getYLocation(from.y);
+
+    geometry_msgs::Point to = req.from;
+    int finishingX = getXLocation(to.x);
+    int finishingY = getYLocation(to.y);
+
+    std::cout << "Start: " << startingX << ", " << startingY;
+    std::cout << "Finish: " << finishingX << ", " << finishingY;
+
+    return true;
+}
+
+bool is_vacant(geometry_msgs::Point point)
+{
+
     int x = getXLocation(point.x);
     int y = getYLocation(point.y);
+
+    //ROS_INFO("X: %d", x);
+    //ROS_INFO("Y: %d", y);
+
     if (x < 0 || x >= width ||
         y < 0 || y >= height) {
-        ROS_INFO("OUT OF BOUNDS at position %f, %f", point.x, point.y);
-        return;
-        //return false;
+        //ROS_INFO("OUT OF BOUNDS at position %f, %f", point.x, point.y);
+        //return;
+        return false;
     }
 
     if (occupancyAtPoint(x, y) > 0) {
-        ROS_INFO("Wall at position %f, %f", point.x, point.y);
-        //return true;
+        //ROS_INFO("Wall at position %f, %f", point.x, point.y);
+        return true;
     } else {
-        ROS_INFO("Empty at position %f, %f", point.x, point.y);
-        //return false;
+        //ROS_INFO("Empty at position %f, %f", point.x, point.y);
+        return false;
     }
-    //return true;
-}
-
-/**
- * TODO: Remove
- *
-void is_vacanty(geometry_msgs::Point point)
-{
-
-    if (point.x < left   || point.x > right ||
-        point.y < bottom || point.y > top) {
-        ROS_INFO("OUT OF BOUNDS at position %f, %f", point.x, point.y);
-        return;
-    }
-
-    // Find the x and y position of this coordinate on the map
-    int x = round(pixelWidth  * (point.x - left)   / width);
-    int y = round(pixelHeight * (point.y - bottom) / height);
-
-    ROS_INFO("X: %d", x);
-    ROS_INFO("Y: %d", y);
-
-    if (occupancyAtPoint(x, y) > 0) {
-        ROS_INFO("Wall at position %f, %f", point.x, point.y);
-    } else {
-        ROS_INFO("Empty at position %f, %f", point.x, point.y);
-    }
-}*/
-
-
-
-void printFirst()
-{
-
-    for (int y = bottom; y < top; ++y) {
-        for (int x = height; x < left; ++x) {
-             if (occupancyGrid.data[y * width + x] > 0) {
-                ROS_INFO("X: %d", x);
-                ROS_INFO("Y: %d", y);
-                ROS_INFO("Value: %d", occupancyGrid.data[y * width + x]);
-             } 
-        }
-    }
+    return true;
 }
 
 void initializeHelperVariables()
@@ -150,8 +112,8 @@ void initializeHelperVariables()
     top         = bottom + (pixelHeight / resolution);
     right       = left   + (pixelWidth  / resolution);
 
-    width       = right - left;
-    height      = top - bottom;
+    width       = (right - left) * resolution;
+    height      = (top - bottom) * resolution;
 
     ROS_INFO("Pixel width:  %d", pixelWidth);
     ROS_INFO("Pixel height: %d", pixelHeight);
@@ -176,15 +138,10 @@ int main(int argc, char **argv)
     // Map server that offers a get_map service
     ros::ServiceClient mapServer = pathNodeHandle.serviceClient<nav_msgs::GetMap>("static_map");
 
-    // TODO: Remove
-    ros::Subscriber pathToRobotSub = pathNodeHandle.subscribe<geometry_msgs::Point>("is_vacant", 1000, is_vacant);
-
     nav_msgs::GetMap getMapService;
     if (mapServer.call(getMapService)) {
         occupancyGrid = getMapService.response.map;
         initializeHelperVariables();
-
-        printFirst(); // TODO: Remove
     } else {
         ROS_WARN("Could not retrieve map from mapserver");
     }
