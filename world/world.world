@@ -1,5 +1,6 @@
 include "include/resident.inc"
 include "include/robot.inc"
+include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
 
@@ -25,14 +26,16 @@ floorplan
   pose [ 0 0 0 0.000 ]
 )
 
-# load an bed bitmap
-appliances
+bed
 ( 
   name "bed"
-  bitmap "Bed.png"
-  size [2 3 0.1]
-  pose [ -3.1 -8 0 180.000 ]
-  color "black"
+  pose [-3.1 -8 0 0]
+)
+
+shower
+(
+  name "shower"
+  pose [8.85 -3.65 0 0]
 )
 
 # load an couch bitmap
