@@ -1,3 +1,4 @@
+include "include/resident.inc"
 include "include/robot.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
@@ -105,28 +106,17 @@ appliances
 )
 
 # throw in some robots
-robot(
+resident(
   name "Resident"
   pose [ 0 0 0 0 ]
-  color "black"
-  block
-  (
-    points [3]
-    point[0] [1 0.5]
-    point[1] [2 1]
-    point[2] [2 0]
-    z [0 1]
-  )
 )
 
 robot(
   name "Visitor"
   pose [ 7.5 7.5 0 0 ]
-  color "green"
 )
 
 robot(
   name "Assistant"
   pose [ -7.5 -7.5 0 0 ]
-  color "orange"
 )
