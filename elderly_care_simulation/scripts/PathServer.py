@@ -82,12 +82,15 @@ def find_path_server():
     rospy.spin()
     
 
-def check_vacancy_at_cell(house_map, coordinate):
+def check_vacancy_at_cell(house_map, cell):
 	"""
-	Return True if the given coordinate is vacant
+	Return True if the given cell is vacant.
+
+    Vacancy is defined as a '0' in the house map at the given coordinates.
+    (i.e. there is no wall at that location)
 	"""
-	x = coordinate[0]
-	y = coordinate[1]
+	x = cell[0]
+	y = cell[1]
 	
 	if not 0 <= x < MAP_WIDTH:
 		return False
@@ -100,9 +103,14 @@ def check_vacancy_at_cell(house_map, coordinate):
     
 def get_vacant_neighbours(house_map, cell):
 	"""
-	Return a list of coordinates that are vacant around the given coordinate.
+    Get a list of coordinates that are vacant around the given cell coordinates.
+
+    Only neighbours to the top, bottom, left and right are considered.
 	
-	'cell' is a tuple: (x, y) with the origin at the bottom left
+    'house_map': a list of lists. Each list is a row of 0s and 1s (vacant cells and walls respectively)
+	'cell': a tuple: (x, y) with the origin at the bottom left
+
+    return: a list of up to four (x, y) tuples, each representing a neighbour of 'cell' that is vacant
 	"""
 	x = cell[0]
 	y = cell[1]
@@ -118,6 +126,19 @@ def get_vacant_neighbours(house_map, cell):
     
     
 def generate_graph(filename):
+    """
+    Read a house map's pgm file and generate an adjacency list that models available paths.
+
+    Entries in the adjacency list (or dict) show the cells that are reachable from any given cell.
+    Cells are represented as (x, y) tuples. e.g.:
+
+    {
+        (3, 4): [(3, 3), (2, 3)],
+        (7, 2): [(7, 1)]
+    }
+
+    'filename': the name of a pgm file of the map 
+    """
 	house_map = []
 	
 	with open(filename, 'r') as f:
