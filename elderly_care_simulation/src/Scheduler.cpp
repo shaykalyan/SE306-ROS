@@ -23,7 +23,8 @@ ros::Publisher eventTriggerPub;
 ros::Subscriber eventTriggerSub;
 ros::Subscriber randomEventSub;
 int ongoingEvents = 0;
-bool allowNewEvents = false;
+
+bool allowNewEvents = true;
 
 /**
  * Returns a C string representation of the coresponding event type
@@ -152,26 +153,30 @@ void populateDailyTasks(void) {
 
     int eventSequence[] = {
 
+        // ======================================
+        // =        COMMENTED OUT STUFF         =
+        // ======================================
+
         // Morning
-        EVENT_TRIGGER_EVENT_TYPE_WAKE,
-        EVENT_TRIGGER_EVENT_TYPE_COOK,
-        EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
-        EVENT_TRIGGER_EVENT_TYPE_EXERCISE,
-        EVENT_TRIGGER_EVENT_TYPE_SHOWER,
-        EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,
+        // EVENT_TRIGGER_EVENT_TYPE_WAKE,
+        // EVENT_TRIGGER_EVENT_TYPE_COOK,
+        // EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
+        // EVENT_TRIGGER_EVENT_TYPE_EXERCISE,
+        // EVENT_TRIGGER_EVENT_TYPE_SHOWER,
+        // EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,
 
-        // Noon
-        EVENT_TRIGGER_EVENT_TYPE_COOK,
-        EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
-        EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,
-        EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE,
-        EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,
+        // // Noon
+        // EVENT_TRIGGER_EVENT_TYPE_COOK,
+        // EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
+        // EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,
+        // EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE,
+        // EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,
 
-        // Evening
-        EVENT_TRIGGER_EVENT_TYPE_COOK,
-        EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
-        EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,
-        EVENT_TRIGGER_EVENT_TYPE_SLEEP
+        // // Evening
+        // EVENT_TRIGGER_EVENT_TYPE_COOK,
+        // EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
+        // EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,
+        // EVENT_TRIGGER_EVENT_TYPE_SLEEP
     };
 
     for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
@@ -250,7 +255,7 @@ void dequeueEvent(void) {
             eventTriggerPub.publish(msg);
             ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
             ongoingEvents++;
-        }       
+        }
     }
 }
 
@@ -282,13 +287,18 @@ int main(int argc, char **argv) {
 
     while (ros::ok()) {
 
-        if(eventQueue.size() == 0 && ongoingEvents == 0) {
-            sleep(5);
-            clearEventQueue();
-            populateDailyTasks();
-        }else {
-            dequeueEvent();
-        }
+        // ======================================
+        // =        COMMENTED OUT STUFF         =
+        // ======================================
+        // if(eventQueue.size() == 0 && ongoingEvents == 0) {
+        //     sleep(5);
+        //     clearEventQueue();
+        //     populateDailyTasks();
+        // }else {
+        //     dequeueEvent();
+        // }
+
+        dequeueEvent();
 
         ros::spinOnce();
         loop_rate.sleep();
