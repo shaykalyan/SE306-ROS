@@ -166,6 +166,7 @@ void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg)
             ROS_INFO("Resident: Unknown.");
             return;
     }
+    msgOut.event_weight = getEventWeight(msgOut.event_type);
     ROS_INFO("Resident: Sending request to scheduler");
     residentEventPub.publish(msgOut);
 }

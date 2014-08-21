@@ -48,6 +48,17 @@ const int EVENT_TRIGGER_PRIORITY_NONE                    = 5;
 const int EVENT_TRIGGER_PRIORITY_UNDEFINED               = 6;
 
 // ========================================
+// =           EVENT WEIGHT               =
+// ========================================
+const int EVENT_TRIGGER_WEIGHT_0                         = 0;
+const int EVENT_TRIGGER_WEIGHT_1                         = 1;
+const int EVENT_TRIGGER_WEIGHT_2                         = 2;
+const int EVENT_TRIGGER_WEIGHT_3                         = 3;
+const int EVENT_TRIGGER_WEIGHT_4                         = 4;
+const int EVENT_TRIGGER_WEIGHT_5                         = 5;
+const int EVENT_TRIGGER_WEIGHT_UNDEFINED                 = 6;
+
+// ========================================
 // =              RESULT                  =
 // ========================================
 const int EVENT_TRIGGER_RESULT_UNDEFINED = 0;
@@ -99,6 +110,27 @@ const char * priorityToString(int priority) {
         case EVENT_TRIGGER_PRIORITY_VERY_LOW:           return "VERY_LOW";
         case EVENT_TRIGGER_PRIORITY_NONE:               return "NONE";
         default:                                        return "UNDEFINED";
+    }
+}
+
+int getEventWeight(int eventType) {
+    switch(eventType){
+
+        case EVENT_TRIGGER_EVENT_TYPE_EAT:              return EVENT_TRIGGER_WEIGHT_2;
+        case EVENT_TRIGGER_EVENT_TYPE_SHOWER:           return EVENT_TRIGGER_WEIGHT_2;
+        case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:         return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:     return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:    return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE:  return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_ILL:              return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:         return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_MEDICATION:       return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_COOK:             return EVENT_TRIGGER_WEIGHT_0;
+        case EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT:    return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:    return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return EVENT_TRIGGER_WEIGHT_0;
+        case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return EVENT_TRIGGER_WEIGHT_2;
+        default:                                        return EVENT_TRIGGER_WEIGHT_1;
     }
 }
 

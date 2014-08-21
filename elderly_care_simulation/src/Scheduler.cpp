@@ -22,6 +22,7 @@ int concurrentWeight = 0;
 // =          SHOULD BE FALSE           =
 // ======================================
 bool allowNewEvents = true;
+bool stopRosInfoSpam = false;
 
 /**
  * Creates a Request EventTrigger message for requesting robot tasks.
@@ -32,6 +33,7 @@ elderly_care_simulation::EventTrigger createEventRequestMsg(int eventType, int p
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
     msg.event_type = eventType;
     msg.event_priority = priority;
+    msg.event_weight = getEventWeight(eventType);
     msg.result = EVENT_TRIGGER_RESULT_UNDEFINED;
 
     return msg;
@@ -57,8 +59,8 @@ void randomEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
     }
 
     ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
-             eventTypeToString(msg.event_type)
-             prorityToString(msg.event_priority));
+             eventTypeToString(msg.event_type),
+             priorityToString(msg.event_priority));
 
     eventQueue.push(EventNode(msg));
 }
@@ -75,18 +77,13 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
                 elderly_care_simulation::EventTrigger msg;
                 msg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT, EVENT_TRIGGER_PRIORITY_HIGH);
 
-                ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
-                          eventTypeToString(msg.event_type)
-                          prorityToString(msg.event_priority));
+                ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]",
+                          eventTypeToString(msg.event_type),
+                          priorityToString(msg.event_priority));
 
                 eventQueue.push(EventNode(msg));
             }else{
-                switch(msg.event_type){
-                    case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
-                        concurrentWeight -= 2; break;
-                    default:
-                        concurrentWeight -= 1; break; 
-                }
+                concurrentWeight -= msg.event_weight;
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
             }
         }
@@ -164,6 +161,7 @@ void populateDailyTasks(void) {
  * Resident.
  */
 void dequeueEvent(void) {
+
     if (eventQueue.size() < 1) {
         return;
     }
@@ -171,59 +169,51 @@ void dequeueEvent(void) {
     elderly_care_simulation::EventTrigger msg;
     msg = eventQueue.top().getEventTriggerMessage();
 
-    // Enable random events to be added to queue only after WAKE event
-    if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_WAKE){
-        allowNewEvents = true;
-    }
+    
+    // Publish event if enough concurrent weight available
+    if (concurrentWeight + msg.event_weight <= MAX_CONCURRENT_WEIGHT) {
 
-    // Disable random events from being added to queue after SLEEP event
-    // Also prevent the SLEEP event until all tasks are finished.
-    if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP){
-        allowNewEvents = false;
+        stopRosInfoSpam = false;
+        switch(msg.event_type) {
+            case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
+                allowNewEvents = false;
 
-        // If no more tasks, then publish SLEEP event
-        if(concurrentWeight == 0) {
-            eventQueue.pop();
-            eventTriggerPub.publish(msg);
-            ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
-            concurrentWeight += 2;
+                eventQueue.pop();
+                eventTriggerPub.publish(msg);
+                ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+                concurrentWeight += msg.event_weight;
 
-        // If tasks still ongoing, do not allow SLEEP
-        }else{
-            ROS_INFO("Scheduler: Target still busy, cannot do event: [%s]", eventTypeToString(msg.event_type));
-            return;
+
+            case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
+                allowNewEvents = false;
+
+                ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+                concurrentWeight += msg.event_weight;
+                eventTriggerPub.publish(msg);
+
+                clearEventQueue();
+
+                // Enqueue a SLEEP event with max priority so when resident comes back from 
+                // hospital it goes to sleep right away.
+                // Since the queue is now empty after the SLEEP event, a new batch of daily
+                // schedules will be repopulated automatically (in the main method).
+                eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_SLEEP,
+                                                                EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
+
+            default:
+                allowNewEvents = true;
+                eventTriggerPub.publish(msg);
+                ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+                concurrentWeight += msg.event_weight;
+                eventQueue.pop();
+                break;
         }
 
-    // cooking event type is published immediately
-    } else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
-        eventQueue.pop();
-        eventTriggerPub.publish(msg);
-        ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
     } else {
-        
-        // Publish event if concurrentWeight available
-        if (concurrentWeight < MAX_CONCURRENT_WEIGHT) {
-
-            switch(msg.event_type) {
-                case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
-                    allowNewEvents = false;
-
-                    ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
-                    concurrentWeight += 1;
-                    eventTriggerPub.publish(msg);
-
-                    
-                    clearEventQueue();
-                    eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_SLEEP,
-                                                                    EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
-
-                default:
-                    eventTriggerPub.publish(msg);
-                    ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
-                    concurrentWeight += 1;
-                    eventQueue.pop();
-                    break;
-            }
+        if(!stopRosInfoSpam){
+            ROS_INFO("Scheduler: Event: [%s] waiting for additional concurrent weight.", 
+                eventTypeToString(msg.event_type));
+            stopRosInfoSpam = true;
         }
     }
 }
