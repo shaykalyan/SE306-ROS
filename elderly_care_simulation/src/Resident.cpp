@@ -1,59 +1,50 @@
 #include "ros/ros.h"
+#include <sstream>
+#include <unistd.h>
+
 #include "std_msgs/String.h"
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
-#include <sensor_msgs/LaserScan.h>
-#include "EventTriggerConstants.h"
-#include "PerformTaskConstants.h"
-#include "elderly_care_simulation/PerformTask.h"
+#include "std_msgs/Empty.h"
+#include <geometry_msgs/Point.h>
+
 #include <queue>
 #include <tf/tf.h>
-#include "std_msgs/Empty.h"
 
-#include <sstream>
-#include "math.h"
-
+#include "PerformTaskConstants.h"
+#include "elderly_care_simulation/PerformTask.h"
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
-#include "EventTriggerConstants.h"
+#include "EventTriggerUtility.h"
 #include "elderly_care_simulation/EventTrigger.h"
-#include <unistd.h> // sleep
+
+#include "Robot.h"
+#include "Resident.h"
+#include "Poi.h"
+#include "StaticPoi.h"
+#include "StaticPoiConstants.h"
 
 // Current task type: -1 corresponds to no task
-int currentTaskType = -1;
 
-// Basic health attributes
-const int HEALTHY_THRESHOLD = 50;
-int happiness = 0;
-int amusement = 0;
 
-// Signatures
-ros::Publisher robotNodeStagePub;
-ros::Subscriber stageOdoSub;
-ros::Subscriber diceTriggerSub;
-ros::Publisher residentEventPub;
-ros::Subscriber locationInstructionsSub;
-ros::Subscriber pathOfResidentSub;
+Resident::Resident(){
+    currentTaskType = -1;
 
-double currentAngle;
-
-// Current velocity of the Robot
-geometry_msgs::Twist currentVelocity;
-
-// Current location of the robot
-geometry_msgs::Pose currentLocation;
-
-// Locations to visit
-std::queue<geometry_msgs::Point> locationQueue;
-
-void stageOdomCallback(nav_msgs::Odometry msg);
-void diceTriggerCallback();
+    // Basic health attributes
+    HEALTHY_THRESHOLD = 50;
+    happiness = 0;
+    amusement = 0;
+   
+}
+Resident::~Resident(){
+    
+}
 
 /**
  * Method to perform after a task has been performed on this resident.
  * Moves the robot to the left and right to acknowledge his task has been performed.
  */
-void taskCompleted(const std_msgs::Empty){
+void Resident::taskCompleted(const std_msgs::Empty empty){
 	geometry_msgs::Point locationOne;
     locationOne.x = currentLocation.position.x + 1;
     locationOne.y = currentLocation.position.y;
@@ -72,134 +63,6 @@ void taskCompleted(const std_msgs::Empty){
 }
 
 /**
-    Process odometry messages from Stage
-*/
-void stageOdomCallback(const nav_msgs::Odometry msg) {
-	
-	 //Update Current Position
-    currentLocation = msg.pose.pose;
-    double x = currentLocation.orientation.x;
-    double y = currentLocation.orientation.y;
-    double z = currentLocation.orientation.z;
-    double w = currentLocation.orientation.w;
-  	double roll, pitch, yaw;
-    tf::Matrix3x3(tf::Quaternion(x, y, z, w)).getRPY(roll, pitch, yaw);
-    currentAngle = yaw;
-
-}
-
-void updateDesiredLocationCallback(const geometry_msgs::Point location)
-{   
-    // Add location to the locationQueue queue
-    locationQueue.push(location);
-}
-
-bool doubleEquals(double a, double b, double difference)
-{
-    return std::abs(a - b) < difference;
-}
-
-double normalizeAngle(double angle)
-{
-    while (angle < 0) {
-        angle += 2 * M_PI;
-    }
-    while (angle > 2 * M_PI) {
-        angle -= 2 * M_PI;
-    }
-    return angle;
-}
-
-bool turnAnticlockwise(double currentAngle, double desiredAngle)
-{   
-    if (currentAngle < 0) {
-        currentAngle = 2 * M_PI + currentAngle;
-    }
-    if (desiredAngle < 0) {
-        desiredAngle = 2 * M_PI + desiredAngle;
-    }
-    desiredAngle = normalizeAngle(desiredAngle - currentAngle);
-    return desiredAngle < M_PI;
-    
-}
-
-bool atDesiredLocation()
-{  
-    if (locationQueue.empty()) {
-        return true;
-    } else {
-        double toleratedDifference = 0.05;
-        geometry_msgs::Point desiredLocation = locationQueue.front();
-
-        if( doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
-            doubleEquals(currentLocation.position.y, desiredLocation.y, toleratedDifference)) {
-            locationQueue.pop();
-            return atDesiredLocation();
-        }
-    }
-    return false;
-      
-}
-
-void updateCurrentVelocity()
-{
-    if (atDesiredLocation()) {
-        currentVelocity.linear.x = 0;
-        currentVelocity.angular.z = 0;
-        return;
-    }
-    // Find the correct angle
-    geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
-
-    geometry_msgs::Point desiredLocation = locationQueue.front();
-
-    directionVector.x = desiredLocation.x - currentLocation.position.x;
-    directionVector.y = desiredLocation.y - currentLocation.position.y;
-    directionVector.z = desiredLocation.z - currentLocation.position.z;
-    
-    // Thank god we're only doing 2D stuff
-    double desiredAngle = atan2(directionVector.y, directionVector.x);
-
-    if (! doubleEquals(currentAngle, desiredAngle, 0.1)) {
-        // Turn towards angle
-        currentVelocity.linear.x = 0;
-        
-        if (turnAnticlockwise(currentAngle, desiredAngle)) {
-            // Turn anti clockwise
-            currentVelocity.angular.z = 1;
-        } else {
-            // Turn clockwise
-            currentVelocity.angular.z = -1;
-        }
-    } else {
-        // Go forward
-        currentVelocity.linear.x = 1;
-        currentVelocity.angular.z = 0;
-    }
-}
-
-
-void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
-    elderly_care_simulation::EventTrigger msgOut;
-    msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-    msgOut.result = EVENT_TRIGGER_RESULT_FAILURE;
-
-    switch(msg.type) {
-        case MORAL_SUPPORT:
-            ROS_INFO("Resident: I want moral support");
-            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
-            break;
-        case ENTERTAINMENT:
-			ROS_INFO("Resident: I need entertainment");
-			msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
-			break;
-    }
-
-    ROS_INFO("Resident: Sending request to scheduler");
-    residentEventPub.publish(msgOut);
-}
-
-/**
  * Change the resident's state in response to a task that is being performed
  * by a helper.
  * 
@@ -211,11 +74,11 @@ void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg) {
  * @return PERFORM_TASK_RESULT_ACCEPTED or PERFORM_TASK_RESULT_FINISHED
  *         (which correspond to 0 and 1 respectively)
  */
-int handleTask(int taskType) {
+int Resident::handleTask(int taskType) {
 	int result;
 	
 	switch (taskType) {
-		case EVENT_TRIGGER_EVENT_TYPE_VISITOR:
+		case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
 			// The visitor is consoling us
 			happiness += 1;
 			if (happiness > HEALTHY_THRESHOLD) {
@@ -230,7 +93,7 @@ int handleTask(int taskType) {
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 			break;
-		case EVENT_TRIGGER_EVENT_TYPE_ASSISTANT:
+		case EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT:
 			// The assistant is entertaining us
 			amusement += 1;
 			if (amusement > HEALTHY_THRESHOLD) {
@@ -245,6 +108,8 @@ int handleTask(int taskType) {
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 		    break;
+        default:
+            result = -1;
 	}
 	
 	return result;
@@ -263,7 +128,7 @@ int handleTask(int taskType) {
  *   1 - I accepted the task and you can now stop
  *   2 - I am busy at the moment, try again
  */
-bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
+bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
 				   elderly_care_simulation::PerformTask::Response &res) {
 					   
 	//ROS_INFO("Received service call with task type: %d", req.taskType);
@@ -284,54 +149,99 @@ bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &re
 	return true;
 }
 
-/**
-    Process 
-*/
+void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg){
+    elderly_care_simulation::EventTrigger msgOut;
+    msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
+    msgOut.result = EVENT_TRIGGER_RESULT_UNDEFINED;
 
+    // Modify this switch statement to control random events
+    switch(msg.type) {
+        case MORAL_SUPPORT:
+            ROS_INFO("Resident: I want moral support");
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
+            msgOut.event_priority = EVENT_TRIGGER_PRIORITY_MEDIUM;
+            break;
+        case ENTERTAINMENT:
+            ROS_INFO("Resident: I need entertainment");
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
+            msgOut.event_priority = EVENT_TRIGGER_PRIORITY_MEDIUM;
+            break;
+        default:
+            ROS_INFO("Resident: Unknown.");
+            return;
+    }
+    msgOut.event_weight = getEventWeight(msgOut.event_type);
+    ROS_INFO("Resident: Sending request to scheduler");
+    residentEventPub.publish(msgOut);
+}
+
+Resident resident;
+
+void callStage0domCallback(const nav_msgs::Odometry msg) {
+    resident.stage0domCallback(msg);
+}
+void callDiceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg){
+    resident.diceTriggerCallback(msg);
+
+}
+
+void callUpdateDesiredLocationCallback(const geometry_msgs::Point location){
+    resident.updateDesiredLocationCallback(location);
+}
+
+void callTaskCompleted(const std_msgs::Empty empty){
+    resident.taskCompleted(empty);
+}
+
+bool callPerformTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
+                   elderly_care_simulation::PerformTask::Response &res){
+    return resident.performTaskServiceHandler(req, res);
+}
 int main(int argc, char **argv) {
 
     // ROS initialiser calls
     ros::init(argc, argv, "Resident");
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(25);
-	
-    // Initialise publishers
-    robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
-    residentEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
+
+    resident = Resident();
+
+      // Initialise publishers
+    resident.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
+    resident.residentEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
 
     // Initialise subscribers
-    stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, stageOdomCallback);
-    diceTriggerSub = nodeHandle.subscribe<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, diceTriggerCallback);
+    resident.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, callStage0domCallback);
+    resident.diceTriggerSub = nodeHandle.subscribe<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, callDiceTriggerCallback);
 
-    locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_0/location", 1000, updateDesiredLocationCallback);
+    resident.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_0/location", 1000, callUpdateDesiredLocationCallback);
 
-    pathOfResidentSub = nodeHandle.subscribe<std_msgs::Empty>("robot_0/resident_respond", 1000, taskCompleted);
-    // Initialise messages
-    geometry_msgs::Twist robotNodeCmdvel;
-    
+    resident.pathOfResidentSub = nodeHandle.subscribe<std_msgs::Empty>("robot_0/resident_respond", 1000, callTaskCompleted);   
+
     // Advertise that the Resident responds to PerformTask service calls
-	ros::ServiceServer service = nodeHandle.advertiseService("perform_task", performTaskServiceHandler);
+	ros::ServiceServer service = nodeHandle.advertiseService("perform_task", callPerformTaskServiceHandler);
 
-	//a count of howmany messages we have sent
+	// A count of howmany messages we have sent
 	int count = 0;
 
 	while (ros::ok())
 	{
-		updateCurrentVelocity();
+		resident.updateCurrentVelocity();
 
-		// Every once in a while, decrease health values
+		// Every 5 seconds ...
 		if (count % 50 == 0) {
-			// Every 5 secs
 			
-			amusement = (amusement - 15) > 0 ? amusement - 15 : 0;
-			ROS_INFO("Amusement level fell to %d", amusement);
+            // ... decrease health values
+			
+			resident.amusement = (resident.amusement - 15) > 0 ? resident.amusement - 15 : 0;
+			ROS_INFO("Amusement level fell to %d", resident.amusement);
 
-			happiness = (happiness - 10) > 0 ? happiness - 10 : 0;
-			ROS_INFO("Happiness level fell to %d", happiness);
+			resident.happiness = (resident.happiness - 10) > 0 ? resident.happiness - 10 : 0;
+			ROS_INFO("Happiness level fell to %d", resident.happiness);
 		}
 
-		robotNodeStagePub.publish(currentVelocity);
-		
+		resident.robotNodeStagePub.publish(resident.currentVelocity);
+
 		ros::spinOnce();
 		loop_rate.sleep();
 		++count;
