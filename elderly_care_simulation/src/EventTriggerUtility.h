@@ -1,5 +1,6 @@
 #ifndef EVENT_TRIGGER_MSG_INCLUDE
 #define EVENT_TRIGGER_MSG_INCLUDE 1
+
 // ========================================
 // =           MESSAGE TYPE               =
 // ========================================
@@ -62,7 +63,7 @@ const int NO_CURRENT_TASK = -1;
 // =          RELAVENT FUNCTIONS          =
 // ========================================
 /**
- * Returns a C string representation of the coresponding event type
+ * Returns a C string representation of the corresponding event type
  */
 const char * eventTypeToString(int eventType) {
     switch(eventType){
@@ -81,6 +82,22 @@ const char * eventTypeToString(int eventType) {
         case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:    return "COMPANIONSHIP";
         case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return "WAKE";
         case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return "SLEEP";
+        default:                                        return "UNDEFINED";
+    }
+}
+
+/**
+ * Returns a C string representation of the corresponding priority
+ */
+const char * priorityToString(int priority) {
+    switch(priority){
+
+        case EVENT_TRIGGER_PRIORITY_VERY_HIGH:          return "VERY_HIGH";
+        case EVENT_TRIGGER_PRIORITY_HIGH:               return "HIGH";
+        case EVENT_TRIGGER_PRIORITY_MEDIUM:             return "MEDIUM";
+        case EVENT_TRIGGER_PRIORITY_LOW:                return "LOW";
+        case EVENT_TRIGGER_PRIORITY_VERY_LOW:           return "VERY_LOW";
+        case EVENT_TRIGGER_PRIORITY_NONE:               return "NONE";
         default:                                        return "UNDEFINED";
     }
 }

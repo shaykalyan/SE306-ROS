@@ -9,14 +9,14 @@
 
 
 // constants
-const int MAX_CONCURRENT_EVENTS = 2;
+const int MAX_CONCURRENT_WEIGHT = 2;
 
 // globals
 std::priority_queue<EventNode > eventQueue;
 ros::Publisher eventTriggerPub;
 ros::Subscriber eventTriggerSub;
 ros::Subscriber randomEventSub;
-int ongoingEvents = 0;
+int concurrentWeight = 0;
 
 // ======================================
 // =          SHOULD BE FALSE           =
@@ -32,7 +32,7 @@ elderly_care_simulation::EventTrigger createEventRequestMsg(int eventType, int p
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
     msg.event_type = eventType;
     msg.event_priority = priority;
-    msg.result = EVENT_TRIGGER_RESULT_FAILURE;
+    msg.result = EVENT_TRIGGER_RESULT_UNDEFINED;
 
     return msg;
 }
@@ -56,7 +56,10 @@ void randomEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
         return;
     }
 
-    ROS_INFO("Scheduler: Adding event: [%s] to queue.", eventTypeToString(msg.event_type));
+    ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
+             eventTypeToString(msg.event_type)
+             prorityToString(msg.event_priority));
+
     eventQueue.push(EventNode(msg));
 }
 
@@ -72,10 +75,18 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
                 elderly_care_simulation::EventTrigger msg;
                 msg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT, EVENT_TRIGGER_PRIORITY_HIGH);
 
-                ROS_INFO("Scheduler: Adding [%s] event to queue.", eventTypeToString(msg.event_type));
+                ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
+                          eventTypeToString(msg.event_type)
+                          prorityToString(msg.event_priority));
+
                 eventQueue.push(EventNode(msg));
             }else{
-                ongoingEvents--;
+                switch(msg.event_type){
+                    case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
+                        concurrentWeight -= 2; break;
+                    default:
+                        concurrentWeight -= 1; break; 
+                }
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
             }
         }
@@ -118,26 +129,26 @@ void populateDailyTasks(void) {
         // =        COMMENTED OUT STUFF         =
         // ======================================
 
-        // // Morning
-        // { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
+        // Morning
+        { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
-        // // Noon
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE, EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
+        // Noon
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
-        // // Evening
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
+        // Evening
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
     };
     for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
         eventQueue.push(EventNode(createEventRequestMsg(eventSequence[i][0], eventSequence[i][1])));
@@ -147,7 +158,7 @@ void populateDailyTasks(void) {
 /**
  * Dequeues an event and publishes to the event_trigger topic.
  * Allows concurrent events to be triggered up to the limit
- * set in MAX_CONCURRENT_EVENTS
+ * set in MAX_CONCURRENT_WEIGHT
  *
  * COOK event is not affected as it acts independently of the 
  * Resident.
@@ -171,29 +182,16 @@ void dequeueEvent(void) {
         allowNewEvents = false;
 
         // If no more tasks, then publish SLEEP event
-        if(ongoingEvents == 0) {
+        if(concurrentWeight == 0) {
             eventQueue.pop();
             eventTriggerPub.publish(msg);
             ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
-            ongoingEvents++;
+            concurrentWeight += 2;
 
         // If tasks still ongoing, do not allow SLEEP
         }else{
             ROS_INFO("Scheduler: Target still busy, cannot do event: [%s]", eventTypeToString(msg.event_type));
             return;
-        }
-
-    } else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
-        ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
-        ongoingEvents++;
-        eventTriggerPub.publish(msg);
-
-        allowNewEvents = false;
-
-        // Pop everything except sleep, which will be executed after the
-        // Resident comes back from hospital
-        while(eventQueue.top().getEventTriggerMessage().event_type != EVENT_TRIGGER_EVENT_TYPE_SLEEP) {
-            eventQueue.pop();
         }
 
     // cooking event type is published immediately
@@ -202,12 +200,30 @@ void dequeueEvent(void) {
         eventTriggerPub.publish(msg);
         ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
     } else {
-        // publish new event only if less than two events are ongoing
-        if (ongoingEvents < MAX_CONCURRENT_EVENTS) {
-            eventQueue.pop();
-            eventTriggerPub.publish(msg);
-            ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
-            ongoingEvents++;
+        
+        // Publish event if concurrentWeight available
+        if (concurrentWeight < MAX_CONCURRENT_WEIGHT) {
+
+            switch(msg.event_type) {
+                case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
+                    allowNewEvents = false;
+
+                    ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+                    concurrentWeight += 1;
+                    eventTriggerPub.publish(msg);
+
+                    
+                    clearEventQueue();
+                    eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_SLEEP,
+                                                                    EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
+
+                default:
+                    eventTriggerPub.publish(msg);
+                    ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+                    concurrentWeight += 1;
+                    eventQueue.pop();
+                    break;
+            }
         }
     }
 }
@@ -243,7 +259,7 @@ int main(int argc, char **argv) {
         // ======================================
         // =        COMMENTED OUT STUFF         =
         // ======================================
-        // if(eventQueue.size() == 0 && ongoingEvents == 0) {
+        // if(eventQueue.size() == 0 && concurrentWeight == 0) {
         //     sleep(5);
         //     clearEventQueue();
         //     populateDailyTasks();
