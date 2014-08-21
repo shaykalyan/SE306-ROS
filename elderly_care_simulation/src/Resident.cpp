@@ -1,25 +1,25 @@
 #include "ros/ros.h"
+#include <sstream>
+#include <unistd.h>
+
 #include "std_msgs/String.h"
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
-#include <sensor_msgs/LaserScan.h>
-#include "PerformTaskConstants.h"
-#include "elderly_care_simulation/PerformTask.h"
+#include "std_msgs/Empty.h"
+#include <geometry_msgs/Point.h>
+
 #include <queue>
 #include <tf/tf.h>
-#include "std_msgs/Empty.h"
 
-#include <sstream>
-#include "math.h"
+#include "PerformTaskConstants.h"
+#include "elderly_care_simulation/PerformTask.h"
+#include "DiceRollerTypeConstants.h"
+#include "elderly_care_simulation/DiceRollTrigger.h"
+#include "EventTriggerUtility.h"
+#include "elderly_care_simulation/EventTrigger.h"
 
 #include "Robot.h"
 #include "Resident.h"
-
-#include "DiceRollerTypeConstants.h"
-#include "elderly_care_simulation/DiceRollTrigger.h"
-#include "elderly_care_simulation/EventTrigger.h"
-#include <unistd.h> // sleep
-
 #include "Poi.h"
 #include "StaticPoi.h"
 #include "StaticPoiConstants.h"
