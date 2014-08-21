@@ -6,7 +6,6 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
-#include "EventTriggerConstants.h"
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/PerformTask.h"
 #include <queue>
@@ -18,7 +17,7 @@
 
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
-#include "EventTriggerConstants.h"
+#include "EventTriggerUtility.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include <unistd.h> // sleep
 
