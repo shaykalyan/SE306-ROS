@@ -55,5 +55,5 @@ rosbuild_add_executable(Visitor src/Visitor.cpp)		#R2
 target_link_libraries(Visitor Robot)
 
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
-target_link_libraries(Assistant Robot
+target_link_libraries(Assistant Robot)
 
