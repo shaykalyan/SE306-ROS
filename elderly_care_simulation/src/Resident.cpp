@@ -3,7 +3,6 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
-#include "EventTriggerConstants.h"
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/PerformTask.h"
 #include <queue>
@@ -18,7 +17,6 @@
 
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
-#include "EventTriggerConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include <unistd.h> // sleep
 
@@ -150,17 +148,19 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
 void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg){
     elderly_care_simulation::EventTrigger msgOut;
     msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-    msgOut.result = EVENT_TRIGGER_RESULT_FAILURE;
+    msgOut.result = EVENT_TRIGGER_RESULT_UNDEFINED;
 
     // Modify this switch statement to control random events
     switch(msg.type) {
         case MORAL_SUPPORT:
             ROS_INFO("Resident: I want moral support");
             msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
+            msgOut.event_priority = EVENT_TRIGGER_PRIORITY_MEDIUM;
             break;
         case ENTERTAINMENT:
             ROS_INFO("Resident: I need entertainment");
             msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
+            msgOut.event_priority = EVENT_TRIGGER_PRIORITY_MEDIUM;
             break;
         default:
             ROS_INFO("Resident: Unknown.");

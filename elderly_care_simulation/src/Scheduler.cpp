@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
-#include "EventTriggerConstants.h"
+#include "EventTriggerUtility.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include <queue>
 #include "EventNode.h"
@@ -11,12 +11,6 @@
 // constants
 const int MAX_CONCURRENT_EVENTS = 2;
 
-const int VERY_HIGH_PRIORITY = 0;   // for emergency and custom
-const int HIGH_PRIORITY = 1;        // for eat
-const int MEDIUM_PRIORITY = 2;      // for random
-const int LOW_PRIORITY = 3;         // for scheduled
-const int VERY_LOW_PRIORITY = 4;    // for sleep
-
 // globals
 std::priority_queue<EventNode > eventQueue;
 ros::Publisher eventTriggerPub;
@@ -24,40 +18,20 @@ ros::Subscriber eventTriggerSub;
 ros::Subscriber randomEventSub;
 int ongoingEvents = 0;
 
+// ======================================
+// =          SHOULD BE FALSE           =
+// ======================================
 bool allowNewEvents = true;
-
-/**
- * Returns a C string representation of the coresponding event type
- */
-const char * eventTypeToString(int eventType) {
-    switch(eventType){
-
-        case EVENT_TRIGGER_EVENT_TYPE_EAT:              return "EAT";
-        case EVENT_TRIGGER_EVENT_TYPE_SHOWER:           return "SHOWER";
-        case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:         return "EXERCISE";
-        case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:     return "CONVERSATION";
-        case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:    return "MORAL_SUPPORT";
-        case EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE:  return "FRIEND_RELATIVE";
-        case EVENT_TRIGGER_EVENT_TYPE_ILL:              return "ILL";
-        case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:         return "VERY_ILL";
-        case EVENT_TRIGGER_EVENT_TYPE_MEDICATION:       return "MEDICATION";
-        case EVENT_TRIGGER_EVENT_TYPE_COOK:             return "COOK";
-        case EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT:    return "ENTERTAINMENT";
-        case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:    return "COMPANIONSHIP";
-        case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return "WAKE";
-        case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return "SLEEP";
-        default:                                        return "-ERROR-";
-    }
-}
 
 /**
  * Creates a Request EventTrigger message for requesting robot tasks.
  * @param eventType the event type for the message
  */
-elderly_care_simulation::EventTrigger createEventRequestMsg(int eventType){
+elderly_care_simulation::EventTrigger createEventRequestMsg(int eventType, int priority){
     elderly_care_simulation::EventTrigger msg;
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
     msg.event_type = eventType;
+    msg.event_priority = priority;
     msg.result = EVENT_TRIGGER_RESULT_FAILURE;
 
     return msg;
@@ -78,25 +52,12 @@ void randomEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
     // Only allows random events to be added to event queue in the allowed
     // timeframe (between WAKE and SLEEP)
     if(!allowNewEvents) {
-        ROS_INFO("Scheduler: Random events are not allowed at this time.");
+        ROS_INFO("Scheduler: Additional events are not allowed at this time.");
         return;
     }
 
-    int priority = MEDIUM_PRIORITY; // default
-    switch(msg.event_type) {
-        case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
-            priority = MEDIUM_PRIORITY;
-            break;
-        case EVENT_TRIGGER_EVENT_TYPE_ILL:
-            priority = VERY_HIGH_PRIORITY;
-            break;
-        case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
-            priority = VERY_HIGH_PRIORITY;
-            break;
-    }
-
-    ROS_INFO("Scheduler: Adding random event: [%s] to queue.", eventTypeToString(msg.event_type));
-    eventQueue.push(EventNode(priority, msg));
+    ROS_INFO("Scheduler: Adding event: [%s] to queue.", eventTypeToString(msg.event_type));
+    eventQueue.push(EventNode(msg));
 }
 
 /**
@@ -109,10 +70,10 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 
             if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
                 elderly_care_simulation::EventTrigger msg;
-                msg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT);
+                msg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT, EVENT_TRIGGER_PRIORITY_HIGH);
 
                 ROS_INFO("Scheduler: Adding [%s] event to queue.", eventTypeToString(msg.event_type));
-                eventQueue.push(EventNode(1, msg));
+                eventQueue.push(EventNode(msg));
             }else{
                 ongoingEvents--;
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
@@ -151,43 +112,35 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
  */
 void populateDailyTasks(void) {
 
-    int eventSequence[] = {
+    int eventSequence[][2] = {
 
         // ======================================
         // =        COMMENTED OUT STUFF         =
         // ======================================
 
-        // Morning
-        // EVENT_TRIGGER_EVENT_TYPE_WAKE,
-        // EVENT_TRIGGER_EVENT_TYPE_COOK,
-        // EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
-        // EVENT_TRIGGER_EVENT_TYPE_EXERCISE,
-        // EVENT_TRIGGER_EVENT_TYPE_SHOWER,
-        // EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,
+        // // Morning
+        // { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Noon
-        // EVENT_TRIGGER_EVENT_TYPE_COOK,
-        // EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
-        // EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,
-        // EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE,
-        // EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,
+        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE, EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Evening
-        // EVENT_TRIGGER_EVENT_TYPE_COOK,
-        // EVENT_TRIGGER_EVENT_TYPE_MEDICATION,
-        // EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,
-        // EVENT_TRIGGER_EVENT_TYPE_SLEEP
+        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
     };
-
     for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
-        switch(eventSequence[i]) {
-            case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
-                eventQueue.push(EventNode(VERY_LOW_PRIORITY, createEventRequestMsg(eventSequence[i])));
-                break;
-            default:
-                eventQueue.push(EventNode(LOW_PRIORITY, createEventRequestMsg(eventSequence[i])));
-                break;
-        }
+        eventQueue.push(EventNode(createEventRequestMsg(eventSequence[i][0], eventSequence[i][1])));
     }
 }
 
@@ -297,7 +250,6 @@ int main(int argc, char **argv) {
         // }else {
         //     dequeueEvent();
         // }
-
         dequeueEvent();
 
         ros::spinOnce();
