@@ -29,14 +29,16 @@ def get_y_location(y):
 
 def shortest_path(start, end):
     """
-    Code for shortest path algorithm adapted from
+    Code for breadth first search shortest path algorithm adapted from
     http://stackoverflow.com/questions/8922060/breadth-first-search-trace-path
     """
+    rospy.loginfo(end)
     # maintain a queue of paths
     queue = []
     
     # Nodes that have already been visited
-    visited = set()
+    visited = set([])
+    visited.add(start)
     
     # push the first path into the queue
     queue.append([start])
@@ -54,13 +56,15 @@ def shortest_path(start, end):
             return path
             
         rospy.loginfo(node)
+        #rospy.loginfo(path)
 
         # enumerate all adjacent nodes, construct a new path and push it into the queue
         for adjacent in graph.get(node, []):
-            new_path = list(path)
-            new_path.append(adjacent)
-            if adjacent not in visited:
+            if not adjacent in visited:
+                new_path = list(path)
+                new_path.append(adjacent)
                 queue.append(new_path)
+                visited.add(adjacent)
 
 
 def create_response_message(path):
@@ -72,7 +76,7 @@ def create_response_message(path):
         
     path.pop() # Remove the point that the robot already is
     formatted_path = []
-    for current in reversed(path):
+    for current in path:
         formatted_path.append(Point(current[0] - MAP_WIDTH / 2, current[1] - MAP_HEIGHT / 2, 0))
     return FindPathResponse(formatted_path)
 
@@ -85,12 +89,15 @@ def find_path(req):
     req.to_point is a geometry_msgs Point object signifying the final location
     req.from_point is a geometry_msgs Point object signifying the initial location
     """ 
+    rospy.loginfo("Recieved request finding best path")
+
     from_point = req.from_point;
     to_point = req.to_point;
 
     from_node = get_x_location(from_point.x), get_y_location(from_point.y) 
     to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
     path = shortest_path(from_node, to_node)
+
     return create_response_message(path)
 
 

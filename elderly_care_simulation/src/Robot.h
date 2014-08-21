@@ -23,11 +23,13 @@ class Robot{
 
 		geometry_msgs::Twist currentVelocity;
 		geometry_msgs::Pose currentLocation;
+		ros::ServiceClient pathFinderService;
 		ros::Publisher robotNodeStagePub;
 		ros::Subscriber stageOdoSub;
 		std::queue<geometry_msgs::Point> locationQueue;
 
 		void stage0domCallback(const nav_msgs::Odometry msg);
+		void addPointsToQueue(const std::vector<geometry_msgs::Point> points);
 		void updateDesiredLocationCallback(const geometry_msgs::Point location);
 		bool doubleEquals(double a, double b, double difference);
 		double normalizeAngle(double angle);

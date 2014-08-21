@@ -10,6 +10,8 @@
 #include <nav_msgs/Odometry.h>
 #include "math.h"
 #include "Robot.h"
+#include <vector>
+#include "elderly_care_simulation/FindPath.h"
 
 Robot::Robot() {
 }
@@ -32,12 +34,24 @@ void Robot::stage0domCallback(const nav_msgs::Odometry msg) {
     currentAngle = yaw;
 }
 
+void Robot::addPointsToQueue(const std::vector<geometry_msgs::Point> points) {
+
+    for (uint i = 0; i < points.size(); ++i) {
+        locationQueue.push(points[i]);
+    }
+}
+
 /**
  * Adds location's points to the queue to traverse 
  */
 void Robot::updateDesiredLocationCallback(const geometry_msgs::Point location) { 
-  
-    locationQueue.push(location);
+
+    elderly_care_simulation::FindPath srv;
+    srv.request.from_point = currentLocation.position;
+    srv.request.to_point = location;
+    if (pathFinderService.call(srv)) {
+        addPointsToQueue(srv.response.path);
+    }
 }
 
 /**
