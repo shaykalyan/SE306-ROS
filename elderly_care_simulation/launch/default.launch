@@ -9,5 +9,5 @@
 	<node name="entertainmentDiceRoller" pkg="elderly_care_simulation" type="EntertainmentDiceRoller" />
 	<node name="console" pkg="rqt_console" type="rqt_console" />
 	
-	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/alpha-house.yaml"/>
+	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/house.pgm"/>
 </launch>
