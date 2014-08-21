@@ -1,18 +1,19 @@
 #include "ros/ros.h"
+#include <sstream>
+#include <unistd.h>
+
 #include "std_msgs/Empty.h"
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
-#include <sensor_msgs/LaserScan.h>
+
 #include <tf/tf.h>
 #include <queue>
 
-#include <sstream>
-#include "math.h"
 #include "EventTriggerUtility.h"
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include "elderly_care_simulation/PerformTask.h"
-#include <unistd.h>
+
 
 // Tasks
 const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
