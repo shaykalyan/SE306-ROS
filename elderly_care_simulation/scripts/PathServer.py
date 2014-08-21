@@ -57,7 +57,7 @@ def shortest_path(start, end):
 
 def create_return_message(path):
     formatted_path = []
-    for current in path:
+    for current in reversed(path):
         formatted_path.append(Point(current[0] - MAP_WIDTH / 2, current[1] - MAP_HEIGHT / 2, 0))
     return formatted_path
 
@@ -68,11 +68,8 @@ def find_path(req):
 
     from_node = get_x_location(from_point.x), get_y_location(from_point.y) 
     to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
-    rospy.loginfo(str(from_node))
-    rospy.loginfo(str(to_node))
-    rospy.loginfo(str(graph))
     path = shortest_path(from_node, to_node)
-    rospy.loginfo(str(path))
+    path.pop() # Remove the point that the robot already is
     return FindPathResponse(create_return_message(path))
 
 
