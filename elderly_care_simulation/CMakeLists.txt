@@ -41,8 +41,10 @@ target_link_libraries(MoralSupportDiceRoller DiceRoller)
 rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
 target_link_libraries(EntertainmentDiceRoller DiceRoller)
 
+rosbuild_add_library(Poi src/Poi.cpp)
+
 rosbuild_add_library(Robot src/Robot.cpp)
-target_link_libraries(Resident Robot)
+target_link_libraries(Resident Robot Poi)
 
 
 
