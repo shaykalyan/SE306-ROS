@@ -26,6 +26,8 @@ float height;
 // The number of pixels per meter in stage
 float resolution;
 
+std::vector<std::vector<int>> path;
+
 /**
  * Helper function to return the int value 
  * at the x, y position in occupancyGrid.data.
@@ -51,9 +53,74 @@ int getYLocation(float y)
     return int(floor(y + 10));
 }
 
+struct xyPoint
+{
+    int x;
+    int y;
+    bool visited;
+    int distance;
+    std::vector<xyPoint> path;
+
+    bool operator<(const xyPoint& a, const xyPoint& b) {
+        return a.distance < b.distance;
+    }
+};
+
+std::set<xyPoint> initializePoints()
+{
+    std::set<xyPoint> points;
+    for (int i = 0; i < width; i++) {
+        for int j = 0; j < height; j++) {
+            xyPoint p = {}
+            points.insert()
+        }
+    }
+}
+
+
+void Dijkstra(int s)
+{
+    std::set<xyPoint> visited;
+    std::set<xyPoint> notVisited = initializePoints();
+
+    path = std::vector<std::vector<int>>(height, width);
+    std::set<xyPoint> Q;
+
+    int[][] 
+    D[s] = 0;
+    Q.insert(ii(0,s));
+ 
+    while(!Q.empty())
+    {
+        xyPoint top = *Q.begin();
+        Q.erase(Q.begin());
+        int x = top.x;
+        int y = top.y;
+        int d = top.distance;
+ 
+        for (vii::const_iterator it = G[v].begin(); it != G[v].end(); it++)
+        {
+            int v2 = it->first;
+            int cost = it->second;
+            if (D[v2] > D[v] + cost)
+            {
+                if (D[v2] != 1000000000)
+                {
+                    Q.erase(Q.find(ii(D[v2], v2)));
+                }
+                D[v2] = D[v] + cost;
+                Q.insert(ii(D[v2], v2));
+            }
+        }
+    }
+}
+
 /**
  * Returns a vector of geometry_msgs::Point objects that indicate the best path to take
  * from point 'from' to point 'to'.
+ *
+ * Code for this algorithm has been adapted from:
+ * http://www.algolist.com/code/cpp/Dijkstra%27s_algorithm
  */
 bool findPath(elderly_care_simulation::FindPath::Request& req,
               elderly_care_simulation::FindPath::Response& res)
@@ -68,6 +135,8 @@ bool findPath(elderly_care_simulation::FindPath::Request& req,
     geometry_msgs::Point to = req.from;
     int finishingX = getXLocation(to.x);
     int finishingY = getYLocation(to.y);
+
+    std::vector<geometry_msgs::Point> points;
 
     std::cout << "Start: " << startingX << ", " << startingY;
     std::cout << "Finish: " << finishingX << ", " << finishingY;
