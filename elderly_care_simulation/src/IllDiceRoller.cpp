@@ -6,11 +6,12 @@
 #include "math.h"
 
 #include "DiceRoller.h"
-#include "EntertainmentDiceRoller.h"
+#include "IllDiceRoller.h"
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
 
-EntertainmentDiceRoller::~EntertainmentDiceRoller() {
+
+IllDiceRoller::~IllDiceRoller() {
 }
 
 // Signatures
@@ -20,7 +21,7 @@ elderly_care_simulation::DiceRollTrigger diceRollTrigger;
 int main(int argc, char **argv) {
 	
     // ROS initialiser calls
-    ros::init(argc, argv, "EntertainmentDiceRoller");
+    ros::init(argc, argv, "IllDiceRoller");
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(10);
 
@@ -28,27 +29,27 @@ int main(int argc, char **argv) {
     diceTriggerPub = nodeHandle.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, true);
 
     // Create diceroller
-    DiceRoller roller = EntertainmentDiceRoller();
+    IllDiceRoller roller = IllDiceRoller();
 
     int tick = 1;
 
     while (ros::ok()) {
-    
-        // Every 10 ticks ...        
+        
+        // Every 10 ticks ...
         if (tick % 10 == 0) {
 
             // ... roll dice
             bool result = roller.roll();
             if (result) {
-                ROS_INFO("YOUR ENTERTAINMENT/AMUSEMENT NEEDS REPLENISHING.");
-                diceRollTrigger.type = ENTERTAINMENT;
+                ROS_INFO("YOU HAVE CAUGHT A MINOR ILLNESS.");
+                diceRollTrigger.type = ILL;
                 diceTriggerPub.publish(diceRollTrigger);
-            }
+            } 
             tick = 1;
         }
         else {
             tick++;
-        }   
+        }  
         
 	    ros::spinOnce();
 	    loop_rate.sleep();

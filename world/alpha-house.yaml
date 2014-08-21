@@ -1,0 +1,6 @@
+image: house_navigation.png
+resolution: 2 # Number of pixels wide / world width
+origin: [-10.0, -10.0, 0.0]
+occupied_thresh: 0.5
+free_thresh: 0.5
+negate: 0

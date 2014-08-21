@@ -45,6 +45,12 @@ target_link_libraries(MoralSupportDiceRoller DiceRoller)
 rosbuild_add_gtest(test/TestDiceRoller test/TestDiceRoller.cpp)
 target_link_libraries(test/TestDiceRoller DiceRoller)
 
+rosbuild_add_executable(IllDiceRoller src/IllDiceRoller.cpp)
+target_link_libraries(IllDiceRoller DiceRoller)
+
+rosbuild_add_executable(VeryIllDiceRoller src/VeryIllDiceRoller.cpp)
+target_link_libraries(VeryIllDiceRoller DiceRoller)
+
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
 target_link_libraries(Resident Robot Poi StaticPoi)

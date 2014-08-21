@@ -19,8 +19,8 @@ window
 floorplan
 ( 
   name "alpha-house"
-  bitmap "alpha-house.png"
-  size [20 20 0.1]
+  bitmap "house.png"
+  size [20 20 1]
   pose [ 0 0 0 0.000 ]
 )
 
