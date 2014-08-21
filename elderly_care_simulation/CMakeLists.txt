@@ -21,6 +21,8 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
 
+include_directories(include)
+
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
@@ -39,6 +41,10 @@ rosbuild_add_library(StaticPoi src/StaticPoi.cpp)
 rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
 target_link_libraries(MoralSupportDiceRoller DiceRoller)
 
+# Testing
+rosbuild_add_gtest(test/TestDiceRoller test/TestDiceRoller.cpp)
+target_link_libraries(test/TestDiceRoller DiceRoller)
+
 rosbuild_add_executable(IllDiceRoller src/IllDiceRoller.cpp)
 target_link_libraries(IllDiceRoller DiceRoller)
 
@@ -52,8 +58,8 @@ target_link_libraries(Resident Robot Poi StaticPoi)
 rosbuild_add_executable(Scheduler src/Scheduler.cpp)	#R1
 
 rosbuild_add_executable(Visitor src/Visitor.cpp)		#R2
-
 target_link_libraries(Visitor Robot)
 
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
 target_link_libraries(Assistant Robot)
+
