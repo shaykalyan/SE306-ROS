@@ -58,7 +58,7 @@ def shortest_path(start, end):
 def create_return_message(path):
     formatted_path = []
     for current in path:
-        formatted_path.append(Point(current[0], current[1], 0))
+        formatted_path.append(Point(current[0] - MAP_WIDTH / 2, current[1] - MAP_HEIGHT / 2, 0))
     return formatted_path
 
 
