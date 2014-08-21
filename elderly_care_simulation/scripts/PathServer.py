@@ -67,6 +67,9 @@ def create_response_message(path):
     """
     Formats the return message for response of the find_path service.
     """
+    if not path:
+        return FindPathResponse([])
+        
     path.pop() # Remove the point that the robot already is
     formatted_path = []
     for current in reversed(path):
