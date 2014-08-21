@@ -11,10 +11,11 @@
 // constants
 const int MAX_CONCURRENT_EVENTS = 2;
 
-const int CRITICAL_PRIORITY = 0;
-const int HIGH_PRIORITY = 1;
-const int MEDIUM_PRIORITY = 2;
-const int LOW_PRIORITY = 3;
+const int VERY_HIGH_PRIORITY = 0;   // for emergency and custom
+const int HIGH_PRIORITY = 1;        // for eat
+const int MEDIUM_PRIORITY = 2;      // for random
+const int LOW_PRIORITY = 3;         // for scheduled
+const int VERY_LOW_PRIORITY = 4;    // for sleep
 
 // globals
 std::priority_queue<EventNode > eventQueue;
@@ -22,7 +23,7 @@ ros::Publisher eventTriggerPub;
 ros::Subscriber eventTriggerSub;
 ros::Subscriber randomEventSub;
 int ongoingEvents = 0;
-bool allowRandomEvents = false;
+bool allowNewEvents = false;
 
 /**
  * Returns a C string representation of the coresponding event type
@@ -75,7 +76,7 @@ void randomEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
 
     // Only allows random events to be added to event queue in the allowed
     // timeframe (between WAKE and SLEEP)
-    if(!allowRandomEvents) {
+    if(!allowNewEvents) {
         ROS_INFO("Scheduler: Random events are not allowed at this time.");
         return;
     }
@@ -86,10 +87,10 @@ void randomEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
             priority = MEDIUM_PRIORITY;
             break;
         case EVENT_TRIGGER_EVENT_TYPE_ILL:
-            priority = CRITICAL_PRIORITY;
+            priority = VERY_HIGH_PRIORITY;
             break;
         case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
-            priority = CRITICAL_PRIORITY;
+            priority = VERY_HIGH_PRIORITY;
             break;
     }
 
@@ -174,7 +175,14 @@ void populateDailyTasks(void) {
     };
 
     for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
-        eventQueue.push(EventNode(LOW_PRIORITY, createEventRequestMsg(eventSequence[i])));
+        switch(eventSequence[i]) {
+            case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
+                eventQueue.push(EventNode(VERY_LOW_PRIORITY, createEventRequestMsg(eventSequence[i])));
+                break;
+            default:
+                eventQueue.push(EventNode(LOW_PRIORITY, createEventRequestMsg(eventSequence[i])));
+                break;
+        }
     }
 }
 
@@ -196,13 +204,13 @@ void dequeueEvent(void) {
 
     // Enable random events to be added to queue only after WAKE event
     if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_WAKE){
-        allowRandomEvents = true;
+        allowNewEvents = true;
     }
 
     // Disable random events from being added to queue after SLEEP event
     // Also prevent the SLEEP event until all tasks are finished.
     if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP){
-        allowRandomEvents = false;
+        allowNewEvents = false;
 
         // If no more tasks, then publish SLEEP event
         if(ongoingEvents == 0) {
@@ -215,6 +223,19 @@ void dequeueEvent(void) {
         }else{
             ROS_INFO("Scheduler: Target still busy, cannot do event: [%s]", eventTypeToString(msg.event_type));
             return;
+        }
+
+    } else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+        ongoingEvents++;
+        eventTriggerPub.publish(msg);
+
+        allowNewEvents = false;
+
+        // Pop everything except sleep, which will be executed after the
+        // Resident comes back from hospital
+        while(eventQueue.top().getEventTriggerMessage().event_type != EVENT_TRIGGER_EVENT_TYPE_SLEEP) {
+            eventQueue.pop();
         }
 
     // cooking event type is published immediately
@@ -262,7 +283,7 @@ int main(int argc, char **argv) {
     while (ros::ok()) {
 
         if(eventQueue.size() == 0 && ongoingEvents == 0) {
-            sleep(10);
+            sleep(5);
             clearEventQueue();
             populateDailyTasks();
         }else {
