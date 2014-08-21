@@ -8,7 +8,7 @@
 
 #include <sstream>
 #include "math.h"
-#include "EventTriggerConstants.h"
+#include "EventTriggerUtility.h"
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include "elderly_care_simulation/PerformTask.h"
@@ -213,6 +213,8 @@ void eventTriggerReply() {
 
     // TODO: INSERT SWITCH STATEMENT FOR DIFFERENT TASKS HERE!
 	msg.event_type = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
+    msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
+    msg.event_weight = getEventWeight(msg.event_type);
 	msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
 	eventTriggerPub.publish(msg);
