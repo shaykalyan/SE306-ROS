@@ -16,77 +16,144 @@ class DiceRollerGUI:
         """
         # create root element with fixed size
         self.root = Tk()
-        self.root.geometry('400x250+1+1')
+        self.root.geometry('600x400+1+1')
 
-        # create frame element to host labels and graphics
-        self.frame = Frame(self.root)        
-        self.frame.pack()
+        # create the left most frame which will hold an embeded frame with the grid of current tasks being performed ny the robots
+        self.frame_left = Frame(self.root, height=400, width=300)
+        self.frame_left.pack(side=LEFT, fill=BOTH)
 
-        # create variable label
+        # create right most frame which will hold other embeded frames detailing dice rolls, upcoming events and allow event injection
+        self.frame_right = Frame(self.root, height=400, width = 300)        
+        self.frame_right.pack(side=TOP, fill=BOTH)
+
+        # create frame element to host the grid detailing current tasks being performed by robots
+        self.frame_robotGrid = Frame(self.frame_left, bd=3)        
+        self.frame_robotGrid.pack(side=LEFT, padx=10, pady=20)
+
+        # create frame element to host upcoming events and dice rolls
+        self.frame_events_dice = Frame(self.frame_right)        
+        self.frame_events_dice.pack(side=TOP, padx=10)
+
+        # create frame element to host the event injection interface
+        self.frame_eventManipulate = Frame(self.frame_right)        
+        self.frame_eventManipulate.pack(side=BOTTOM, padx=10)
+
+        # create frame element to host upcoming events
+        self.frame_events = Frame(self.frame_events_dice)        
+        self.frame_events.pack(side=LEFT, padx=10, pady=20, fill=BOTH)
+
+        # create frame element to host dice rolls
+        self.frame_dice = Frame(self.frame_events_dice, width=100)        
+        self.frame_dice.pack(side=LEFT, padx=10, pady=20, fill=BOTH)
+
+        # create frame element to host the event injection interface
+        self.frame_injectEvent = Frame(self.frame_eventManipulate)        
+        self.frame_injectEvent.pack(side=LEFT, padx=10, pady=10, fill=BOTH)
+
+        # create frame element to host the event injection interface
+        self.frame_eventChange = Frame(self.frame_eventManipulate)        
+        self.frame_eventChange.pack(side=LEFT, padx=10, pady=10, fill=BOTH)
+
+        # create variable labels
+        self.resident_task = StringVar()
+        self.resident_n_task = StringVar()
+        self.resident_task.set("None")
+        self.resident_n_task.set("None Scheduled")
+
         self.dice_label = StringVar()
 
-        #grid.columnconfigure(frame,0,weight=1)
+        gridRelief = RIDGE
+        gridAnchor = W
+        gridWidth = 15
+        gridHeight = 2
 
         # Creates Labels which will eventually contain information about robots and their tasks
         # :Column Names
-        Label(self.frame, text="Robot Name", anchor=W, relief=RIDGE, width=15, bg='ivory4').grid(row=0, column=0)
-        Label(self.frame, text="Current Task", anchor=W, relief=RIDGE, width=15, bg='ivory4').grid(row=0, column=1)
-        Label(self.frame, text="Queued Task", anchor=W, relief=RIDGE, width=15, bg='ivory4').grid(row=0, column=2)
+        Label(self.frame_robotGrid, text="Robot Name", anchor=gridAnchor, relief=gridRelief, bg='ivory4', width=gridWidth).grid(row=0, column=0)
+        Label(self.frame_robotGrid, text="Current Task", anchor=gridAnchor, relief=gridRelief, bg='ivory4', width=gridWidth).grid(row=0, column=1)
 
         # : Row 1: Resident
-        Label(self.frame, text="Resident", anchor=W, relief=RIDGE, width=15).grid(row=1, column=0)
-        Label(self.frame, text="Sleep", anchor=W, relief=RIDGE, width=15).grid(row=1, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=1, column=2)
+        Label(self.frame_robotGrid, text="Resident", anchor=gridAnchor, relief=gridRelief, height=gridHeight, width=gridWidth).grid(row=1, column=0)
+        Label(self.frame_robotGrid, textvariable=self.resident_task, anchor=gridAnchor, relief=gridRelief, height=gridHeight, width=gridWidth).grid(row=1, column=1)
 
         # : Row 1: Cook
-        Label(self.frame, text="Cook", anchor=W, relief=RIDGE, width=15).grid(row=2, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=2, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=2, column=2)
+        Label(self.frame_robotGrid, text="Cook", anchor=gridAnchor, relief=gridRelief, height=gridHeight, width=gridWidth).grid(row=2, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=2, column=1)
 
         # : Row 1: Medication
-        Label(self.frame, text="Medication", anchor=W, relief=RIDGE, width=15).grid(row=3, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=3, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=3, column=2)
+        Label(self.frame_robotGrid, text="Medication", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=3, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=3, column=1)
 
         # : Row 1: Entertainment
-        Label(self.frame, text="Entertainment", anchor=W, relief=RIDGE, width=15).grid(row=4, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=4, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=4, column=2)
+        Label(self.frame_robotGrid, text="Entertainment", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=4, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=4, column=1)
 
         # : Row 1: Companionship
-        Label(self.frame, text="Companionship", anchor=W, relief=RIDGE, width=15).grid(row=5, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=5, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=5, column=2)
+        Label(self.frame_robotGrid, text="Companionship", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=5, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=5, column=1)
 
         # : Row 1: Friend
-        Label(self.frame, text="Friend", anchor=W, relief=RIDGE, width=15).grid(row=6, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=6, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=6, column=2)
+        Label(self.frame_robotGrid, text="Friend", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=6, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=6, column=1)
 
         # : Row 1: Relative
-        Label(self.frame, text="Relative", anchor=W, relief=RIDGE, width=15).grid(row=7, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=7, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=7, column=2)
+        Label(self.frame_robotGrid, text="Relative", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=7, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=7, column=1)
 
         # : Row 1: Doctor
-        Label(self.frame, text="Doctor", anchor=W, relief=RIDGE, width=15).grid(row=8, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=8, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=8, column=2)
+        Label(self.frame_robotGrid, text="Doctor", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=8, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=8, column=1)
 
         # : Row 1: Nurse
-        Label(self.frame, text="Nurse", anchor=W, relief=RIDGE, width=15).grid(row=9, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=9, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=9, column=2)
+        Label(self.frame_robotGrid, text="Nurse", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=1)
 
         # : Row 1: Caregivier
-        Label(self.frame, text="Caregivier", anchor=W, relief=RIDGE, width=15).grid(row=10, column=0)
-        Label(self.frame, text="None", anchor=W, relief=RIDGE, width=15).grid(row=10, column=1)
-        Label(self.frame, text="None Scheduled", anchor=W, relief=RIDGE, width=15).grid(row=10, column=2)
+        Label(self.frame_robotGrid, text="Caregivier", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=0)
+        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=1)
+
+        # Set the Labels that contain information about current events
+        Label(self.frame_events, text="Current Events", relief=gridRelief, bg='ivory4').pack(fill=X)
+        Label(self.frame_events, text="Cooking", relief=gridRelief).pack(fill=X)
+        Label(self.frame_events, text="Medication", relief=gridRelief).pack(fill=X)
+        Label(self.frame_events, text="", relief=gridRelief).pack(fill=X)
+        Label(self.frame_events, text="").pack(fill=X)
+        Label(self.frame_events, text="Upcoming Events", relief=gridRelief, bg='ivory4').pack(fill=X)
+        Label(self.frame_events, text="Shower", relief=gridRelief).pack(fill=X)
+        Label(self.frame_events, text="", relief=gridRelief).pack(fill=X)
+
+        # Label for the dice rollers
+        Label(self.frame_dice, text="Dice Rollers", relief=gridRelief, bg='ivory4', width=15).pack(fill=X)
+
+        # Label for event injection
+        Label(self.frame_injectEvent, text="Event Injection", bg='ivory4', width=15).pack(side=TOP, padx=10, pady=5, fill=X)
+
+        # Set up event type dropdown menu
+        self.eventOption = ["Food", "Moral", "Companion", "Entertainment"]
+        self.eventType = StringVar(self.root)
+        self.eventType.set(self.eventOption[0])
+
+        # Set up event priority menu
+        self.priorityOption = ["0", "1", "2"]
+        self.eventPriority = StringVar(self.root)
+        self.eventPriority.set(self.priorityOption[0])
+
+        # Create dropdown menus and inject button
+        Button(self.frame_injectEvent, text="Inject").pack(side=BOTTOM, padx=10, fill=X)
+        OptionMenu(self.frame_injectEvent, self.eventPriority, *self.priorityOption).pack(side=BOTTOM, padx=10, pady=5, fill=X)
+        Label(self.frame_injectEvent, text="Event Priority", bg='ivory2', width=15).pack(side=BOTTOM, padx=10, fill=X)
+        OptionMenu(self.frame_injectEvent, self.eventType, *self.eventOption).pack(side=BOTTOM, padx=10, pady=5, fill=X)
+        Label(self.frame_injectEvent, text="Event Type", bg='ivory2', width=15).pack(side=BOTTOM, padx=10, fill=X)
+        
+        # Label for event changing
+        Label(self.frame_eventChange, text="Change Events", bg='ivory4', width=15).pack(side=TOP, padx=5, pady=5, fill=X)
+        Button(self.frame_eventChange, text="Repopulate Daily \n Events", width=18).pack(side=TOP, padx=5, pady=10, fill=X)
+        Button(self.frame_eventChange, text="Clear All Events").pack(side=TOP, padx=10, pady=10, fill=X)
 
         # create and assign dice label to label widget. Updating dice_label will
         # automatically update the widget's text
-        self.dice_label_widget = Label(self.root, textvariable=self.dice_label)
-        self.dice_label_widget.pack(side=LEFT)
+        #self.dice_label_widget = Label(self.frame_events, textvariable=self.dice_label)
+        #self.dice_label_widget.pack()
 
         # initialise listener node
         # anonymous ensures a unique listeners allowing multiple instances
