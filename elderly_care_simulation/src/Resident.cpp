@@ -22,6 +22,10 @@
 #include "elderly_care_simulation/EventTrigger.h"
 #include <unistd.h> // sleep
 
+#include "Poi.h"
+#include "StaticPoi.h"
+#include "StaticPoiConstants.h"
+
 // Current task type: -1 corresponds to no task
 
 
@@ -211,22 +215,22 @@ int main(int argc, char **argv) {
 
     resident.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_0/location", 1000, callUpdateDesiredLocationCallback);
 
-    resident.pathOfResidentSub = nodeHandle.subscribe<std_msgs::Empty>("robot_0/resident_respond", 1000, callTaskCompleted);
-    
+    resident.pathOfResidentSub = nodeHandle.subscribe<std_msgs::Empty>("robot_0/resident_respond", 1000, callTaskCompleted);   
 
     // Advertise that the Resident responds to PerformTask service calls
 	ros::ServiceServer service = nodeHandle.advertiseService("perform_task", callPerformTaskServiceHandler);
 
-	//a count of howmany messages we have sent
+	// A count of howmany messages we have sent
 	int count = 0;
 
 	while (ros::ok())
 	{
 		resident.updateCurrentVelocity();
 
-		// Every once in a while, decrease health values
+		// Every 5 seconds ...
 		if (count % 50 == 0) {
-			// Every 5 secs
+			
+            // ... decrease health values
 			
 			resident.amusement = (resident.amusement - 15) > 0 ? resident.amusement - 15 : 0;
 			ROS_INFO("Amusement level fell to %d", resident.amusement);
@@ -236,7 +240,7 @@ int main(int argc, char **argv) {
 		}
 
 		resident.robotNodeStagePub.publish(resident.currentVelocity);
-		
+
 		ros::spinOnce();
 		loop_rate.sleep();
 		++count;
