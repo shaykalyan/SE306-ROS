@@ -8,7 +8,6 @@
 	<node name="moralSupportDiceRoller" pkg="elderly_care_simulation" type="MoralSupportDiceRoller" />	
 	<node name="entertainmentDiceRoller" pkg="elderly_care_simulation" type="EntertainmentDiceRoller" />
 	<node name="console" pkg="rqt_console" type="rqt_console" />
-
-	<node name="map_server" pkg="map_server" type="map_server" args="$(find elderly_care_simulation)/../world/alpha-house.yaml" />
-	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" />
+	
+	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/alpha-house.yaml"/>
 </launch>
