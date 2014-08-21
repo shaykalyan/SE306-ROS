@@ -36,6 +36,9 @@ void Robot::stage0domCallback(const nav_msgs::Odometry msg) {
     currentAngle = yaw;
 }
 
+/**
+ * Add all points in points to the location queue.
+ */ 
 void Robot::addPointsToQueue(const std::vector<geometry_msgs::Point> points) {
 
     for (uint i = 0; i < points.size(); ++i) {
@@ -43,6 +46,9 @@ void Robot::addPointsToQueue(const std::vector<geometry_msgs::Point> points) {
     }
 }
 
+/**
+ * Clears the location queue.
+ */ 
 void Robot::clearLocationQueue()
 {
     while (! locationQueue.empty()) {
