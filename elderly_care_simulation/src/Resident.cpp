@@ -76,7 +76,7 @@ int Resident::handleTask(int taskType) {
 	int result;
 	
 	switch (taskType) {
-		case EVENT_TRIGGER_EVENT_TYPE_VISITOR:
+		case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
 			// The visitor is consoling us
 			happiness += 1;
 			if (happiness > HEALTHY_THRESHOLD) {
@@ -91,7 +91,7 @@ int Resident::handleTask(int taskType) {
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 			break;
-		case EVENT_TRIGGER_EVENT_TYPE_ASSISTANT:
+		case EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT:
 			// The assistant is entertaining us
 			amusement += 1;
 			if (amusement > HEALTHY_THRESHOLD) {
@@ -151,15 +151,20 @@ void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg)
     elderly_care_simulation::EventTrigger msgOut;
     msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
     msgOut.result = EVENT_TRIGGER_RESULT_FAILURE;
+
+    // Modify this switch statement to control random events
     switch(msg.type) {
         case MORAL_SUPPORT:
             ROS_INFO("Resident: I want moral support");
-            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
             break;
         case ENTERTAINMENT:
             ROS_INFO("Resident: I need entertainment");
-            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
             break;
+        default:
+            ROS_INFO("Resident: Unknown.");
+            return;
     }
     ROS_INFO("Resident: Sending request to scheduler");
     residentEventPub.publish(msgOut);

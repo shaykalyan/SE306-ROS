@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 // Tasks
-const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
+const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
 bool performingTask = false;
 
 // Topics
@@ -210,7 +210,9 @@ void eventTriggerReply() {
 	// create response message
 	elderly_care_simulation::EventTrigger msg;
 	msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
-	msg.event_type = EVENT_TRIGGER_EVENT_TYPE_ASSISTANT;
+
+    // TODO: INSERT SWITCH STATEMENT FOR DIFFERENT TASKS HERE!
+	msg.event_type = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
 	msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
 	eventTriggerPub.publish(msg);
@@ -238,8 +240,10 @@ void stopRotating() {
 void eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
-		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-			ROS_INFO("Assistant: Message Recieved");
+
+        // TODO: NEW ROBOT CHANGE HERE
+		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT) {
+			ROS_INFO("Assistant: Event Recieved: [ENTERTAINMENT]");
 			
 			performingTask = true;
 			
