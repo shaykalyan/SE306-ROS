@@ -63,14 +63,15 @@ def shortest_path(start, end):
                 queue.append(new_path)
 
 
-def create_return_message(path):
+def create_response_message(path):
     """
     Formats the return message for response of the find_path service.
     """
+    path.pop() # Remove the point that the robot already is
     formatted_path = []
     for current in reversed(path):
         formatted_path.append(Point(current[0] - MAP_WIDTH / 2, current[1] - MAP_HEIGHT / 2, 0))
-    return formatted_path
+    return FindPathResponse(formatted_path)
 
 
 def find_path(req):
@@ -87,8 +88,7 @@ def find_path(req):
     from_node = get_x_location(from_point.x), get_y_location(from_point.y) 
     to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
     path = shortest_path(from_node, to_node)
-    path.pop() # Remove the point that the robot already is
-    return FindPathResponse(create_return_message(path))
+    return create_response_message(path)
 
 
 def find_path_server():
