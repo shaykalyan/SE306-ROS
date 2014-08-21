@@ -14,16 +14,24 @@ MAP_HEIGHT = 20
 graph = {}
 
 def get_x_location(x):
+    """
+    Returns the x location used for the key in the graph
+    """
     return int(math.floor(x + MAP_WIDTH / 2))
 
 
 def get_y_location(y):
+    """
+    Returns the y location used for the key in the graph
+    """
     return int(math.floor(y + MAP_HEIGHT / 2))
 
 
 def shortest_path(start, end):
-    """Code for shortest path algorithm adapted from
-       http://stackoverflow.com/questions/8922060/breadth-first-search-trace-path"""
+    """
+    Code for shortest path algorithm adapted from
+    http://stackoverflow.com/questions/8922060/breadth-first-search-trace-path
+    """
     # maintain a queue of paths
     queue = []
     
@@ -56,6 +64,9 @@ def shortest_path(start, end):
 
 
 def create_return_message(path):
+    """
+    Formats the return message for response of the find_path service.
+    """
     formatted_path = []
     for current in reversed(path):
         formatted_path.append(Point(current[0] - MAP_WIDTH / 2, current[1] - MAP_HEIGHT / 2, 0))
@@ -63,6 +74,13 @@ def create_return_message(path):
 
 
 def find_path(req):
+    """
+    The ROS service that will find a path from the to_point and from_point
+    defined in FindPath.srv.
+
+    req.to_point is a geometry_msgs Point object signifying the final location
+    req.from_point is a geometry_msgs Point object signifying the initial location
+    """ 
     from_point = req.from_point;
     to_point = req.to_point;
 
@@ -74,6 +92,9 @@ def find_path(req):
 
 
 def find_path_server():
+    """
+    Initialize this ROS service node.
+    """
     rospy.init_node('find_path_server')
     service = rospy.Service('find_path', FindPath, find_path)
     rospy.spin()
