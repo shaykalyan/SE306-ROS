@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import math
+import time
 import roslib; roslib.load_manifest('elderly_care_simulation')
 import sys
 import rospy
@@ -13,11 +14,11 @@ MAP_HEIGHT = 20
 graph = {}
 
 def get_x_location(x):
-    return int(math.floor(x + 10))
+    return int(math.floor(x + MAP_WIDTH / 2))
 
 
 def get_y_location(y):
-    return int(math.floor(y + 10))
+    return int(math.floor(y + MAP_HEIGHT / 2))
 
 
 def shortest_path(start, end):
@@ -121,6 +122,9 @@ def generate_graph(filename):
 	
 	with open(filename, 'r') as f:
 		lines = f.read().splitlines()
+	
+	# Remove pgm file information
+	del lines[:3]
 	
 	for line in reversed(lines):
 		house_map.append(line.split())
