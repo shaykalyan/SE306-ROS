@@ -5,6 +5,7 @@
 	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
 	<node name="assistant" pkg="elderly_care_simulation" type="Assistant" />
 	<node name="moralSupportDiceRoller" pkg="elderly_care_simulation" type="MoralSupportDiceRoller" />	
-	<node name="entertainmentDiceRoller" pkg="elderly_care_simulation" type="EntertainmentDiceRoller" />
+	<node name="illDiceRoller" pkg="elderly_care_simulation" type="IllDiceRoller" />
+    <node name="VeryIllDiceRoller" pkg="elderly_care_simulation" type="VeryIllDiceRoller" />
 	<node name="console" pkg="rqt_console" type="rqt_console" />
 </launch>
