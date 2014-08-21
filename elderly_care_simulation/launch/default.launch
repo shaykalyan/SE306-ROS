@@ -1,5 +1,6 @@
 <launch>
 	<node name="stage" pkg="stage_ros" type="stageros" args="$(find elderly_care_simulation)/../world/world.world"/>
+
 	<node name="resident" pkg="elderly_care_simulation" type="Resident" />
 	<node name="scheduler" pkg="elderly_care_simulation" type="Scheduler" />
 	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
@@ -8,4 +9,6 @@
 	<node name="illDiceRoller" pkg="elderly_care_simulation" type="IllDiceRoller" />
     <node name="VeryIllDiceRoller" pkg="elderly_care_simulation" type="VeryIllDiceRoller" />
 	<node name="console" pkg="rqt_console" type="rqt_console" />
+	
+	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/house.pgm"/>
 </launch>

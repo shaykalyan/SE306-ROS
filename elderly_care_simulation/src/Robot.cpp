@@ -12,6 +12,8 @@
 #include <tf/tf.h>
 #include <queue>
 #include "Robot.h"
+#include <vector>
+#include "elderly_care_simulation/FindPath.h"
 
 Robot::Robot() {
 }
@@ -35,11 +37,37 @@ void Robot::stage0domCallback(const nav_msgs::Odometry msg) {
 }
 
 /**
+ * Add all points in points to the location queue.
+ */ 
+void Robot::addPointsToQueue(const std::vector<geometry_msgs::Point> points) {
+
+    for (uint i = 0; i < points.size(); ++i) {
+        locationQueue.push(points[i]);
+    }
+}
+
+/**
+ * Clears the location queue.
+ */ 
+void Robot::clearLocationQueue()
+{
+    while (! locationQueue.empty()) {
+        locationQueue.pop();
+    }
+}
+
+/**
  * Adds location's points to the queue to traverse 
  */
 void Robot::updateDesiredLocationCallback(const geometry_msgs::Point location) { 
-  
-    locationQueue.push(location);
+
+    elderly_care_simulation::FindPath srv;
+    srv.request.from_point = currentLocation.position;
+    srv.request.to_point = location;
+    if (pathFinderService.call(srv)) {
+        clearLocationQueue();
+        addPointsToQueue(srv.response.path);
+    }
 }
 
 /**
@@ -124,7 +152,6 @@ void Robot::updateCurrentVelocity() {
 
     directionVector.x = desiredLocation.x - currentLocation.position.x;
     directionVector.y = desiredLocation.y - currentLocation.position.y;
-    directionVector.z = desiredLocation.z - currentLocation.position.z;
     
     double desiredAngle = atan2(directionVector.y, directionVector.x);
 
