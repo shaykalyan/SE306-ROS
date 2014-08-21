@@ -105,8 +105,8 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
     
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
         if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
-            // reset ability to send
-            if (msg.event_type != EVENT_TRIGGER_EVENT_TYPE_COOK) {
+
+            if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
                 elderly_care_simulation::EventTrigger msg;
                 msg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT);
 
