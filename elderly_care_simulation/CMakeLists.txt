@@ -29,14 +29,23 @@ rosbuild_gensrv()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+# Libraries
+rosbuild_add_library(Robot src/Robot.cpp)
+rosbuild_add_library(DiceRoller src/DiceRoller.cpp)
+rosbuild_add_library(Poi src/Poi.cpp)
+rosbuild_add_library(StaticPoi src/StaticPoi.cpp)
+
+# Invisible Nodes
+rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
+target_link_libraries(MoralSupportDiceRoller DiceRoller)
+
+rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
+target_link_libraries(EntertainmentDiceRoller DiceRoller)
+
+# Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
+target_link_libraries(Resident Robot Poi StaticPoi)
+
 rosbuild_add_executable(Scheduler src/Scheduler.cpp)	#R1
 rosbuild_add_executable(Visitor src/Visitor.cpp)		#R2
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
-
-# Invisible
-rosbuild_add_library(DiceRoller src/DiceRoller.cpp)
-rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
-target_link_libraries(MoralSupportDiceRoller DiceRoller)
-rosbuild_add_executable(EntertainmentDiceRoller src/EntertainmentDiceRoller.cpp)
-target_link_libraries(EntertainmentDiceRoller DiceRoller)

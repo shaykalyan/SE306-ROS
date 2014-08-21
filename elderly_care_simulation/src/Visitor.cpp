@@ -8,14 +8,14 @@
 
 #include <sstream>
 #include "math.h"
-#include "EventTriggerConstants.h"
+#include "EventTriggerUtility.h"
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include "elderly_care_simulation/PerformTask.h"
 #include <unistd.h>
 
 // Tasks
-const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
+const int MY_TASK = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
 bool performingTask = false;
 
 // Topics
@@ -220,7 +220,11 @@ void eventTriggerReply() {
 	// create response message
 	elderly_care_simulation::EventTrigger msg;
 	msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
-	msg.event_type = EVENT_TRIGGER_EVENT_TYPE_VISITOR;
+
+    // TODO: INSERT SWITCH STATEMENT FOR DIFFERENT TASKS HERE!
+	msg.event_type = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
+    msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
+    msg.event_weight = getEventWeight(msg.event_type);
 	msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
 	eventTriggerPub.publish(msg);
@@ -248,8 +252,10 @@ void stopRotating() {
 void eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
 	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
-		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-			ROS_INFO("Visitor: Message Recieved");
+
+        // TODO: INSERT SWITCH STATEMENT FOR DIFFERENT TASKS HERE!
+		if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT) {
+			ROS_INFO("Visitor: Event Recieved: [MORAL_SUPPORT]");
 			
 			performingTask = true;
 			
@@ -308,7 +314,7 @@ void performTask() {
 int main(int argc, char **argv)
 {	
 	//You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
-	ros::init(argc, argv, "Assistant");
+	ros::init(argc, argv, "Visitor");
 
 	//NodeHandle is the main access point to communicate with ros.
 	ros::NodeHandle nodeHandle;
