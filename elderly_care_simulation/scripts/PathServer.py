@@ -6,6 +6,11 @@ import rospy
 from geometry_msgs.msg import Point
 from elderly_care_simulation.srv import *
 
+MAP_WIDTH = 20
+MAP_HEIGHT = 20
+
+graph = {}
+
 def get_x_location(x):
     return int(floor(x + 10))
 
@@ -58,6 +63,50 @@ def find_path_server():
     rospy.init_node('find_path_server')
     service = rospy.Service('find_path', FindPath, find_path)
     rospy.spin()
+    
+
+def check_vacancy_at_cell(house_map, coordinate):
+	"""
+	Return True if the given coordinate is vacant
+	"""
+	x = coordinate[0]
+	y = coordinate[1]
+	
+	if not 0 <= x < MAP_WIDTH:
+		return False
+	
+	if not 0 <= y < MAP_HEIGHT:
+		return False
+		
+	return house_map[y][x] == 0
+    
+    
+def get_vacant_neighbours(house_map, coordinate):
+	"""
+	Return a list of coordinates that are vacant around the given coordinate.
+	
+	'coordinate' is a tuple: (x, y) with the origin at the bottom left
+	"""
+	x = coordinate[0]
+	y = coordinate[1]
+	
+	neighbours = [(x, y + 1), (x + 1, y), (x, y - 1), (x - 1, y)]
+	vacant_neighbours = []
+	
+	for neighbour in neighbours:
+		if check_vacancy_at_cell(neighbour):
+			vacant_neighbours.append(neighbour)
+			
+	return vacant_neighbours
+    
+    
+def generate_graph(filename):
+	with open(filename, 'r') as f:
+		lines = f.read().splitlines()
+	
+	for line in reversed(lines):
+		house_map.append(line.split())
+		
 
 if __name__ == "__main__":
     if len(sys.argv) < 1:
