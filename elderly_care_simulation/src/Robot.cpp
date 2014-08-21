@@ -43,6 +43,13 @@ void Robot::addPointsToQueue(const std::vector<geometry_msgs::Point> points) {
     }
 }
 
+void Robot::clearLocationQueue()
+{
+    while (! locationQueue.empty()) {
+        locationQueue.pop();
+    }
+}
+
 /**
  * Adds location's points to the queue to traverse 
  */
@@ -52,6 +59,7 @@ void Robot::updateDesiredLocationCallback(const geometry_msgs::Point location) {
     srv.request.from_point = currentLocation.position;
     srv.request.to_point = location;
     if (pathFinderService.call(srv)) {
+        clearLocationQueue();
         addPointsToQueue(srv.response.path);
     }
 }
@@ -138,7 +146,6 @@ void Robot::updateCurrentVelocity() {
 
     directionVector.x = desiredLocation.x - currentLocation.position.x;
     directionVector.y = desiredLocation.y - currentLocation.position.y;
-    directionVector.z = desiredLocation.z - currentLocation.position.z;
     
     double desiredAngle = atan2(directionVector.y, directionVector.x);
 
