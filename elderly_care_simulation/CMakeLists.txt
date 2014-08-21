@@ -47,5 +47,10 @@ rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
 target_link_libraries(Resident Robot Poi StaticPoi)
 
 rosbuild_add_executable(Scheduler src/Scheduler.cpp)	#R1
+
 rosbuild_add_executable(Visitor src/Visitor.cpp)		#R2
+
+target_link_libraries(Visitor Robot)
+
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
+target_link_libraries(Assistant Robot)

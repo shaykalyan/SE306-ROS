@@ -2,17 +2,18 @@
 #define ROBOT_H
 
 #include "ros/ros.h"
-#include "std_msgs/Empty.h"
-#include "std_msgs/String.h"
-#include <tf/tf.h>
-#include <queue>
+
 #include <sstream>
 #include "math.h"
 #include <cstdlib>
+
+#include "std_msgs/Empty.h"
+#include "std_msgs/String.h"
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
-#include <math.h>
 
+#include <tf/tf.h>
+#include <queue>
 
 class Robot{
 
