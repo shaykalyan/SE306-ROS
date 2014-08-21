@@ -11,17 +11,18 @@
 #include <queue>
 #include <tf/tf.h>
 #include "std_msgs/Empty.h"
-#include "Robot.h"
 #include <sstream>
 #include "math.h"
-
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
 #include "EventTriggerUtility.h"
 #include "elderly_care_simulation/EventTrigger.h"
-#include <unistd.h> // sleep
+#include <unistd.h>
 
-class Resident : public Robot{
+#include "Robot.h"
+#include "Poi.h"
+
+class Resident : public Robot, public Poi {
 
 	public:
 		Resident();
@@ -41,6 +42,10 @@ class Resident : public Robot{
 		int handleTask(int taskType);
 		bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
 				   elderly_care_simulation::PerformTask::Response &res);
+
+        virtual geometry_msgs::Point getLocation() {
+            return currentLocation.position;
+        }
 
 	private:
 		
