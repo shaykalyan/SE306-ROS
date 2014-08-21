@@ -211,7 +211,7 @@ void dequeueEvent(void) {
 
     } else {
         if(!stopRosInfoSpam){
-            ROS_INFO("Scheduler: Event: [%s] waiting for additional concurrent weight.", 
+            ROS_INFO("Scheduler: Event: [%s] is waiting for additional concurrent weight.", 
                 eventTypeToString(msg.event_type));
             stopRosInfoSpam = true;
         }
