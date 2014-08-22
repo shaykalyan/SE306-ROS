@@ -12,6 +12,7 @@
 DiceRoller::DiceRoller(int sides) {
     this->DICE_SIDES = sides;
     this->threshold = DICE_SIDES;
+    this->oldThreshold = DICE_SIDES;
 }
 
 DiceRoller::~DiceRoller() {
@@ -25,15 +26,17 @@ DiceRoller::~DiceRoller() {
  */
 bool DiceRoller::roll() {
 
-    int rolled = rand() % DICE_SIDES + 1;
+    rolled = rand() % DICE_SIDES + 1;
     ROS_INFO("Rolled: %d. Needed: %d", rolled, threshold);
     
     if (rolled >= threshold) {
         // Reset threshold
+        oldThreshold = threshold;
         threshold = DICE_SIDES;
         return true;
     } 
     else {
+        oldThreshold = threshold;
         threshold--;
         return false;
     }   

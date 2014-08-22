@@ -21,9 +21,8 @@ class DiceRoller {
         bool roll();
 
         int threshold;
-
-    private:
-
+        int oldThreshold;
+        int rolled;
         int DICE_SIDES; // not const as it needs to be assigned in constructor (work-around)
 };
 
