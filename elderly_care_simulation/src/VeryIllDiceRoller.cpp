@@ -6,49 +6,61 @@
 #include "math.h"
 
 #include "DiceRoller.h"
-#include "EntertainmentDiceRoller.h"
+#include "VeryIllDiceRoller.h"
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
+#include "elderly_care_simulation/DiceRollReport.h"
 
-EntertainmentDiceRoller::~EntertainmentDiceRoller() {
+
+VeryIllDiceRoller::~VeryIllDiceRoller() {
 }
 
 // Signatures
 ros::Publisher diceTriggerPub;
+ros::Publisher rollReportPub;
 elderly_care_simulation::DiceRollTrigger diceRollTrigger;
+elderly_care_simulation::DiceRollReport diceRollReport;
 
 int main(int argc, char **argv) {
 	
     // ROS initialiser calls
-    ros::init(argc, argv, "EntertainmentDiceRoller");
+    ros::init(argc, argv, "VeryIllDiceRoller");
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(10);
 
     // Declare publishers
     diceTriggerPub = nodeHandle.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, true);
+    rollReportPub = nodeHandle.advertise<elderly_care_simulation::DiceRollReport>("dice_roll_report", 1000, true);
 
     // Create diceroller
-    DiceRoller roller = EntertainmentDiceRoller();
+    VeryIllDiceRoller roller = VeryIllDiceRoller();
 
     int tick = 1;
 
     while (ros::ok()) {
-    
-        // Every 10 ticks ...        
+        
+        // Every 10 ticks ...
         if (tick % 10 == 0) {
 
             // ... roll dice
             bool result = roller.roll();
             if (result) {
-                ROS_INFO("YOUR ENTERTAINMENT/AMUSEMENT NEEDS REPLENISHING.");
-                diceRollTrigger.type = ENTERTAINMENT;
+                ROS_INFO("YOU HAVE BECOME EXTREMELY ILL. SEEK HELP!");
+                diceRollTrigger.type = VERY_ILL;
                 diceTriggerPub.publish(diceRollTrigger);
-            }
+            } 
             tick = 1;
         }
         else {
             tick++;
-        }   
+        }  
+
+        // Publish report of roll
+        diceRollReport.threshold = roller.oldThreshold;
+        diceRollReport.rolled = roller.rolled;
+        diceRollReport.numSides = roller.DICE_SIDES;
+        diceRollReport.type = VERY_ILL;
+        rollReportPub.publish(diceRollReport); 
         
 	    ros::spinOnce();
 	    loop_rate.sleep();

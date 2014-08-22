@@ -2,7 +2,7 @@
 
 class EventNode {
 public:
-	EventNode(int priority, elderly_care_simulation::EventTrigger msg);
+	EventNode(elderly_care_simulation::EventTrigger msg);
 	int getPriority() const;
 	int getWeight() const;
 	elderly_care_simulation::EventTrigger getEventTriggerMessage() const;
@@ -15,8 +15,8 @@ private:
 
 int EventNode::_count = 0;
 
-EventNode::EventNode(int priority, elderly_care_simulation::EventTrigger msg) {
-	_priority = priority;
+EventNode::EventNode(elderly_care_simulation::EventTrigger msg) {
+	_priority = msg.event_priority;
 	_msg = msg;
 	_weight = EventNode::_count;
 	EventNode::_count++;

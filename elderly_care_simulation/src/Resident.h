@@ -2,27 +2,29 @@
 #define RESIDENT_H
 
 #include "ros/ros.h"
+#include <sstream>
+#include <unistd.h>
+
 #include "std_msgs/String.h"
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
-#include <sensor_msgs/LaserScan.h>
-#include "EventTriggerConstants.h"
-#include "PerformTaskConstants.h"
-#include "elderly_care_simulation/PerformTask.h"
+#include "std_msgs/Empty.h"
+#include <geometry_msgs/Point.h>
+
 #include <queue>
 #include <tf/tf.h>
-#include "std_msgs/Empty.h"
-#include "Robot.h"
-#include <sstream>
-#include "math.h"
 
+#include "PerformTaskConstants.h"
+#include "elderly_care_simulation/PerformTask.h"
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
-#include "EventTriggerConstants.h"
+#include "EventTriggerUtility.h"
 #include "elderly_care_simulation/EventTrigger.h"
-#include <unistd.h> // sleep
 
-class Resident : public Robot{
+#include "Robot.h"
+#include "Poi.h"
+
+class Resident : public Robot, public Poi {
 
 	public:
 		Resident();
@@ -42,6 +44,10 @@ class Resident : public Robot{
 		int handleTask(int taskType);
 		bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
 				   elderly_care_simulation::PerformTask::Response &res);
+
+        virtual geometry_msgs::Point getLocation() {
+            return currentLocation.position;
+        }
 
 	private:
 		

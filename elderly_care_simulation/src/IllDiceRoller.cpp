@@ -6,13 +6,13 @@
 #include "math.h"
 
 #include "DiceRoller.h"
-#include "MoralSupportDiceRoller.h"
+#include "IllDiceRoller.h"
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
 #include "elderly_care_simulation/DiceRollReport.h"
 
 
-MoralSupportDiceRoller::~MoralSupportDiceRoller() {
+IllDiceRoller::~IllDiceRoller() {
 }
 
 // Signatures
@@ -24,7 +24,7 @@ elderly_care_simulation::DiceRollReport diceRollReport;
 int main(int argc, char **argv) {
 	
     // ROS initialiser calls
-    ros::init(argc, argv, "MoralSupportDiceRoller");
+    ros::init(argc, argv, "IllDiceRoller");
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(10);
 
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     rollReportPub = nodeHandle.advertise<elderly_care_simulation::DiceRollReport>("dice_roll_report", 1000, true);
 
     // Create diceroller
-    MoralSupportDiceRoller roller = MoralSupportDiceRoller();
+    IllDiceRoller roller = IllDiceRoller();
 
     int tick = 1;
 
@@ -45,22 +45,22 @@ int main(int argc, char **argv) {
             // ... roll dice
             bool result = roller.roll();
             if (result) {
-                ROS_INFO("YOUR MORALE NEEDS REPLENISHING.");
-                diceRollTrigger.type = MORAL_SUPPORT;
+                ROS_INFO("YOU HAVE CAUGHT A MINOR ILLNESS.");
+                diceRollTrigger.type = ILL;
                 diceTriggerPub.publish(diceRollTrigger);
             } 
             tick = 1;
         }
         else {
             tick++;
-        }  
+        }
 
         // Publish report of roll
         diceRollReport.threshold = roller.oldThreshold;
         diceRollReport.rolled = roller.rolled;
         diceRollReport.numSides = roller.DICE_SIDES;
-        diceRollReport.type = MORAL_SUPPORT;
-        rollReportPub.publish(diceRollReport); 
+        diceRollReport.type = ILL;
+        rollReportPub.publish(diceRollReport);  
         
 	    ros::spinOnce();
 	    loop_rate.sleep();

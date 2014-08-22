@@ -36,9 +36,9 @@ window
 floorplan
 ( 
   name "alpha-house"
-  bitmap "bitmaps/alpha-house.png"
+  bitmap "house.png"
   size [20 20 0.5]
-  pose [0 0 0 0]
+  pose [ 0 0 0 0.000 ]
 )
 
 bed
@@ -72,5 +72,5 @@ robot(
 
 robot(
   name "Assistant"
-  pose [-7.5 -7.5 0 0]
+  pose [ -8 -8 0 0 ]
 )
