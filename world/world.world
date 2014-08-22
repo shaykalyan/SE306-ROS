@@ -130,3 +130,9 @@ robot(
   pose [ -7.5 -7.5 0 0 ]
   color "orange"
 )
+
+robot(
+  name "Friend"
+  pose [ 3.7 -8.65 0 0 ]
+  color "blue"
+)
