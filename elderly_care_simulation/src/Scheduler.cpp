@@ -184,7 +184,7 @@ void dequeueEvent(void) {
                 eventTriggerPub.publish(msg);
                 ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
                 concurrentWeight += msg.event_weight;
-
+                break;
 
             case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
                 allowNewEvents = false;
@@ -201,6 +201,7 @@ void dequeueEvent(void) {
                 // schedules will be repopulated automatically (in the main method).
                 eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_SLEEP,
                                                                 EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
+                break;
 
             default:
                 allowNewEvents = true;
@@ -213,7 +214,7 @@ void dequeueEvent(void) {
 
     } else {
         if(!stopRosInfoSpam){
-            ROS_INFO("Scheduler: Event: [%s] is waiting for additional concurrent weight.", 
+            ROS_INFO("Scheduler: Pending event: [%s]", 
                 eventTypeToString(msg.event_type));
             stopRosInfoSpam = true;
         }
@@ -251,14 +252,14 @@ int main(int argc, char **argv) {
         // ======================================
         // =        COMMENTED OUT STUFF         =
         // ======================================
-        // if(eventQueue.size() == 0 && concurrentWeight == 0) {
-        //     sleep(5);
-        //     clearEventQueue();
-        //     populateDailyTasks();
-        // }else {
-        //     dequeueEvent();
-        // }
-        dequeueEvent();
+        if(eventQueue.size() == 0 && concurrentWeight == 0) {
+            sleep(5);
+            clearEventQueue();
+            populateDailyTasks();
+        }else {
+            dequeueEvent();
+        }
+        // dequeueEvent();
 
         ros::spinOnce();
         loop_rate.sleep();
