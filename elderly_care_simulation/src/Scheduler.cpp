@@ -252,14 +252,14 @@ int main(int argc, char **argv) {
         // ======================================
         // =        COMMENTED OUT STUFF         =
         // ======================================
-        if(eventQueue.size() == 0 && concurrentWeight == 0) {
-            sleep(5);
-            clearEventQueue();
-            populateDailyTasks();
-        }else {
-            dequeueEvent();
-        }
-        // dequeueEvent();
+        // if(eventQueue.size() == 0 && concurrentWeight == 0) {
+        //     sleep(5);
+        //     clearEventQueue();
+        //     populateDailyTasks();
+        // }else {
+        //     dequeueEvent();
+        // }
+        dequeueEvent();
 
         ros::spinOnce();
         loop_rate.sleep();
