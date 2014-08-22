@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import math
 import time
 import roslib; roslib.load_manifest('elderly_care_simulation')
 import sys
@@ -17,14 +16,14 @@ def get_x_location(x):
     """
     Returns the x location used for the key in the graph
     """
-    return int(math.floor(x + MAP_WIDTH / 2))
+    return int(round(x + MAP_WIDTH / 2))
 
 
 def get_y_location(y):
     """
     Returns the y location used for the key in the graph
     """
-    return int(math.floor(y + MAP_HEIGHT / 2))
+    return int(round(y + MAP_HEIGHT / 2))
 
 
 def shortest_path(start, end):
@@ -74,7 +73,7 @@ def create_response_message(path):
     if not path:
         return FindPathResponse([])
         
-    path.pop() # Remove the point that the robot already is
+    del path[0] # Remove the point that the robot already is
     formatted_path = []
     for current in path:
         formatted_path.append(Point(current[0] - MAP_WIDTH / 2, current[1] - MAP_HEIGHT / 2, 0))
@@ -89,16 +88,20 @@ def find_path(req):
     req.to_point is a geometry_msgs Point object signifying the final location
     req.from_point is a geometry_msgs Point object signifying the initial location
     """ 
-    rospy.loginfo("Recieved request finding best path")
+    try:
+        rospy.loginfo("Recieved request finding best path")
 
-    from_point = req.from_point;
-    to_point = req.to_point;
+        from_point = req.from_point;
+        to_point = req.to_point;
 
-    from_node = get_x_location(from_point.x), get_y_location(from_point.y) 
-    to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
-    path = shortest_path(from_node, to_node)
+        from_node = get_x_location(from_point.x), get_y_location(from_point.y) 
+        to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
+        path = shortest_path(from_node, to_node)
 
-    return create_response_message(path)
+        return create_response_message(path)
+    except Exception as e:
+        rospy.loginfo(str(e))
+        return False
 
 
 def find_path_server():
