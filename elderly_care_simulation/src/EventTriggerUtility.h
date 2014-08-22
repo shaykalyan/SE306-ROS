@@ -118,6 +118,8 @@ int getEventWeight(int eventType) {
 
         case EVENT_TRIGGER_EVENT_TYPE_EAT:              return EVENT_TRIGGER_WEIGHT_2;
         case EVENT_TRIGGER_EVENT_TYPE_SHOWER:           return EVENT_TRIGGER_WEIGHT_2;
+        case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return EVENT_TRIGGER_WEIGHT_2;
+
         case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:         return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:     return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:    return EVENT_TRIGGER_WEIGHT_1;
@@ -125,12 +127,13 @@ int getEventWeight(int eventType) {
         case EVENT_TRIGGER_EVENT_TYPE_ILL:              return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:         return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_MEDICATION:       return EVENT_TRIGGER_WEIGHT_1;
-        case EVENT_TRIGGER_EVENT_TYPE_COOK:             return EVENT_TRIGGER_WEIGHT_0;
         case EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT:    return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:    return EVENT_TRIGGER_WEIGHT_1;
+
+        case EVENT_TRIGGER_EVENT_TYPE_COOK:             return EVENT_TRIGGER_WEIGHT_0;
         case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return EVENT_TRIGGER_WEIGHT_0;
-        case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return EVENT_TRIGGER_WEIGHT_2;
-        default:                                        return EVENT_TRIGGER_WEIGHT_1;
+
+        default:                                        return EVENT_TRIGGER_WEIGHT_UNDEFINED;
     }
 }
 

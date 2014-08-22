@@ -74,14 +74,15 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
         if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
 
             if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
-                elderly_care_simulation::EventTrigger msg;
-                msg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT, EVENT_TRIGGER_PRIORITY_HIGH);
+                ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));
 
+                elderly_care_simulation::EventTrigger eatMsg;
+                eatMsg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT, EVENT_TRIGGER_PRIORITY_HIGH);
                 ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]",
-                          eventTypeToString(msg.event_type),
-                          priorityToString(msg.event_priority));
+                          eventTypeToString(eatMsg.event_type),
+                          priorityToString(eatMsg.event_priority));
 
-                eventQueue.push(EventNode(msg));
+                eventQueue.push(EventNode(eatMsg));
             }else{
                 concurrentWeight -= msg.event_weight;
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
