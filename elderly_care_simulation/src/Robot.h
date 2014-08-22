@@ -10,6 +10,7 @@
 #include "std_msgs/Empty.h"
 #include "std_msgs/String.h"
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Point.h>
 #include <nav_msgs/Odometry.h>
 
 #include <tf/tf.h>
@@ -20,28 +21,37 @@ class Robot{
 	public:
 		Robot();
 		~Robot();
-		double  currentAngle;
 
-		geometry_msgs::Twist currentVelocity;
-		geometry_msgs::Pose currentLocation;
 		ros::ServiceClient pathFinderService;
 		ros::Publisher robotNodeStagePub;
 		ros::Subscriber stageOdoSub;
-		std::queue<geometry_msgs::Point> locationQueue;
+
+		geometry_msgs::Pose currentLocation;
+        geometry_msgs::Twist currentVelocity;        
 
 		void stage0domCallback(const nav_msgs::Odometry msg);
+		void goToLocation(const geometry_msgs::Point location);
+		void startSpinning(bool clockwise);
+		void stopSpinning();
+		void updateCurrentVelocity();
+		bool atDesiredLocation();
+
+	protected:
+		std::queue<geometry_msgs::Point> locationQueue;
+		double  currentAngle;
+
+		enum Spin {
+			NOT_SPINNING, CLOCKWISE, ANTI_CLOCKWISE
+		};
+
+		Spin spin;
+
 		void addPointsToQueue(const std::vector<geometry_msgs::Point> points);
-		void updateDesiredLocationCallback(const geometry_msgs::Point location);
+		void updateCurrentVelocityToDesiredLocation();
 		void clearLocationQueue();
 		bool doubleEquals(double a, double b, double difference);
 		double normalizeAngle(double angle);
 		bool turnAnticlockwise(double currentAngle, double desiredAngle);
-		bool atDesiredLocation();
-		void updateCurrentVelocity();
-		
-
-	private:
-
 };
 
 #endif

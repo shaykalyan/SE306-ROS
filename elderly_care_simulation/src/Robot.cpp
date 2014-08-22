@@ -16,9 +16,30 @@
 #include "elderly_care_simulation/FindPath.h"
 
 Robot::Robot() {
+    spin = NOT_SPINNING;
 }
 
 Robot::~Robot() {
+}
+
+/**
+ * Starts the robot spinning clockwise or anticlockwise.
+ */ 
+void Robot::startSpinning(bool clockwise) {
+
+    if (clockwise) {
+        spin = CLOCKWISE;
+    } else {
+        spin = ANTI_CLOCKWISE;
+    }
+}
+
+/**
+ * Stops the robot spinning
+ */ 
+void Robot::stopSpinning() {
+
+    spin = NOT_SPINNING;
 }
 
 /**
@@ -60,7 +81,7 @@ void Robot::clearLocationQueue()
 /**
  * Adds location's points to the queue to traverse 
  */
-void Robot::updateDesiredLocationCallback(const geometry_msgs::Point location) { 
+void Robot::goToLocation(const geometry_msgs::Point location) { 
 
     elderly_care_simulation::FindPath srv;
     srv.request.from_point = currentLocation.position;
@@ -68,7 +89,10 @@ void Robot::updateDesiredLocationCallback(const geometry_msgs::Point location) {
     if (pathFinderService.call(srv)) {
         clearLocationQueue();
         addPointsToQueue(srv.response.path);
+    } else {
+        ROS_INFO("Call failed");
     }
+    ROS_INFO("ROBOT GOING TO LOCATION %f, %f", location.x, location.y);
 }
 
 /**
@@ -118,8 +142,7 @@ bool Robot::atDesiredLocation() {
 
     if (locationQueue.empty()) {
         return true;
-    } 
-    else {
+    } else {
         double toleratedDifference = 0.05;
         geometry_msgs::Point desiredLocation = locationQueue.front();
 
@@ -133,18 +156,7 @@ bool Robot::atDesiredLocation() {
       
 }
 
-/**
- * If at the desired location, stop the robot's movement.
- * Otherwise, turns towards the next location and move towards it.
- */
-void Robot::updateCurrentVelocity() {
-
-    if (atDesiredLocation()) {
-        // Stop robot
-        currentVelocity.linear.x = 0;
-        currentVelocity.angular.z = 0;
-        return;
-    }
+void Robot::updateCurrentVelocityToDesiredLocation() {
 
     // Find the correct angle
     geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
@@ -156,20 +168,44 @@ void Robot::updateCurrentVelocity() {
     
     double desiredAngle = atan2(directionVector.y, directionVector.x);
 
-    if (! doubleEquals(currentAngle, desiredAngle, 0.1)) {
+    if (! doubleEquals(currentAngle, desiredAngle, 0.10)) {
         // Turn towards angle
         currentVelocity.linear.x = 0;
         
         if (turnAnticlockwise(currentAngle, desiredAngle)) {
             // Turn anti clockwise
-            currentVelocity.angular.z = 1;
+            currentVelocity.angular.z = M_PI / 4;
         } else {
             // Turn clockwise
-            currentVelocity.angular.z = -1;
+            currentVelocity.angular.z = - M_PI / 4;
         }
     } else {
         // Go forward
-        currentVelocity.linear.x = 1;
+        currentVelocity.linear.x = 10;
         currentVelocity.angular.z = 0;
     }
+}
+
+/**
+ * If at the desired location, stop the robot's movement.
+ * Otherwise, turns towards the next location and move towards it.
+ */
+void Robot::updateCurrentVelocity() {
+
+    if (spin == CLOCKWISE) {
+        // Spin clockwise
+        currentVelocity.linear.x = 0;
+        currentVelocity.angular.z = M_PI / 4;
+    } else if (spin == ANTI_CLOCKWISE) {
+        // Spin anti_clockwise
+        currentVelocity.linear.x = 0;
+        currentVelocity.angular.z = - M_PI / 4;
+    } else if (atDesiredLocation()) {
+        // Stop robot
+        currentVelocity.linear.x = 0;
+        currentVelocity.angular.z = 0;
+    } else {
+        updateCurrentVelocityToDesiredLocation();
+    }
+    robotNodeStagePub.publish(currentVelocity);
 }

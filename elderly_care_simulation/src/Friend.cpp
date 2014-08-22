@@ -14,6 +14,7 @@
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include "elderly_care_simulation/PerformTask.h"
+#include "elderly_care_simulation/FindPath.h"
 
 #include "Robot.h"
 #include "Friend.h"
@@ -30,7 +31,7 @@
  */
 
 ;Friend::Friend() {
-    MY_TASK = EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE;
+    MY_TASK = EVENT_TRIGGER_EVENT_TYPE_FRIEND;
     performingTask = false;
     currentLocationState = AT_HOME;
 }
@@ -43,7 +44,7 @@ Friend::~Friend() {
  */
 void Friend::goToResident(const std_msgs::Empty) {
     ROS_INFO("Friend: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
-    updateDesiredLocationCallback(residentPoi.getLocation());
+    goToLocation(residentPoi.getLocation());
     currentLocationState = GOING_TO_RESIDENT;
 }
 
@@ -51,9 +52,8 @@ void Friend::goToResident(const std_msgs::Empty) {
  * Request robot to move back to its home location
  */
 void Friend::goToHome(const std_msgs::Empty) {
-    updateDesiredLocationCallback(homePoi.getLocation());
+    goToLocation(homePoi.getLocation());
     currentLocationState = GOING_HOME;
-
 }
 
 /**
@@ -71,24 +71,6 @@ void Friend::eventTriggerReply() {
 
     eventTriggerPub.publish(msg);
     ROS_INFO("Friend: Reply Message Sent");
-}
-
-/**
- * Send a message to Stage to start rotation of this robot.
- */
-void Friend::startRotating() {
-    ROS_INFO("Friend: Started Rotating");
-    currentVelocity.linear.x = 0;
-    currentVelocity.angular.z = 2.0;
-}
-
-/**
- * Send a message to Stage to stop rotation of this robot.
- */
-void Friend::stopRotating() {
-    ROS_INFO("Friend: Stopped Rotating");
-    currentVelocity.linear.x = 0;
-    currentVelocity.angular.z = 0.0;
 }
 
 /**
@@ -130,7 +112,7 @@ void Friend::performTask() {
         case PERFORM_TASK_RESULT_ACCEPTED:
         {
             // Resident has accepted the task but isn't finished yet
-            startRotating();
+            startSpinning(false);
             break;
         }
         case PERFORM_TASK_RESULT_FINISHED:
@@ -141,7 +123,7 @@ void Friend::performTask() {
             std_msgs::Empty emptyMessage;
             goToHome(emptyMessage);
             
-            stopRotating();
+            stopSpinning();
             eventTriggerReply();
             break;
         }
@@ -160,7 +142,7 @@ void callStage0domCallback(const nav_msgs::Odometry msg) {
     theFriend.stage0domCallback(msg);
 }
 void callUpdateDesiredLocationCallback(const geometry_msgs::Point location){
-    theFriend.updateDesiredLocationCallback(location);
+    theFriend.goToLocation(location);
 }
 void callEventTriggerCallback(elderly_care_simulation::EventTrigger msg){
     theFriend.eventTriggerCallback(msg);
@@ -207,6 +189,9 @@ int main(int argc, char **argv) {
     // Create a client to make service requests to the Resident
     theFriend.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
+    // Create a link to the pathfinding service
+    theFriend.pathFinderService = nodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
+
     while (ros::ok())
     {
         // Required for dynamic pathfinding                   
@@ -224,8 +209,7 @@ int main(int argc, char **argv) {
             theFriend.performTask();
         }
         
-        // Inform Stage of current velocity
-        theFriend.robotNodeStagePub.publish(theFriend.currentVelocity);
+        theFriend.updateCurrentVelocity();
         
         ros::spinOnce();
         loop_rate.sleep();

@@ -14,6 +14,7 @@
 #include "PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include "elderly_care_simulation/PerformTask.h"
+#include "elderly_care_simulation/FindPath.h"
 
 #include "Robot.h"
 #include "Assistant.h"
@@ -29,41 +30,23 @@ Assistant::~Assistant(){
 }
 
 void Assistant::goToResident(const std_msgs::Empty) {
-    geometry_msgs::Point locationOne;
-    locationOne.x = -4;
-    locationOne.y = 2;
+    geometry_msgs::Point location;
+    location.x = 0;
+    location.y = 1;
     
-    geometry_msgs::Point locationTwo;
-    locationTwo.x = 0;
-    locationTwo.y = 2;
-    
-    geometry_msgs::Point locationThree;
-    locationThree.x = 0;
-    locationThree.y = 1;
-    
-    locationQueue.push(locationOne);
-    locationQueue.push(locationTwo);
-    locationQueue.push(locationThree);
+    goToLocation(location);
+    ROS_INFO("ASSISTANT GOING TO RESIDENT");
     
     currentLocationState = GOING_TO_RESIDENT;
 }
 
 void Assistant::goToHome(const std_msgs::Empty) {
-    geometry_msgs::Point locationOne;
-    locationOne.x = 0;
-    locationOne.y = 2;
+    geometry_msgs::Point location;
+    location.x = -7.5;
+    location.y = -7.5;
     
-    geometry_msgs::Point locationTwo;
-    locationTwo.x = -4;
-    locationTwo.y = 2;
-    
-    geometry_msgs::Point locationThree;
-    locationThree.x = -7.5;
-    locationThree.y = -7.5;
-    
-    locationQueue.push(locationOne);
-    locationQueue.push(locationTwo);
-    locationQueue.push(locationThree);
+    goToLocation(location);
+    ROS_INFO("Assistant Going home");
     
     currentLocationState = GOING_HOME;
 
@@ -82,24 +65,6 @@ void Assistant::eventTriggerReply() {
 
     eventTriggerPub.publish(msg);
     ROS_INFO("Assistant: Reply Message Sent");
-}
-
-/**
- * Send a message to Stage to start rotation of this robot.
- */
-void Assistant::startRotating() {
-    ROS_INFO("Assistant: Started Rotating");
-    currentVelocity.linear.x = 0;
-    currentVelocity.angular.z = 2.0;
-}
-
-/**
- * Send a message to Stage to stop rotation of this robot.
- */
-void Assistant::stopRotating() {
-    ROS_INFO("Assistant: Stopped Rotating");
-    currentVelocity.linear.x = 0;
-    currentVelocity.angular.z = 0.0;
 }
 
 void Assistant::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
@@ -138,7 +103,7 @@ void Assistant::performTask() {
         {
             // Resident has accepted the task but keep going
             ROS_INFO("Assistant: Resident has accepted the task but says keep going");
-            startRotating();
+            startSpinning(true);
             break;
         }
         case PERFORM_TASK_RESULT_FINISHED:
@@ -151,7 +116,7 @@ void Assistant::performTask() {
             std_msgs::Empty emptyMessage;
             goToHome(emptyMessage);
             
-            stopRotating();
+            stopSpinning();
             eventTriggerReply();
             break;
         }
@@ -171,7 +136,7 @@ void callStage0domCallback(const nav_msgs::Odometry msg) {
 }
 
 void callUpdateDesiredLocationCallback(const geometry_msgs::Point location){
-    assistant.updateDesiredLocationCallback(location);
+    assistant.goToLocation(location);
 }
 
 void callEventTriggerCallback(elderly_care_simulation::EventTrigger msg){
@@ -207,16 +172,16 @@ int main(int argc, char **argv)
     assistant.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_2/location", 1000, callUpdateDesiredLocationCallback);
     assistant.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_2/toResident", 1000, callGoToResident);
     assistant.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_2/toHome", 1000, callGoToHome);
+
+    assistant.pathFinderService = nodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
         
     // Create a client to make service requests to the Resident
     assistant.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
-    ros::Rate loop_rate(25);
+    ros::Rate loop_rate(10);
 
     while (ros::ok())
     {                   
-        assistant.updateCurrentVelocity();
-
         if (assistant.atDesiredLocation()){
              // Bad place for this, but need to get it working..
             if (assistant.currentLocationState == assistant.GOING_TO_RESIDENT) {
@@ -230,7 +195,7 @@ int main(int argc, char **argv)
             assistant.performTask();
         }
 
-        assistant.robotNodeStagePub.publish(assistant.currentVelocity);
+        assistant.updateCurrentVelocity();
         
         ros::spinOnce();
         loop_rate.sleep();

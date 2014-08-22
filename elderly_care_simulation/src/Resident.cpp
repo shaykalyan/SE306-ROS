@@ -83,7 +83,7 @@ int Resident::handleTask(int taskType) {
 	int result;
 	
 	switch (taskType) {
-        case EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE:
+        case EVENT_TRIGGER_EVENT_TYPE_FRIEND:
 
             // The friend is interacting with me
             if (++friendshipCount > FRIENDSHIP_DURATION) {
@@ -214,7 +214,7 @@ void callDiceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg){
 }
 
 void callUpdateDesiredLocationCallback(const geometry_msgs::Point location){
-    resident.updateDesiredLocationCallback(location);
+    resident.goToLocation(location);
 }
 
 void callTaskCompleted(const std_msgs::Empty empty){
@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
     // ROS initialiser calls
     ros::init(argc, argv, "Resident");
     ros::NodeHandle nodeHandle;
-    ros::Rate loop_rate(25);
+    ros::Rate loop_rate(10);
 
     resident = Resident();
 
@@ -269,8 +269,6 @@ int main(int argc, char **argv) {
 			resident.happiness = (resident.happiness - 10) > 0 ? resident.happiness - 10 : 0;
 			ROS_INFO("Happiness level fell to %d", resident.happiness);
 		}
-
-		resident.robotNodeStagePub.publish(resident.currentVelocity);
 
 		ros::spinOnce();
 		loop_rate.sleep();

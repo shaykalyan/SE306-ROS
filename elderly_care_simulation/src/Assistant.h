@@ -46,8 +46,6 @@ class Assistant : public Robot{
 		void goToResident(const std_msgs::Empty);
 		void goToHome(const std_msgs::Empty);
 		void eventTriggerReply();
-		void startRotating();
-		void stopRotating();
 		void eventTriggerCallback(elderly_care_simulation::EventTrigger msg);
 		void performTask();		
 
