@@ -31,6 +31,7 @@ void Robot::stage0domCallback(const nav_msgs::Odometry msg) {
     double y = currentLocation.orientation.y;
     double z = currentLocation.orientation.z;
     double w = currentLocation.orientation.w;
+
   	double roll, pitch, yaw;
     tf::Matrix3x3(tf::Quaternion(x, y, z, w)).getRPY(roll, pitch, yaw);
     currentAngle = yaw;

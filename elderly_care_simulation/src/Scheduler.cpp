@@ -139,7 +139,7 @@ void populateDailyTasks(void) {
         // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE, EVENT_TRIGGER_PRIORITY_LOW }
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Evening
@@ -250,13 +250,13 @@ int main(int argc, char **argv) {
         // ======================================
         // =        COMMENTED OUT STUFF         =
         // ======================================
-        // if(eventQueue.size() == 0 && concurrentWeight == 0) {
-        //     sleep(5);
-        //     clearEventQueue();
-        //     populateDailyTasks();
-        // }else {
-        //     dequeueEvent();
-        // }
+        if(eventQueue.size() == 0 && concurrentWeight == 0) {
+            sleep(10);
+            clearEventQueue();
+            populateDailyTasks();
+        }else {
+            dequeueEvent();
+        }
         dequeueEvent();
 
         ros::spinOnce();
