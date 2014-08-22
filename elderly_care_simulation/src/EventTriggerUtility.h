@@ -17,24 +17,25 @@ const int EVENT_TRIGGER_EVENT_TYPE_EAT                  = 1;
 const int EVENT_TRIGGER_EVENT_TYPE_SHOWER               = 2;
 const int EVENT_TRIGGER_EVENT_TYPE_EXERCISE             = 3;
 const int EVENT_TRIGGER_EVENT_TYPE_CONVERSATION         = 4;
-const int EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT        = 5; // RAND
+const int EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT        = 5;
 
 // VISITOR (FRIEND & RELATIVE)
-const int EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE      = 6;
+const int EVENT_TRIGGER_EVENT_TYPE_RELATIVE             = 6;
+const int EVENT_TRIGGER_EVENT_TYPE_FRIEND               = 7;
 
 // VISITOR (DOCTOR & NURSE)
-const int EVENT_TRIGGER_EVENT_TYPE_ILL                  = 7;
-const int EVENT_TRIGGER_EVENT_TYPE_VERY_ILL             = 8;
+const int EVENT_TRIGGER_EVENT_TYPE_ILL                  = 8;
+const int EVENT_TRIGGER_EVENT_TYPE_VERY_ILL             = 9;
 
 // ASSISTANT
-const int EVENT_TRIGGER_EVENT_TYPE_MEDICATION           = 9;
-const int EVENT_TRIGGER_EVENT_TYPE_COOK                 = 10;
-const int EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT        = 11;
-const int EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP        = 12;
+const int EVENT_TRIGGER_EVENT_TYPE_MEDICATION           = 10;
+const int EVENT_TRIGGER_EVENT_TYPE_COOK                 = 11;
+const int EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT        = 12;
+const int EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP        = 13;
 
 // RESIDENT
-const int EVENT_TRIGGER_EVENT_TYPE_WAKE                 = 13;
-const int EVENT_TRIGGER_EVENT_TYPE_SLEEP                = 14;
+const int EVENT_TRIGGER_EVENT_TYPE_WAKE                 = 14;
+const int EVENT_TRIGGER_EVENT_TYPE_SLEEP                = 15;
 
 // ========================================
 // =           EVENT PRIORITY             =
@@ -84,7 +85,8 @@ const char * eventTypeToString(int eventType) {
         case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:         return "EXERCISE";
         case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:     return "CONVERSATION";
         case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:    return "MORAL_SUPPORT";
-        case EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE:  return "FRIEND_RELATIVE";
+        case EVENT_TRIGGER_EVENT_TYPE_FRIEND:           return "FRIEND";
+        case EVENT_TRIGGER_EVENT_TYPE_RELATIVE:         return "RELATIVE";
         case EVENT_TRIGGER_EVENT_TYPE_ILL:              return "ILL";
         case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:         return "VERY_ILL";
         case EVENT_TRIGGER_EVENT_TYPE_MEDICATION:       return "MEDICATION";
@@ -123,7 +125,8 @@ int getEventWeight(int eventType) {
         case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:         return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:     return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:    return EVENT_TRIGGER_WEIGHT_1;
-        case EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE:  return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_FRIEND:           return EVENT_TRIGGER_WEIGHT_1;
+        case EVENT_TRIGGER_EVENT_TYPE_RELATIVE:         return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_ILL:              return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:         return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_MEDICATION:       return EVENT_TRIGGER_WEIGHT_1;
