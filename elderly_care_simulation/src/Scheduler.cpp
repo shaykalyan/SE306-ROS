@@ -139,7 +139,8 @@ void populateDailyTasks(void) {
         // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_FRIEND_RELATIVE, EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_RELATIVE,        EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_FRIEND,          EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Evening
@@ -183,7 +184,7 @@ void dequeueEvent(void) {
                 eventTriggerPub.publish(msg);
                 ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
                 concurrentWeight += msg.event_weight;
-
+                break;
 
             case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
                 allowNewEvents = false;
@@ -200,6 +201,7 @@ void dequeueEvent(void) {
                 // schedules will be repopulated automatically (in the main method).
                 eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_SLEEP,
                                                                 EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
+                break;
 
             default:
                 allowNewEvents = true;
@@ -212,7 +214,7 @@ void dequeueEvent(void) {
 
     } else {
         if(!stopRosInfoSpam){
-            ROS_INFO("Scheduler: Event: [%s] is waiting for additional concurrent weight.", 
+            ROS_INFO("Scheduler: Pending event: [%s]", 
                 eventTypeToString(msg.event_type));
             stopRosInfoSpam = true;
         }
