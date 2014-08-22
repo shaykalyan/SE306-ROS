@@ -9,6 +9,7 @@
 #include "MoralSupportDiceRoller.h"
 #include "DiceRollerTypeConstants.h"
 #include "elderly_care_simulation/DiceRollTrigger.h"
+#include "elderly_care_simulation/DiceRollReport.h"
 
 
 MoralSupportDiceRoller::~MoralSupportDiceRoller() {
@@ -16,7 +17,9 @@ MoralSupportDiceRoller::~MoralSupportDiceRoller() {
 
 // Signatures
 ros::Publisher diceTriggerPub;
+ros::Publisher rollReportPub;
 elderly_care_simulation::DiceRollTrigger diceRollTrigger;
+elderly_care_simulation::DiceRollReport diceRollReport;
 
 int main(int argc, char **argv) {
 	
@@ -27,6 +30,7 @@ int main(int argc, char **argv) {
 
     // Declare publishers
     diceTriggerPub = nodeHandle.advertise<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, true);
+    rollReportPub = nodeHandle.advertise<elderly_care_simulation::DiceRollReport>("dice_roll_report", 1000, true);
 
     // Create diceroller
     MoralSupportDiceRoller roller = MoralSupportDiceRoller();
@@ -50,6 +54,13 @@ int main(int argc, char **argv) {
         else {
             tick++;
         }  
+
+        // Publish report of roll
+        diceRollReport.threshold = roller.oldThreshold;
+        diceRollReport.rolled = roller.rolled;
+        diceRollReport.numSides = roller.DICE_SIDES;
+        diceRollReport.type = MORAL_SUPPORT;
+        rollReportPub.publish(diceRollReport); 
         
 	    ros::spinOnce();
 	    loop_rate.sleep();
