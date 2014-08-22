@@ -209,8 +209,6 @@ int main(int argc, char **argv) {
             theFriend.performTask();
         }
         
-        theFriend.updateCurrentVelocity();
-        
         ros::spinOnce();
         loop_rate.sleep();
     }
