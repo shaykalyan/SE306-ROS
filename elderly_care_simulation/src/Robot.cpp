@@ -180,7 +180,15 @@ bool Robot::atDesiredLocation() {
       
 }
 
+/**
+ * Updates the current velocity to head towards the finalDestination
+ * via the points in the locationQueue.
+ */
 void Robot::updateCurrentVelocityToDesiredLocation() {
+
+    if (locationQueue.empty()) {
+        return;
+    }
 
     // Find the correct angle
     geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation
