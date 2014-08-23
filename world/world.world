@@ -1,4 +1,6 @@
+include "include/resident.inc"
 include "include/robot.inc"
+include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
 
@@ -11,8 +13,23 @@ interval_sim 100
 window
 ( 
   #size of the window in pixels
-  size [ 800.000 600.000 ] 
-  scale 20
+  size [800 600]
+  center [0 0]
+  rotate [65 -50]
+  scale 25
+  show_data 0
+  show_flags 1
+  show_blocks 1
+  show_clock 1
+  show_footprints 0
+  show_grid 0
+  show_trailarrows 0
+  show_trailrise 0
+  show_trailfast 0
+  show_occupancy 0
+  show_tree 0
+  pcam_on 0
+  screenshots 0
 )
 
 # load an environment bitmap
@@ -20,113 +37,40 @@ floorplan
 ( 
   name "alpha-house"
   bitmap "house.png"
-  size [20 20 1]
+  size [20 20 0.5]
   pose [ 0 0 0 0.000 ]
 )
 
-# load an bed bitmap
-appliances
+bed
 ( 
   name "bed"
-  bitmap "Bed.png"
-  size [2 3 0.1]
-  pose [ -3.1 -8 0 180.000 ]
-  color "black"
+  pose [-3.100 -8.000 0.000 0.000]
 )
 
-# load an couch bitmap
-appliances
-( 
-  name "couch"
-  bitmap "Couch.png"
-  size [2 3 0.1]
-  pose [ -8.5 -1 0 0.000 ]
-  color "black"
+shower
+(
+  name "shower"
+  pose [8.850 -3.650 0.000 0.000]
 )
 
-# load an table bitmap
-appliances
-( 
-  name "comfyChair"
-  bitmap "ComfyChair.png"
-  size [2 2 0.1]
-  pose [ -8.5 -4 0 0.000 ]
-  color "black"
-)
-
-# load an table bitmap
-appliances
-( 
-  name "table"
-  bitmap "Table.png"
-  size [3.5  2.0 0.1]
-  pose [ 5 3 0 0.000 ]
-  color "black"
-)
-
-# load an chair bitmap
-appliances
-( 
-  name "chair"
-  bitmap "Chair.png"
-  size [.8 .8 0.1]
-  pose [ 5 4.5 0 0.000 ]
-  color "black"
-)
-
-# load an chair bitmap
-appliances
-( 
-  name "chair"
-  bitmap "Chair.png"
-  size [.8 .8 0.1]
-  pose [ 5 1.55 0 0.000 ]
-  color "black"
-)
-
-# load an chair bitmap
-appliances
-( 
-  name "chair"
-  bitmap "Chair.png"
-  size [.8 .8 0.1]
-  pose [ 2.7 2.9 0 0.000 ]
-  color "black"
-)
-
-# load an chair bitmap
-appliances
-( 
-  name "chair"
-  bitmap "Chair.png"
-  size [.8 .8 0.1]
-  pose [ 7.3 2.9 0 0.000 ]
-  color "black"
+oven
+(
+  name "oven"
+  pose [8.850 8.850 0.000 0.000]
 )
 
 # throw in some robots
-robot(
+resident(
   name "Resident"
-  pose [ 0 0 0 0 ]
-  color "black"
-  block
-  (
-    points [3]
-    point[0] [1 0.5]
-    point[1] [2 1]
-    point[2] [2 0]
-    z [0 1]
-  )
+  pose [0 0 0 270]
 )
 
 robot(
   name "Visitor"
-  pose [ 8 8 0 0 ]
-  color "green"
+  pose [5 6 0 0]
 )
 
 robot(
   name "Assistant"
   pose [ -8 -8 0 0 ]
-  color "orange"
 )
