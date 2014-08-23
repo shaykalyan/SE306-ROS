@@ -23,8 +23,8 @@ const float ADJACENT_SHOWER_Y = -5.0f;
 const float ADJACENT_STOVE_X = 8.8f;
 const float ADJACENT_STOVE_Y = 7.5f;
 
-const float COMPANIONSHIP_HOME_X = 5.0f
-const float COMPANIONSHIP_HOME_Y = -5.0f
+const float COMPANIONSHIP_HOME_X = 5.0f;
+const float COMPANIONSHIP_HOME_Y = -5.0f;
 
 
 

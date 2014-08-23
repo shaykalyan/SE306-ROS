@@ -113,16 +113,16 @@ int Resident::handleTask(int taskType) {
 		    break;
 		case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:
 			// The assistant is providing companionship
-			companionshipLevel += 1;
-			if (companionshipLevel > COMPANION_THRESHOLD) {
-				ROS_INFO("Resident: Companionship raised to %d and I've had enough!", companionshipLevel);
+			companionshipCount += 1;
+			if (companionshipCount > COMPANION_THRESHOLD) {
+				ROS_INFO("Resident: Companionship raised to %d and I've had enough!", companionshipCount);
 				result = PERFORM_TASK_RESULT_FINISHED;
 				currentTaskType = NO_CURRENT_TASK;
 
 				std_msgs::Empty emptyMessage;
 				taskCompleted(emptyMessage);
 			} else {
-				ROS_INFO("Resident: Companionship raised to %d, keep providing companionship.", companionshipLevel);
+				ROS_INFO("Resident: Companionship raised to %d, keep providing companionship.", companionshipCount);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 		    break;
