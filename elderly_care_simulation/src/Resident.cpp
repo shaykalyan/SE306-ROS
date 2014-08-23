@@ -31,8 +31,10 @@
 Resident::Resident(){
     currentTaskType = -1;
 
-    // Basic health attributes
+    // attributes
     HEALTHY_THRESHOLD = 50;
+    COMPANION_THRESHOLD = 50;
+    companionshipCount = 0;
     happiness = 0;
     amusement = 0;
    
@@ -106,6 +108,21 @@ int Resident::handleTask(int taskType) {
 				taskCompleted(emptyMessage);
 			} else {
 				ROS_INFO("Resident: Amusement raised to %d, keep being funny.", amusement);
+				result = PERFORM_TASK_RESULT_ACCEPTED;
+			}
+		    break;
+		case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:
+			// The assistant is providing companionship
+			companionshipLevel += 1;
+			if (companionshipLevel > COMPANION_THRESHOLD) {
+				ROS_INFO("Resident: Companionship raised to %d and I've had enough!", companionshipLevel);
+				result = PERFORM_TASK_RESULT_FINISHED;
+				currentTaskType = NO_CURRENT_TASK;
+
+				std_msgs::Empty emptyMessage;
+				taskCompleted(emptyMessage);
+			} else {
+				ROS_INFO("Resident: Companionship raised to %d, keep providing companionship.", companionshipLevel);
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 		    break;

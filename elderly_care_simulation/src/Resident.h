@@ -31,8 +31,10 @@ class Resident : public Robot, public Poi {
 		~Resident();
 		int currentTaskType;
 		int HEALTHY_THRESHOLD;
+		int COMPANION_THRESHOLD
 		int happiness;
 		int amusement;
+    	int companionshipCount;
 
 		ros::Subscriber diceTriggerSub;
 		ros::Publisher residentEventPub;
