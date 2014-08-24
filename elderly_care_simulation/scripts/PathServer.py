@@ -7,8 +7,8 @@ import rospy
 from geometry_msgs.msg import Point
 from elderly_care_simulation.srv import *
 
-MAP_WIDTH = 20
-MAP_HEIGHT = 20
+MAP_WIDTH = 30
+MAP_HEIGHT = 30
 
 graph = {}
 
@@ -175,6 +175,9 @@ def generate_graph(filename):
     with open(filename, 'r') as f:
         lines = f.read().splitlines()
     
+    size = lines[1].split()
+    MAP_WIDTH = size[0]
+    MAP_HEIGHT = size[1]
     # Remove pgm file information
     del lines[:3]
     
