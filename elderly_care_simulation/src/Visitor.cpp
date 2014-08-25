@@ -31,7 +31,7 @@ Visitor::~Visitor(){
 void Visitor::goToResident(const std_msgs::Empty) {
     geometry_msgs::Point location;
     location.x = 0;
-    location.y = 1;
+    location.y = 1.5;
     
     goToLocation(location);
     
