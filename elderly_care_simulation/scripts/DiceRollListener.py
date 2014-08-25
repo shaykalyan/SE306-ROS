@@ -3,6 +3,7 @@ import rospy
 import roslib
 import roslib; roslib.load_manifest('elderly_care_simulation')
 from elderly_care_simulation.msg import DiceRollTrigger
+from elderly_care_simulation.msg import EventTrigger
 from Tkinter import *
 
 class DiceRollerGUI:
@@ -214,8 +215,10 @@ class DiceRollerGUI:
         # subscribe to topic
         rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)
 
-        self.events = {0:undefined, 1:eat, 2:shower, 3:exercise, 4:conversation, 5:support, 6:relative, 7:friend, 8:ill, 9:veryIll,
-        10:medication, 11:cook, 12:entertainment, 13:companionship, 14:wake, 15:sleep}
+        # Dictionary which maps different events to different method which will respond to them.
+        self.events = {0:self.undefined, 1:self.eat, 2:self.shower, 3:self.exercise, 4:self.converse, 5:self.support, 6:self.relative,
+        7:self.friend, 8:self.ill, 9:self.veryIll, 10:self.medication, 11:self.cook, 12:self.entertainment, 13:self.companionship,
+        14:self.wake, 15:self.sleep}
 
 
     def run(self):
@@ -225,127 +228,193 @@ class DiceRollerGUI:
         """
         self.root.mainloop()
 
+    def dice_roll_callback(self, msg):
+        data = 'Dice Type: %d Threshold: %4d Rolled: %4d' % (msg.type, msg.threshold, msg.rolled)
+        # rospy.loginfo("Dice Type: %d Threshold: %4d Rolled: %4d",msg.type, msg.threshold, msg.rolled)
+        self.update_dice_label(data)
+
     # Callback method for event_trigger topic
     def event_trigger_callback(self, msg):
-        msg_type = msg.msg_type
+        
+        """msg_type = msg.msg_type
         event_type = msg.event_type
         result = msg.result
 
-        if (msg_type == 0):
-            self.events[event_type](result)
+        print("Event trigger detected")
+        print("Message type: ", msg_type)
+        print("Event type: ", event_type)
+        print("result: ", result)"""
 
+        self.events[msg.event_type](msg)
 
     #Update undefined state
     def undefined(self, result):
-        if (result == 0):
-            self.resident_task.set("None")
-        elif (result == 2):
-            self.resident_task.set("None")
+        return
 
     #Update eat state
     def eat(self, result):
-        if (result == 0):
-            self.caregiver_task.set("Feeding")
-        elif (result == 2):
-            self.caregiver_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.caregiver_task.set("Feeding")
+                self.resident_task.set("Eating")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.caregiver_task.set("None")
+                self.resident_task.set("None")
 
     #Update shower state
     def shower(self, result):
-        if (result == 0):
-            self.caregiver_task.set("Showering")
-        elif (result == 2):
-            self.caregiver_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.caregiver_task.set("Showering")
+                self.resident_task.set("Showering")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.caregiver_task.set("None")
+                self.resident_task.set("None")
 
     #Update exercise state
     def exercise(self, result):
-        if (result == 0):
-            self.caregiver_task.set("Exercising")
-        elif (result == 2):
-            self.caregiver_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.caregiver_task.set("Exercising")
+                self.resident_task.set("Exercising")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.caregiver_task.set("None")
+                self.resident_task.set("None")
 
     #Update converse state
     def converse(self, result):
-        if (result == 0):
-            self.caregiver_task.set("Conversing")
-        elif (result == 2):
-            self.caregiver_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.caregiver_task.set("Conversing")
+                self.resident_task.set("Conversing")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.caregiver_task.set("None")
+                self.resident_task.set("None")
 
     #Update support state
-    def support(self, result):
-        if (result == 0):
-            self.caregiver_task.set("Supporting")
-        elif (result == 2):
-            self.caregiver_task.set("None")
+    def support(self, message):
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.caregiver_task.set("Supporting")
+                self.resident_task.set("Complaining")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.caregiver_task.set("None")
+                self.resident_task.set("None")
 
     #Update relative state
     def relative(self, result):
-        if (result == 0):
-            self.relative_task.set("Visiting")
-        elif (result == 2):
-            self.relative_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.relative_task.set("Visiting")
+                self.resident_task.set("Interacting")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.relative_task.set("None")
+                self.resident_task.set("None")
 
     #Update friend state
     def friend(self, result):
-        if (result == 0):
-            self.friend_task.set("Visiting")
-        elif (result == 2):
-            self.friend_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.friend_task.set("Visiting")
+                self.resident_task.set("Interacting")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.friend_task.set("None")
+                self.resident_task.set("None")
 
     #Update ill state
     def ill(self, result):
-        if (result == 0):
-            self.nurse_task.set("Nursing")
-        elif (result == 2):
-            self.nurse_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.nurse_task.set("Nursing")
+                self.resident_task.set("Ill")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.nurse_task.set("None")
+                self.resident_task.set("None")
 
     #Update veryIll state
     def veryIll(self, result):
-        if (result == 0):
-            self.doctor_task.set("Doctoring")
-        elif (result == 2):
-            self.doctor_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.doctor_task.set("Doctoring")
+                self.resident_task.set("Very Ill")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.doctor_task.set("None")
+                self.resident_task.set("None")
 
     #Update medication state
     def medication(self, result):
-        if (result == 0):
-            self.medication_task.set("Drugging")
-        elif (result == 2):
-            self.medication_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.medication_task.set("Drugging")
+                self.resident_task.set("Tripping")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.medication_task.set("None")
+                self.resident_task.set("None")
 
     #Update cook state
     def cook(self, result):
-        if (result == 0):
-            self.cook_task.set("Cooking")
-        elif (result == 2):
-            self.cook_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.cook_task.set("Cooking")
+                self.resident_task.set("Waiting")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.cook_task.set("None")
+                self.resident_task.set("None")
 
     #Update entertainment state
     def entertainment(self, result):
-        if (result == 0):
-            self.entertainment_task.set("Entertaining")
-        elif (result == 2):
-            self.entertainment_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.entertainment_task.set("Entertaining")
+                self.resident_task.set("Enjoying")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.entertainment_task.set("None")
+                self.resident_task.set("None")
 
     #Update companionship state
     def companionship(self, result):
-        if (result == 0):
-            self.companion_task.set("Accompanying")
-        elif (result == 2):
-            self.companion_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.companion_task.set("Accompanying")
+                self.resident_task.set("Talking")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.companion_task.set("None")
+                self.resident_task.set("None")
 
     #Update wake state
     def wake(self, result):
-        if (result == 0):
-            self.resident_task.set("Waking")
-        elif (result == 2):
-            self.resident_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.resident_task.set("Waking")
+                self.resident_task.set("Waking")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.resident_task.set("None")
+                self.resident_task.set("None")
 
     #Update sleep state
     def sleep(self, result):
-        if (result == 0):
-            self.resident_task.set("Sleeping")
-        elif (result == 2):
-            self.resident_task.set("None")
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.resident_task.set("Sleeping")
+                self.resident_task.set("Sleeping")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.resident_task.set("None")
+                self.resident_task.set("None")
 
     #Update undefined state
     def update_robot_task(self, data):
@@ -354,11 +423,6 @@ class DiceRollerGUI:
     #Update undefined state
     def update_dice_label(self, data):
         self.dice_label.set(data)
-
-    def dice_roll_callback(self, msg):
-        data = 'Dice Type: %d Threshold: %4d Rolled: %4d' % (msg.type, msg.threshold, msg.rolled)
-        # rospy.loginfo("Dice Type: %d Threshold: %4d Rolled: %4d",msg.type, msg.threshold, msg.rolled)
-        self.update_dice_label(data)
 
 if __name__=='__main__':
     gui = DiceRollerGUI()
