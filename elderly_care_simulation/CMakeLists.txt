@@ -49,9 +49,13 @@ target_link_libraries(VeryIllDiceRoller DiceRoller)
 
 rosbuild_add_executable(Scheduler src/Scheduler.cpp)
 
+#target_link_libraries(StaticPoi Poi)
+
 # Testing
 rosbuild_add_gtest(test/TestDiceRoller test/TestDiceRoller.cpp)
 target_link_libraries(test/TestDiceRoller DiceRoller)
+
+
 
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
@@ -66,4 +70,6 @@ target_link_libraries(Assistant Robot Poi StaticPoi)
 rosbuild_add_executable(CompanionshipRobot src/CompanionshipRobot.cpp)	        #R3
 target_link_libraries(CompanionshipRobot Robot Poi StaticPoi)
 
-
+rosbuild_add_executable(TestCompanionshipRobot EXCLUDE_FROM_ALL src/test/TestCompanionshipRobot.cpp)
+rosbuild_add_gtest_build_flags(CompanionshipRobot TestCompanionshipRobot)
+rosbuild_add_rostest(test/TestCompanionshipRobot.test)
