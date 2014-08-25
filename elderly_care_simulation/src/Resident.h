@@ -31,6 +31,7 @@ class Resident : public Robot, public Poi {
 		~Resident();
 
 		int currentTaskType;
+
 		std::map<int, int> taskProgress;
 
 		ros::Subscriber diceTriggerSub;

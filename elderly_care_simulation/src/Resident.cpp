@@ -27,8 +27,7 @@
 
 // Current task type: -1 corresponds to no task
 
-
-Resident::Resident(){
+;Resident::Resident(){
     currentTaskType = EVENT_TRIGGER_EVENT_TYPE_UNDEFINED;
 
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_EAT] = 0;
@@ -42,13 +41,13 @@ Resident::Resident(){
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_VERY_ILL] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_MEDICATION] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COOK] = 0;
-    taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;;   
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP] = 0;
 
     navigatingToPoiForTask = false;
-   
 }
-Resident::~Resident(){
+
+Resident::~Resident() {
     
 }
 
