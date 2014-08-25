@@ -19,39 +19,39 @@ class DiceRollerGUI:
         self.root.geometry('600x400+1+1')
 
         # create the left most frame which will hold an embeded frame with the grid of current tasks being performed ny the robots
-        self.frame_left = Frame(self.root, height=400, width=300)
+        self.frame_left = Frame(self.root, height=300, width=200, bg="sea green")
         self.frame_left.pack(side=LEFT, fill=BOTH)
 
         # create right most frame which will hold other embeded frames detailing dice rolls, upcoming events and allow event injection
-        self.frame_right = Frame(self.root, height=400, width = 300)        
-        self.frame_right.pack(side=TOP, fill=BOTH)
+        self.frame_right = Frame(self.root, height=300, width = 200, bg="tomato2")        
+        self.frame_right.pack(side=LEFT, fill=BOTH)
 
         # create frame element to host the grid detailing current tasks being performed by robots
-        self.frame_robotGrid = Frame(self.frame_left, bd=3)        
+        self.frame_robotGrid = Frame(self.frame_left, bd=3, bg="chocolate1")        
         self.frame_robotGrid.pack(side=LEFT, padx=10, pady=20)
 
         # create frame element to host upcoming events and dice rolls
-        self.frame_events_dice = Frame(self.frame_right)        
+        self.frame_events_dice = Frame(self.frame_right, bg="cadet blue")        
         self.frame_events_dice.pack(side=TOP, padx=10)
 
         # create frame element to host the event injection interface
-        self.frame_eventManipulate = Frame(self.frame_right)        
+        self.frame_eventManipulate = Frame(self.frame_right, bg="bisque2")        
         self.frame_eventManipulate.pack(side=BOTTOM, padx=10)
 
         # create frame element to host upcoming events
-        self.frame_events = Frame(self.frame_events_dice)        
+        self.frame_events = Frame(self.frame_events_dice, bg="maroon")        
         self.frame_events.pack(side=LEFT, padx=10, pady=20, fill=BOTH)
 
         # create frame element to host dice rolls
-        self.frame_dice = Frame(self.frame_events_dice, width=100)        
+        self.frame_dice = Frame(self.frame_events_dice, width=100, bg="coral")        
         self.frame_dice.pack(side=LEFT, padx=10, pady=20, fill=BOTH)
 
         # create frame element to host the event injection interface
-        self.frame_injectEvent = Frame(self.frame_eventManipulate)        
+        self.frame_injectEvent = Frame(self.frame_eventManipulate, bg="LemonChiffon4")        
         self.frame_injectEvent.pack(side=LEFT, padx=10, pady=10, fill=BOTH)
 
         # create frame element to host the event injection interface
-        self.frame_eventChange = Frame(self.frame_eventManipulate)        
+        self.frame_eventChange = Frame(self.frame_eventManipulate, bg="thistle1")        
         self.frame_eventChange.pack(side=LEFT, padx=10, pady=10, fill=BOTH)
 
         # create variable labels
@@ -120,7 +120,6 @@ class DiceRollerGUI:
         Label(self.frame_events, text="").pack(fill=X)
         Label(self.frame_events, text="Upcoming Events", relief=gridRelief, bg='ivory4').pack(fill=X)
         Label(self.frame_events, text="Shower", relief=gridRelief).pack(fill=X)
-        Label(self.frame_events, text="", relief=gridRelief).pack(fill=X)
 
         # Label for the dice rollers
         Label(self.frame_dice, text="Dice Rollers", relief=gridRelief, bg='ivory4', width=15).pack(fill=X)
