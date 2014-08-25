@@ -33,6 +33,7 @@ Resident::Resident(){
 
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_EAT] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_SHOWER] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_EXERCISE] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_CONVERSATION] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = 0;    
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_RELATIVE] = 0;
