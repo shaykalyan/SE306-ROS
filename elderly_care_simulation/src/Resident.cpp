@@ -27,9 +27,12 @@
 
 // Current task type: -1 corresponds to no task
 
-
-Resident::Resident(){
+;Resident::Resident() {
     currentTaskType = -1;
+
+    // How long the Resident is to receive friendship for
+    FRIENDSHIP_DURATION = 100;
+    friendshipCount = 0;
 
     // Basic health attributes
     HEALTHY_THRESHOLD = 50;
@@ -37,7 +40,8 @@ Resident::Resident(){
     amusement = 0;
    
 }
-Resident::~Resident(){
+
+Resident::~Resident() {
     
 }
 
@@ -79,8 +83,25 @@ int Resident::handleTask(int taskType) {
 	int result;
 	
 	switch (taskType) {
+        case EVENT_TRIGGER_EVENT_TYPE_FRIEND:
+
+            // The friend is interacting with me
+            if (++friendshipCount > FRIENDSHIP_DURATION) {
+                ROS_INFO("Resident: Thanks for the friendship. You can go now!");
+                result = PERFORM_TASK_RESULT_FINISHED;
+                currentTaskType = NO_CURRENT_TASK;
+
+				std_msgs::Empty emptyMessage;
+				taskCompleted(emptyMessage);
+                friendshipCount = 0;                
+            }
+            else {
+                result = PERFORM_TASK_RESULT_ACCEPTED;
+            }
+            break;
+
 		case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
-			// The visitor is consoling us
+			// The visitor is giving me moral support
 			happiness += 1;
 			if (happiness > HEALTHY_THRESHOLD) {
 				ROS_INFO("Resident: Happiness raised to %d and I'm now happy enough!", happiness);
@@ -94,8 +115,9 @@ int Resident::handleTask(int taskType) {
 				result = PERFORM_TASK_RESULT_ACCEPTED;
 			}
 			break;
+
 		case EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT:
-			// The assistant is entertaining us
+			// The assistant is entertaining me
 			amusement += 1;
 			if (amusement > HEALTHY_THRESHOLD) {
 				ROS_INFO("Resident: Amusement raised to %d and I've had enough!", amusement);

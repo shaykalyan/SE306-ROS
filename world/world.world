@@ -73,4 +73,11 @@ robot(
 robot(
   name "Assistant"
   pose [ -8 -8 0 0 ]
+  color "orange"
+)
+
+robot(
+  name "Friend"
+  pose [ 3.7 -8.65 0 0 ]
+  color "blue"
 )
