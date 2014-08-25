@@ -76,6 +76,17 @@ void Resident::resetTaskProgress(int taskType) {
 }
 
 /**
+ * Reset the current task to UNDEFINED and clear all task progress states.
+ */
+void Resident::clearAllTasks() {
+    currentTaskType = EVENT_TRIGGER_RESULT_UNDEFINED;
+
+    for(std::map<int, int >::iterator iter = taskProgress.begin(); iter != taskProgress.end(); ++iter) {
+        taskProgress[iter->first] = 0;
+    }
+}
+
+/**
  * Update a task's progress in response to a task that is being performed
  * by a helper.
  * 
@@ -116,6 +127,40 @@ int Resident::handleTask(int taskType) {
     return result;
 }
 
+bool Resident::shouldRespondGoAway(int requestedTaskType) {
+    bool result = false;
+
+    if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL && 
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // We're very ill and the request is not to do with being very ill
+        result = true;
+    } else if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // We're ill and the request is unrelated to any type of illness
+        result = true;
+    }
+
+    return result;
+}
+
+bool Resident::shouldOverrideCurrentTask(int requestedTaskType) {
+    bool result = false;
+
+    if (currentTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL &&
+        requestedTaskType == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // A VERY_ILL request should always override if our current task isn't also VERY_ILL
+        result = true;
+    } else if (currentTaskType != EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        currentTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL &&
+        requestedTaskType == EVENT_TRIGGER_EVENT_TYPE_ILL) {
+        // An ILL request should override if the current task is not ILL or VERY_ILL
+        result = true;
+    }
+
+    return result;
+}
+
 /**
  * Handler for PerformTask.srv service 
  * 
@@ -134,7 +179,29 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
                        
     int taskType = req.taskType;
 
+    // Sending an undefined event type is a mechanism to clear the resident's tasks
+    if (taskType == EVENT_TRIGGER_RESULT_UNDEFINED) {
+        clearAllTasks();
+        res.result = PERFORM_TASK_RESULT_FINISHED;
+        return true;
+    }
+
     ROS_INFO("Resident: Someone is requesting to perform task %d", taskType);
+
+    // If we're dealing with health tasks, tell other helpers to go away
+    if (shouldRespondGoAway(taskType)) {
+        res.result = PERFORM_TASK_RESULT_FINISHED;
+        ROS_INFO("Resident: Telling them to go away.");
+        return true;
+    }
+
+    // If we're dealing with a task and an illness task request comes along, switch to it
+    if (shouldOverrideCurrentTask(taskType)) {
+        resetTaskProgress(taskType);
+        currentTaskType = taskType;
+        ROS_INFO("Resident: Overriding current task.");
+
+    }
 
     // No more special case needs to be considered for illness-related tasks, proceed to accept the task
 
