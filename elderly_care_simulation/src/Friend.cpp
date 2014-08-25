@@ -78,8 +78,7 @@ void Friend::eventTriggerReply() {
  * method should be called when getting a request from
  * the Scheduler. 
  */
-void Friend::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
-{
+void Friend::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 
         if (msg.event_type == MY_TASK) {
@@ -144,14 +143,14 @@ void callStage0domCallback(const nav_msgs::Odometry msg) {
 void callUpdateDesiredLocationCallback(const geometry_msgs::Point location){
     theFriend.goToLocation(location);
 }
-void callEventTriggerCallback(elderly_care_simulation::EventTrigger msg){
+void callEventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
     theFriend.eventTriggerCallback(msg);
 }
-void callGoToResident(const std_msgs::Empty empty){
+void callGoToResident(const std_msgs::Empty empty) {
     ROS_INFO("Friend: Going to Resident");
     theFriend.goToResident(empty);
 }
-void callGoToHome(const std_msgs::Empty empty){
+void callGoToHome(const std_msgs::Empty empty) {
     ROS_INFO("Friend: Going home");
     theFriend.goToHome(empty);
 }
@@ -192,12 +191,12 @@ int main(int argc, char **argv) {
     // Create a link to the pathfinding service
     theFriend.pathFinderService = nodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
 
-    while (ros::ok())
-    {
+    while (ros::ok()) {
+
         // Required for dynamic pathfinding                   
         theFriend.updateCurrentVelocity();
 
-        if (theFriend.atDesiredLocation()){
+        if (theFriend.atDesiredLocation()) {
             if (theFriend.currentLocationState == theFriend.GOING_TO_RESIDENT) {
                 theFriend.currentLocationState = theFriend.AT_RESIDENT;
             } else if (theFriend.currentLocationState == theFriend.GOING_HOME) {
