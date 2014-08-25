@@ -214,6 +214,9 @@ class DiceRollerGUI:
         # subscribe to topic
         rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)
 
+        self.events = {0:undefined, 1:eat, 2:shower, 3:exercise, 4:conversation, 5:support, 6:relative, 7:friend, 8:ill, 9:veryIll,
+        10:medication, 11:cook, 12:entertainment, 13:companionship, 14:wake, 15:sleep}
+
 
     def run(self):
         """
@@ -223,11 +226,79 @@ class DiceRollerGUI:
         self.root.mainloop()
 
     def event_trigger_callback(self, msg):
-        type=msg.msg_type
-        type=msg.msg_type
-        type=msg.msg_type
-        type=msg.msg_type
-        type=msg.msg_type
+        msg_type = msg.msg_type
+        event_type = msg.event_type
+        event_priority = msg.event_priority
+        event_weight = msg.event_weight
+        result = msg.result
+
+        if (msg_type == 0):
+            self.events[event_type](result)
+
+
+    def undefined(self, result):
+        if (result == 0):
+            self.resident_task.set("None")
+
+    def eat(self, result):
+        if (result == 0):
+            self.caregiver_task.set("Feeding")
+
+    def shower(self, result):
+        if (result == 0):
+            self.caregiver_task.set("Showering")
+
+    def exercise(self, result):
+        if (result == 0):
+            self.caregiver_task.set("Exercising")
+
+    def converse(self, result):
+        if (result == 0):
+            self.caregiver_task.set("Conversing")
+
+    def support(self, result):
+        if (result == 0):
+            self.caregiver_task.set("Supporting")
+
+    def relative(self, result):
+        if (result == 0):
+            self.relative_task.set("Visiting")
+
+    def friend(self, result):
+        if (result == 0):
+            self.friend_task.set("Visiting")
+
+    def ill(self, result):
+        if (result == 0):
+            self.nurse_task.set("Nursing")
+
+    def veryIll(self, result):
+        if (result == 0):
+            self.doctor_task.set("Doctoring")
+
+    def medication(self, result):
+        if (result == 0):
+            self.medication_task.set("Drugging")
+
+    def cook(self, result):
+        if (result == 0):
+            self.cook_task.set("Cooking")
+
+    def entertainment(self, result):
+        if (result == 0):
+            self.entertainment_task.set("Entertaining")
+
+    def companionship(self, result):
+        if (result == 0):
+            self.companion_task.set("Accompanying")
+
+    def wake(self, result):
+        if (result == 0):
+            self.resident_task.set("Waking")
+
+    def sleep(self, result):
+        if (result == 0):
+            self.resident_task.set("Sleeping")
 
     def update_robot_task(self, data):
         self.dice_label.set(data)
