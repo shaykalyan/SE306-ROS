@@ -33,7 +33,7 @@ class Resident : public Robot, public Poi {
 		std::map<int, int> taskProgress;
 
 		ros::Subscriber diceTriggerSub;
-		ros::Publisher residentEventPub;
+		ros::Publisher externalEventPub;
 		ros::Subscriber locationInstructionsSub;
 		ros::Subscriber pathOfResidentSub;
 

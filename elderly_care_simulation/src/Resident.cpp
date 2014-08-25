@@ -189,7 +189,7 @@ void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg)
     }
     msgOut.event_weight = getEventWeight(msgOut.event_type);
     ROS_INFO("Resident: Sending request to scheduler");
-    residentEventPub.publish(msgOut);
+    externalEventPub.publish(msgOut);
 }
 
 Resident resident;
@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
 
       // Initialise publishers
     resident.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
-    resident.residentEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
+    resident.externalEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("external_event",1000, true);
 
     // Initialise subscribers
     resident.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, callStage0domCallback);

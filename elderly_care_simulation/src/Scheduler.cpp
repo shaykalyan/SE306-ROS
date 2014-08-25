@@ -49,6 +49,9 @@ void clearEventQueue() {
     eventQueue = std::priority_queue<EventNode >();
 }
 
+/**
+ * Reset all random event occurrence back to false.
+ */
 void resetRandomEventOccurrence() {
     randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = false;
     randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_ILL] = false;
@@ -56,9 +59,9 @@ void resetRandomEventOccurrence() {
 }
 
 /**
- * Callback function to deal with random events published by the resident
+ * Callback function to deal with external events
  */
-void randomEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
+void externalEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
 
     // Only allows random events to be added to event queue in the allowed
     // timeframe (between WAKE and SLEEP)
@@ -261,7 +264,7 @@ int main(int argc, char **argv) {
 
     // subscribe to event_trigger topic
     eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
-    randomEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, randomEventReceivedCallback);
+    randomEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("external_event",1000, externalEventReceivedCallback);
     
     ros::Rate loop_rate(10);
 
