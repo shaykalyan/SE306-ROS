@@ -31,6 +31,10 @@ class Resident : public Robot, public Poi {
 		~Resident();
 		int currentTaskType;
 		int HEALTHY_THRESHOLD;
+
+        int friendshipCount;
+        int FRIENDSHIP_DURATION;
+
 		int happiness;
 		int amusement;
 

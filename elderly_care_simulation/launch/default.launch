@@ -4,7 +4,8 @@
 	<node name="resident" pkg="elderly_care_simulation" type="Resident" />
 	<node name="scheduler" pkg="elderly_care_simulation" type="Scheduler" />
 	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
-	<node name="assistant" pkg="elderly_care_simulation" type="Assistant" />
+	<node name="assistant" pkg="elderly_care_simulation" type="Assistant" />>
+    <node name="relative" pkg="elderly_care_simulation" type="Relative" />
 	<node name="moralSupportDiceRoller" pkg="elderly_care_simulation" type="MoralSupportDiceRoller" />	
 	<node name="illDiceRoller" pkg="elderly_care_simulation" type="IllDiceRoller" />
     <node name="VeryIllDiceRoller" pkg="elderly_care_simulation" type="VeryIllDiceRoller" />
