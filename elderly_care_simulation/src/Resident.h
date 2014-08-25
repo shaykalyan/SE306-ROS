@@ -54,7 +54,7 @@ class Resident : public Robot, public Poi {
 		bool shouldRespondGoAway(int requestedTaskType);
 		bool shouldOverrideCurrentTask(int requestedTaskType);
 
-		bool navigatingToPoiForTask = false;
+		bool navigatingToPoiForTask;
 		
 };
 

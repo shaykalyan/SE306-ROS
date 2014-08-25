@@ -44,6 +44,8 @@ Resident::Resident(){
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COOK] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP] = 0;
+
+    navigatingToPoiForTask = false;
    
 }
 Resident::~Resident(){
@@ -212,12 +214,9 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
         currentTaskType = taskType;
     }
 
-    bool atPoiForTask = atDesiredLocation() && navigatingToPoiForTask;
-    if (atPoiForTask) {
-        navigatingToPoiForTask = false;
-    }
+    bool atPoiForTask = atPointOfInterest(taskPoi, 1.0f);
 
-    if (taskRequiresPoi && !atPoiForTask) {
+    if (taskRequiresPoi && !atPoiForTask && !navigatingToPoiForTask) {
         navigatingToPoiForTask = true;
         goToLocation(taskPoi);
         res.result = PERFORM_TASK_RESULT_TAKE_ME_THERE;

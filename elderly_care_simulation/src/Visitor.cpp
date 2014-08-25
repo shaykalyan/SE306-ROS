@@ -92,8 +92,8 @@ void Visitor::performTask() {
     performTaskSrv.request.taskRequiresPoi = true;
 
     geometry_msgs::Point taskPoi;
-    taskPoi.x = 4;
-    taskPoi.y = 13;
+    taskPoi.x = 0;
+    taskPoi.y = -4;
     taskPoi.z = 0;
 
     performTaskSrv.request.taskPoi = taskPoi;
