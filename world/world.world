@@ -3,6 +3,7 @@ include "include/robot.inc"
 include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
+include "include/hospital.inc"
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -50,13 +51,19 @@ bed
 shower
 (
   name "shower"
-  pose [8.850 -3.650 0.000 0.000]
+  pose [8.65 -3.05 0.000 0.000]
 )
 
 oven
 (
   name "oven"
   pose [8.850 8.850 0.000 0.000]
+)
+
+hospital
+(
+  name "hospital"
+  pose [0 -13 0 90]
 )
 
 # throw in some robots
