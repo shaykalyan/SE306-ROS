@@ -27,7 +27,6 @@ class Robot{
 		ros::Subscriber stageOdoSub;
 
 		geometry_msgs::Pose currentLocation;
-        geometry_msgs::Twist currentVelocity;        
 
 		void stage0domCallback(const nav_msgs::Odometry msg);
 		void goToLocation(const geometry_msgs::Point location);
@@ -36,7 +35,10 @@ class Robot{
 		void updateCurrentVelocity();
 		bool atDesiredLocation();
 
-	protected:
+		
+
+	private:
+		geometry_msgs::Twist currentVelocity;
 		geometry_msgs::Point finalDestination;
 		std::queue<geometry_msgs::Point> locationQueue;
 		double  currentAngle;
