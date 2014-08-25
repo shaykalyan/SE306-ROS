@@ -174,12 +174,13 @@ void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg)
             break;
         case ILL:
             ROS_INFO("Resident: I am ill");
-            // TODO:
-            return;
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ILL;
+            msgOut.event_priority = EVENT_TRIGGER_PRIORITY_VERY_HIGH;
             break;
         case VERY_ILL:
             ROS_INFO("Resident: I am very ill");
-            // TODO:
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VERY_ILL;
+            msgOut.event_priority = EVENT_TRIGGER_PRIORITY_VERY_HIGH;
             return;
             break;
         default:

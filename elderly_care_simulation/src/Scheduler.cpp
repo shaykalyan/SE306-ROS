@@ -12,11 +12,14 @@
 const int MAX_CONCURRENT_WEIGHT = 2;
 
 // globals
+
 std::priority_queue<EventNode > eventQueue;
 ros::Publisher eventTriggerPub;
 ros::Subscriber eventTriggerSub;
 ros::Subscriber randomEventSub;
 int concurrentWeight = 0;
+
+std::map<int, bool> randomEventLimit;
 
 // ======================================
 // =          SHOULD BE FALSE           =
@@ -46,6 +49,12 @@ void clearEventQueue() {
     eventQueue = std::priority_queue<EventNode >();
 }
 
+void resetRandomEventOccurrence() {
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = false;
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_ILL] = false;
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_VERY_ILL] = false;
+}
+
 /**
  * Callback function to deal with random events published by the resident
  */
@@ -56,6 +65,21 @@ void randomEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
     if(!allowNewEvents) {
         ROS_INFO("Scheduler: Additional events are not allowed at this time.");
         return;
+    }
+
+    // If the incoming event is a random event
+    if(randomEventLimit.count(msg.event_type) != 0) {
+
+        // If it havent occured before, change the flag and continue
+        if(randomEventLimit[msg.event_type] == false) {
+            randomEventLimit[msg.event_type] = true;
+
+        // If event occured before, then block it
+        } else {
+            ROS_INFO("Scheduler: [%s] cannot occur more than once per day.", 
+                eventTypeToString(msg.event_type));
+            return;
+        }
     }
 
     ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
@@ -119,7 +143,7 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
  *  CLEAR LIST & REPOPULATE DAILY TASKS
  *
  */
-void populateDailyTasks(void) {
+void populateDailyTasks() {
 
     int eventSequence[][2] = {
 
@@ -242,7 +266,9 @@ int main(int argc, char **argv) {
     ros::Rate loop_rate(10);
 
     // populate queue with day's events
+    ROS_INFO("Day Starts....");
     populateDailyTasks();
+    resetRandomEventOccurrence();
 
     //a count of howmany messages we have sent
     int count = 0;
@@ -253,9 +279,12 @@ int main(int argc, char **argv) {
         // =        COMMENTED OUT STUFF         =
         // ======================================
         // if(eventQueue.size() == 0 && concurrentWeight == 0) {
+        //     ROS_INFO("Day Ends....");
         //     sleep(5);
         //     clearEventQueue();
+        //     resetRandomEventOccurrence();
         //     populateDailyTasks();
+        //     ROS_INFO("Day Starts....");
         // }else {
         //     dequeueEvent();
         // }
