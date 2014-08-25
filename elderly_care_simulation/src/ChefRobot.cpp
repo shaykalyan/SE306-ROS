@@ -13,6 +13,8 @@ ChefRobot::ChefRobot() {
     currentLocationState = AT_BASE;
 }
 
+ChefRobot::~ChefRobot() {}
+
 void ChefRobot::goToStove() {
     currentLocationState = GOING_TO_STOVE;
     goToLocation(stove.getLocation());
@@ -23,7 +25,7 @@ void ChefRobot::goToBase() {
     goToLocation(base.getLocation());
 }
 
-void ChefRobot::eventTriggered(elderly_care_simulation::EventTrigger msg) {
+void ChefRobot::eventTriggered(const elderly_care_simulation::EventTrigger msg) {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
         if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
             if (currentLocationState == AT_BASE ||
@@ -80,7 +82,7 @@ void eventTriggeredCallback(elderly_care_simulation::EventTrigger msg) {
     chef.eventTriggered(msg);
 }
 
-void stageCallBack(const nav_msgs::Odometry msg) {
+void stageCallBack(nav_msgs::Odometry msg) {
     chef.stage0domCallback(msg);
 }
 
