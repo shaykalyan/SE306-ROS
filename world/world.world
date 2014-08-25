@@ -60,10 +60,16 @@ oven
   pose [8.7 8.7 0 0]
 )
 
-kitchenBench
+bench
 (
   name "kitchen bench"
   pose [5.7 8.7 0 0]
+)
+
+table
+(
+  name "kitchen table"
+  pose [5.7 2.9 0 0]
 )
 
 hospital

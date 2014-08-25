@@ -55,7 +55,7 @@ define bed model
   )
 )
 
-define kitchenBench model
+define bench model
 (
   size [4 1.5 1.25]
   obstacle_return 0
@@ -69,5 +69,72 @@ define kitchenBench model
     point[2] [1 1]
     point[3] [1 0]
     z [0 0.5]
+  )
+  block
+  (
+    color "gainsboro"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 1]
+    point[2] [1 1]
+    point[3] [1 0]
+    z [0.5 0.55]
+  )
+)
+
+define table model
+(
+  size [2.5 2.5 1.25]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 0.05]
+    point[2] [0.05 0.05]
+    point[3] [0.05 0]
+    z [0 1.2]
+  )
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0 0.95]
+    point[1] [0 1]
+    point[2] [0.05 1]
+    point[3] [0.05 0.95]
+    z [0 1.2]
+  )
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0.95 0.95]
+    point[1] [0.95 1]
+    point[2] [1 1]
+    point[3] [1 0.95]
+    z [0 1.2]
+  )
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0.95 0]
+    point[1] [0.95 0.05]
+    point[2] [1 0.05]
+    point[3] [1 0]
+    z [0 1.2]
+  )
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 1]
+    point[2] [1 1]
+    point[3] [1 0]
+    z [1.2 1.25]
   )
 )
