@@ -34,19 +34,19 @@ Caregiver::~Caregiver(){
 
 void Caregiver::goToResident(const std_msgs::Empty) {
     goToLocation(residentPoi.getLocation());
-    ROS_INFO("CAREGIVER GOING TO RESIDENT");    
+    ROS_INFO("CAREGIVER Going To Resident: %f %f %f", residentPoi.getLocation().x,residentPoi.getLocation().y,residentPoi.getLocation().z);    
     currentLocationState = GOING_TO_RESIDENT;
 }
 
 void Caregiver::goToHome(const std_msgs::Empty) {
     goToLocation(homePoi.getLocation());
-    ROS_INFO("Caregiver Going home");    
+    ROS_INFO("Caregiver Going Home");    
     currentLocationState = GOING_HOME;
 }
 
 void Caregiver::goToShower(const std_msgs::Empty){
     goToLocation(showerPoi.getLocation());
-    ROS_INFO("Caregiver Going shower");    
+    ROS_INFO("Caregiver Going Shower: %f %f %f",showerPoi.getLocation().x,showerPoi.getLocation().y,showerPoi.getLocation().z);    
     currentLocationState = GOING_TO_SHOWER;
 }
 
@@ -109,12 +109,11 @@ void Caregiver::eventTriggerReply() {
 void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
-
+        MY_TASK = msg.event_type;
         // TODO: NEW ROBOT CHANGE HERE
         switch (msg.event_type) {
             case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
             {
-                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_CONVERSATION;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));
                 performingTask = true;
                 std_msgs::Empty emptyMessage;
@@ -125,7 +124,6 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
             {
-                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
                 performingTask = true;                
                 std_msgs::Empty emptyMessage;
@@ -136,7 +134,6 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
             {
-                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_EXERCISE;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
                 performingTask = true;                
                 std_msgs::Empty emptyMessage;
@@ -147,7 +144,6 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
             {
-                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
                 performingTask = true;                
                 std_msgs::Empty emptyMessage;
@@ -166,11 +162,13 @@ void Caregiver::performTask() {
     
     // Generate the service call
     elderly_care_simulation::PerformTask performTaskSrv;
-    
-    ROS_INFO("%d",MY_TASK);
-
     performTaskSrv.request.taskType = MY_TASK;
-    
+
+    if (MY_TASK == EVENT_TRIGGER_EVENT_TYPE_SHOWER){
+        performTaskSrv.request.taskRequiresPoi = true;
+        performTaskSrv.request.taskPoi = showerPoi.getLocation();
+    }
+
     // Make the call using the client
     if (!performTaskClient.call(performTaskSrv)) {
         throw std::runtime_error("Caregiver: Service call to the initiate task with Resident failed");
@@ -181,9 +179,10 @@ void Caregiver::performTask() {
         {
             // Resident has accepted the task but keep going
             ROS_INFO("Caregiver: Resident has accepted the task but says keep going");
-            startSpinning(true);
+            startSpinning(true);        
             break;
         }
+
         case PERFORM_TASK_RESULT_FINISHED:
         {
             // Resident accepted the task and has had enough
@@ -191,22 +190,32 @@ void Caregiver::performTask() {
             performingTask = false;            
             std_msgs::Empty emptyMessage;
             goToHome(emptyMessage);
-
             stopSpinning();
             eventTriggerReply();
             break;
         }
+
         case PERFORM_TASK_RESULT_BUSY:
         {
             // Resident is busy
             ROS_INFO("Caregiver: Resident is busy");
             break;
         }
+
+        case PERFORM_TASK_RESULT_TAKE_ME_THERE:
+        {
+            ROS_INFO("Caregiver: Resident is going to the shower");       
+            std_msgs::Empty emptyMessage;
+            goToShower(emptyMessage);
+            break;
+        }
     }
 }
 
 Caregiver caregiver;
-
+/*
+ * This area is for functions to call the Robot callback methods 
+ */
 void callStage0domCallback(const nav_msgs::Odometry msg) {
     caregiver.stage0domCallback(msg);
 }
@@ -226,6 +235,14 @@ void callGoToResident(const std_msgs::Empty empty){
 void callGoToHome(const std_msgs::Empty empty){
     caregiver.goToHome(empty);
 }
+
+void callGoToShower(const std_msgs::Empty empty){
+    caregiver.goToShower(empty);
+}
+
+/*
+ * Update the resident position
+ */
 
 void updateResidentPositionCallback(const nav_msgs::Odometry msg) {
     double x = msg.pose.pose.position.x;
@@ -255,30 +272,32 @@ int main(int argc, char **argv)
     caregiver.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_3/base_pose_ground_truth",1000, callStage0domCallback);
     caregiver.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, callEventTriggerCallback);
     caregiver.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_3/location", 1000, callUpdateDesiredLocationCallback);
-    caregiver.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toResident", 1000, callGoToResident);
-    caregiver.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toHome", 1000, callGoToHome);
-
+    // caregiver.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toResident", 1000, callGoToResident);
+    // caregiver.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toHome", 1000, callGoToHome);
+    // caregiver.pathToShowerSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toShower", 1000, callGoToShower);
     caregiver.pathFinderService = nodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
         
     // Create a client to make service requests to the Resident
     caregiver.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
-    ros::Rate loop_rate(25);
+    ros::Rate loop_rate(10);
 
     while (ros::ok())
     {                   
         if (caregiver.atDesiredLocation()){
              // Bad place for this, but need to get it working..
-            if (caregiver.currentLocationState == caregiver.GOING_TO_RESIDENT) {// && caregiver.MY_TASK != EVENT_TRIGGER_EVENT_TYPE_SHOWER) {
+            if (caregiver.currentLocationState == caregiver.GOING_TO_RESIDENT) {
                 caregiver.currentLocationState = caregiver.AT_RESIDENT;
             } else if (caregiver.currentLocationState == caregiver.GOING_HOME) {
                 caregiver.currentLocationState = caregiver.AT_HOME;
-            // } else if (caregiver.currentLocationState == caregiver.GOING_TO_RESIDENT && caregiver.MY_TASK == EVENT_TRIGGER_EVENT_TYPE_SHOWER){
-
+            } else if (caregiver.currentLocationState == caregiver.GOING_TO_SHOWER){
+                caregiver.currentLocationState = caregiver.AT_SHOWER;
             }
         }
 
         if ((caregiver.currentLocationState == caregiver.AT_RESIDENT) && caregiver.performingTask) {
+            caregiver.performTask();
+        } else if ((caregiver.currentLocationState == caregiver.AT_SHOWER) && caregiver.performingTask){
             caregiver.performTask();
         }
 

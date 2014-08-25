@@ -49,6 +49,7 @@
         ros::Subscriber residentStageSub;
 		ros::Subscriber eventTriggerSub;
 		ros::Subscriber pathToRobotSub;
+		ros::Subscriber pathToShowerSub;
 		ros::Subscriber pathToHomeSub;
 		ros::Subscriber locationInstructionsSub;
 		ros::Publisher eventTriggerPub;
