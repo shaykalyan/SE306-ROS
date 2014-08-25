@@ -49,6 +49,8 @@ class Resident : public Robot, public Poi {
 
 	private:
 		void resetTaskProgress(int taskType);
+		bool shouldRespondGoAway(int requestedTaskType);
+		bool shouldOverrideCurrentTask(int requestedTaskType);
 		
 };
 
