@@ -11,9 +11,9 @@ class DiceRollerGUI:
     various *DiceRoller implementations
     """
     def __init__(self):
-        """
-        Initialises tkInter elements and subscribes to relevant ROS Topics
-        """
+
+        #Initialises tkInter elements and subscribes to relevant ROS Topics
+
         # create root element with fixed size
         self.root = Tk()
         self.root.geometry('570x535+1+1')
@@ -57,26 +57,30 @@ class DiceRollerGUI:
         # create frame element to host the event injection interface
         self.frame_diceRolls = Frame(self.frame_bottom)        
         self.frame_diceRolls.pack(side=TOP, padx=10, fill=BOTH)
-
-        """# create frame element to host upcoming events and dice rolls
-        self.frame_events_dice = Frame(self.frame_right, bg="cadet blue")        
-        self.frame_events_dice.pack(side=TOP, padx=10)"""
-
-        """# create frame element to host the event injection interface
-        self.frame_eventManipulate = Frame(self.frame_right, bg="bisque2")        
-        self.frame_eventManipulate.pack(side=BOTTOM, padx=10)"""
-
-        """# create frame element to host dice rolls
-        self.frame_dice = Frame(self.frame_events_dice, width=100, bg="coral")        
-        self.frame_dice.pack(side=LEFT, padx=10, pady=20, fill=BOTH)"""
-
         
 
-        # create variable labels
+        # create task variable labels
         self.resident_task = StringVar()
-        self.resident_n_task = StringVar()
         self.resident_task.set("None")
-        self.resident_n_task.set("None Scheduled")
+        self.cook_task = StringVar()
+        self.cook_task.set("None")
+        self.medication_task = StringVar()
+        self.medication_task.set("None")
+        self.entertainment_task = StringVar()
+        self.entertainment_task.set("None")
+        self.companion_task = StringVar()
+        self.companion_task.set("None")
+        self.friend_task = StringVar()
+        self.friend_task.set("None")
+        self.relative_task = StringVar()
+        self.relative_task.set("None")
+        self.doctor_task = StringVar()
+        self.doctor_task.set("None")
+        self.nurse_task = StringVar()
+        self.nurse_task.set("None")
+        self.caregiver_task = StringVar()
+        self.caregiver_task.set("None")
+
 
         self.dice_label = StringVar()
 
@@ -96,39 +100,39 @@ class DiceRollerGUI:
 
         # : Row 1: Cook
         Label(self.frame_robotGrid, text="Cook", anchor=gridAnchor, relief=gridRelief, height=gridHeight, width=gridWidth).grid(row=2, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=2, column=1)
+        Label(self.frame_robotGrid, textvariable=self.cook_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=2, column=1)
 
         # : Row 1: Medication
         Label(self.frame_robotGrid, text="Medication", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=3, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=3, column=1)
+        Label(self.frame_robotGrid, textvariable=self.medication_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=3, column=1)
 
         # : Row 1: Entertainment
         Label(self.frame_robotGrid, text="Entertainment", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=4, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=4, column=1)
+        Label(self.frame_robotGrid, textvariable=self.entertainment_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=4, column=1)
 
         # : Row 1: Companionship
         Label(self.frame_robotGrid, text="Companionship", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=5, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=5, column=1)
+        Label(self.frame_robotGrid, textvariable=self.companion_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=5, column=1)
 
         # : Row 1: Friend
         Label(self.frame_robotGrid, text="Friend", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=6, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=6, column=1)
+        Label(self.frame_robotGrid, textvariable=self.friend_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=6, column=1)
 
         # : Row 1: Relative
         Label(self.frame_robotGrid, text="Relative", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=7, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=7, column=1)
+        Label(self.frame_robotGrid, textvariable=self.relative_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=7, column=1)
 
         # : Row 1: Doctor
         Label(self.frame_robotGrid, text="Doctor", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=8, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=8, column=1)
+        Label(self.frame_robotGrid, textvariable=self.doctor_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=8, column=1)
 
         # : Row 1: Nurse
         Label(self.frame_robotGrid, text="Nurse", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=1)
+        Label(self.frame_robotGrid, textvariable=self.nurse_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=1)
 
         # : Row 1: Caregivier
         Label(self.frame_robotGrid, text="Caregivier", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=0)
-        Label(self.frame_robotGrid, text="None", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=1)
+        Label(self.frame_robotGrid, textvariable=self.caregiver_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=1)
 
         # Set the Labels that contain information about current events
         Label(self.frame_events, text="Current Events", relief=gridRelief, bg='ivory4').pack(fill=X)
@@ -208,7 +212,7 @@ class DiceRollerGUI:
         rospy.init_node('DiceRollListener', anonymous=True)
 
         # subscribe to topic
-        rospy.Subscriber("dice_roll", DiceRollTrigger, self.dice_roll_callback)
+        rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)
 
 
     def run(self):
@@ -217,6 +221,16 @@ class DiceRollerGUI:
         with widgets as declared in __init__
         """
         self.root.mainloop()
+
+    def event_trigger_callback(self, msg):
+        type=msg.msg_type
+        type=msg.msg_type
+        type=msg.msg_type
+        type=msg.msg_type
+        type=msg.msg_type
+
+    def update_robot_task(self, data):
+        self.dice_label.set(data)
 
     def update_dice_label(self, data):
         self.dice_label.set(data)
