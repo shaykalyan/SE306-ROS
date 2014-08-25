@@ -16,43 +16,61 @@ class DiceRollerGUI:
         """
         # create root element with fixed size
         self.root = Tk()
-        self.root.geometry('600x400+1+1')
+        self.root.geometry('570x535+1+1')
 
         # create the left most frame which will hold an embeded frame with the grid of current tasks being performed ny the robots
-        self.frame_left = Frame(self.root, height=300, width=200, bg="sea green")
+        self.frame_top = Frame(self.root)
+        self.frame_top.pack(side=TOP, fill=BOTH)
+
+        # create the left most frame which will hold an embeded frame with the grid of current tasks being performed ny the robots
+        self.frame_bottom = Frame(self.root)
+        self.frame_bottom.pack(side=TOP, fill=BOTH)
+
+        # create the left most frame which will hold an embeded frame with the grid of current tasks being performed ny the robots
+        self.frame_left = Frame(self.frame_top)
         self.frame_left.pack(side=LEFT, fill=BOTH)
 
+        # create the left most frame which will hold an embeded frame with the grid of current tasks being performed ny the robots
+        self.frame_middle = Frame(self.frame_top)
+        self.frame_middle.pack(side=LEFT, fill=BOTH)
+
         # create right most frame which will hold other embeded frames detailing dice rolls, upcoming events and allow event injection
-        self.frame_right = Frame(self.root, height=300, width = 200, bg="tomato2")        
+        self.frame_right = Frame(self.frame_top)        
         self.frame_right.pack(side=LEFT, fill=BOTH)
 
         # create frame element to host the grid detailing current tasks being performed by robots
-        self.frame_robotGrid = Frame(self.frame_left, bd=3, bg="chocolate1")        
-        self.frame_robotGrid.pack(side=LEFT, padx=10, pady=20)
+        self.frame_robotGrid = Frame(self.frame_left, bd=3)        
+        self.frame_robotGrid.pack(side=TOP, padx=10, pady=20)
 
         # create frame element to host upcoming events and dice rolls
+        self.frame_events = Frame(self.frame_middle)        
+        self.frame_events.pack(side=TOP, padx=10, pady=20)
+
+        # create frame element to host the event injection interface
+        self.frame_eventChange = Frame(self.frame_middle)        
+        self.frame_eventChange.pack(side=TOP, padx=10, pady=10, fill=BOTH)
+
+        # create frame element to host the event injection interface
+        self.frame_injectEvent = Frame(self.frame_right)        
+        self.frame_injectEvent.pack(side=TOP, padx=10, pady=20, fill=BOTH)
+
+        # create frame element to host the event injection interface
+        self.frame_diceRolls = Frame(self.frame_bottom)        
+        self.frame_diceRolls.pack(side=TOP, padx=10, fill=BOTH)
+
+        """# create frame element to host upcoming events and dice rolls
         self.frame_events_dice = Frame(self.frame_right, bg="cadet blue")        
-        self.frame_events_dice.pack(side=TOP, padx=10)
+        self.frame_events_dice.pack(side=TOP, padx=10)"""
 
-        # create frame element to host the event injection interface
+        """# create frame element to host the event injection interface
         self.frame_eventManipulate = Frame(self.frame_right, bg="bisque2")        
-        self.frame_eventManipulate.pack(side=BOTTOM, padx=10)
+        self.frame_eventManipulate.pack(side=BOTTOM, padx=10)"""
 
-        # create frame element to host upcoming events
-        self.frame_events = Frame(self.frame_events_dice, bg="maroon")        
-        self.frame_events.pack(side=LEFT, padx=10, pady=20, fill=BOTH)
-
-        # create frame element to host dice rolls
+        """# create frame element to host dice rolls
         self.frame_dice = Frame(self.frame_events_dice, width=100, bg="coral")        
-        self.frame_dice.pack(side=LEFT, padx=10, pady=20, fill=BOTH)
+        self.frame_dice.pack(side=LEFT, padx=10, pady=20, fill=BOTH)"""
 
-        # create frame element to host the event injection interface
-        self.frame_injectEvent = Frame(self.frame_eventManipulate, bg="LemonChiffon4")        
-        self.frame_injectEvent.pack(side=LEFT, padx=10, pady=10, fill=BOTH)
-
-        # create frame element to host the event injection interface
-        self.frame_eventChange = Frame(self.frame_eventManipulate, bg="thistle1")        
-        self.frame_eventChange.pack(side=LEFT, padx=10, pady=10, fill=BOTH)
+        
 
         # create variable labels
         self.resident_task = StringVar()
@@ -122,32 +140,62 @@ class DiceRollerGUI:
         Label(self.frame_events, text="Shower", relief=gridRelief).pack(fill=X)
 
         # Label for the dice rollers
-        Label(self.frame_dice, text="Dice Rollers", relief=gridRelief, bg='ivory4', width=15).pack(fill=X)
+        Label(self.frame_diceRolls, text="Dice Rollers", relief=gridRelief, bg='ivory4', width=40).pack(side=TOP)
+        Label(self.frame_diceRolls, text="Ill", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
+        Label(self.frame_diceRolls, text="Very Ill", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
+        Label(self.frame_diceRolls, text="Moral Support", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
 
+        # Set up event type dropdown menu
+        self.typeOptions = ["Undefined", "Eat", "Shower", "Exercise", "Conversation", "Moral", "Relative", "Friend", "Ill", "Very Ill", 
+        "Medication", "Cook", "Entertainment", "Companionship"]
+        self.eventType = StringVar(self.root)
+        self.eventType.set(self.typeOptions[0])
+
+        # Set up event message menu
+        self.messageOptions = ["Undefined", "Request", "Response"]
+        self.eventMessage = StringVar(self.root)
+        self.eventMessage.set(self.messageOptions[0])
+
+        # Set up event priority menu
+        self.priorityOptions = ["0", "1", "2", "3", "4", "5", "6"]
+        self.eventPriority = StringVar(self.root)
+        self.eventPriority.set(self.priorityOptions[0])
+
+        # Set up event weight menu
+        self.weightOptions = ["0", "1", "2"]
+        self.eventWeight = StringVar(self.root)
+        self.eventWeight.set(self.weightOptions[0])
+
+        # Set up result result menu
+        self.resultOptions = ["Undefined", "Success", "Failure"]
+        self.eventResult = StringVar(self.root)
+        self.eventResult.set(self.resultOptions[0])
+
+        # Create dropdown menus and inject button
         # Label for event injection
         Label(self.frame_injectEvent, text="Event Injection", bg='ivory4', width=15).pack(side=TOP, padx=10, pady=5, fill=X)
 
-        # Set up event type dropdown menu
-        self.eventOption = ["Food", "Moral", "Companion", "Entertainment"]
-        self.eventType = StringVar(self.root)
-        self.eventType.set(self.eventOption[0])
+        Label(self.frame_injectEvent, text="Event Type", bg='ivory2', width=15).pack(side=TOP, padx=10, fill=X)
+        OptionMenu(self.frame_injectEvent, self.eventType, *self.typeOptions).pack(side=TOP, padx=10, pady=5, fill=X)
 
-        # Set up event priority menu
-        self.priorityOption = ["0", "1", "2"]
-        self.eventPriority = StringVar(self.root)
-        self.eventPriority.set(self.priorityOption[0])
+        Label(self.frame_injectEvent, text="Event Message", bg='ivory2', width=15).pack(side=TOP, padx=10, fill=X)
+        OptionMenu(self.frame_injectEvent, self.eventMessage, *self.messageOptions).pack(side=TOP, padx=10, pady=5, fill=X)
 
-        # Create dropdown menus and inject button
-        Button(self.frame_injectEvent, text="Inject").pack(side=BOTTOM, padx=10, fill=X)
-        OptionMenu(self.frame_injectEvent, self.eventPriority, *self.priorityOption).pack(side=BOTTOM, padx=10, pady=5, fill=X)
-        Label(self.frame_injectEvent, text="Event Priority", bg='ivory2', width=15).pack(side=BOTTOM, padx=10, fill=X)
-        OptionMenu(self.frame_injectEvent, self.eventType, *self.eventOption).pack(side=BOTTOM, padx=10, pady=5, fill=X)
-        Label(self.frame_injectEvent, text="Event Type", bg='ivory2', width=15).pack(side=BOTTOM, padx=10, fill=X)
+        Label(self.frame_injectEvent, text="Event Priority", bg='ivory2', width=15).pack(side=TOP, padx=10, fill=X)
+        OptionMenu(self.frame_injectEvent, self.eventPriority, *self.priorityOptions).pack(side=TOP, padx=10, pady=5, fill=X)
+
+        Label(self.frame_injectEvent, text="Event Weight", bg='ivory2', width=15).pack(side=TOP, padx=10, fill=X)
+        OptionMenu(self.frame_injectEvent, self.eventWeight, *self.weightOptions).pack(side=TOP, padx=10, pady=5, fill=X)
+
+        Label(self.frame_injectEvent, text="Event Result", bg='ivory2', width=15).pack(side=TOP, padx=10, fill=X)
+        OptionMenu(self.frame_injectEvent, self.eventResult, *self.resultOptions).pack(side=TOP, padx=10, pady=5, fill=X)
+
+        Button(self.frame_injectEvent, text="Inject").pack(side=TOP, padx=10, pady=5, fill=X)
         
         # Label for event changing
-        Label(self.frame_eventChange, text="Change Events", bg='ivory4', width=15).pack(side=TOP, padx=5, pady=5, fill=X)
-        Button(self.frame_eventChange, text="Repopulate Daily \n Events", width=18).pack(side=TOP, padx=5, pady=10, fill=X)
-        Button(self.frame_eventChange, text="Clear All Events").pack(side=TOP, padx=10, pady=10, fill=X)
+        Label(self.frame_eventChange, text="Change Events", bg='ivory4', width=10).pack(side=TOP, padx=5, pady=5, fill=X)
+        Button(self.frame_eventChange, text="Repopulate\nDaily Events", width=10).pack(side=TOP, padx=5, pady=10, fill=X)
+        Button(self.frame_eventChange, text="Clear All\nEvents").pack(side=TOP, padx=10, pady=10, fill=X)
 
         # create and assign dice label to label widget. Updating dice_label will
         # automatically update the widget's text
