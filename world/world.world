@@ -23,7 +23,7 @@ window
   show_blocks 1
   show_clock 1
   show_footprints 0
-  show_grid 0
+  show_grid 1
   show_trailarrows 0
   show_trailrise 0
   show_trailfast 0
@@ -39,25 +39,31 @@ floorplan
   name "alpha-house"
   bitmap "house.png"
   size [20 20 0.5]
-  pose [ 0 0 0 0.000 ]
+  pose [0 0 0 0]
 )
 
 bed
 ( 
   name "bed"
-  pose [-3.100 -8.000 0.000 0.000]
+  pose [-3.1 -8 0 0]
 )
 
 shower
 (
   name "shower"
-  pose [8.65 -3.05 0.000 0.000]
+  pose [8.65 -3.05 0 0]
 )
 
 oven
 (
   name "oven"
-  pose [8.850 8.850 0.000 0.000]
+  pose [8.7 8.7 0 0]
+)
+
+kitchenBench
+(
+  name "kitchen bench"
+  pose [5.7 8.7 0 0]
 )
 
 hospital

@@ -54,3 +54,20 @@ define bed model
     z [1 1.2]
   )
 )
+
+define kitchenBench model
+(
+  size [4 1.5 1.25]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "PeachPuff"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 1]
+    point[2] [1 1]
+    point[3] [1 0]
+    z [0 0.5]
+  )
+)
