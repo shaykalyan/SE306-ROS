@@ -63,7 +63,7 @@ class CompanionshipRobotTest : public ::testing::Test {
  * should result in an EventTrigger published on 'event_trigger'
  */
 TEST_F(CompanionshipRobotTest, requestCompanionshipRobot) {
-	
+
 	// Send message to the companionship robot
 	EventTrigger msg;
 	msg.msg_type 		= EVENT_TRIGGER_MSG_TYPE_REQUEST;
