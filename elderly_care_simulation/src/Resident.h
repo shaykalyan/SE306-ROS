@@ -30,11 +30,7 @@ class Resident : public Robot, public Poi {
 		Resident();
 		~Resident();
 		int currentTaskType;
-		int HEALTHY_THRESHOLD;
-		int COMPANION_THRESHOLD;
-		int happiness;
-		int amusement;
-    	int companionshipCount;
+		std::map<int, int> taskProgress;
 
 		ros::Subscriber diceTriggerSub;
 		ros::Publisher residentEventPub;
@@ -52,6 +48,7 @@ class Resident : public Robot, public Poi {
         }
 
 	private:
+		void resetTaskProgress(int taskType);
 		
 };
 
