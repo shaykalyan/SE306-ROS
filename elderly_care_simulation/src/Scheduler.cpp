@@ -1,38 +1,29 @@
 #include "ros/ros.h"
-#include "std_msgs/String.h"
 
 #include "EventTriggerUtility.h"
 #include "elderly_care_simulation/EventTrigger.h"
 #include <queue>
-#include "EventNode.h"
 #include <unistd.h> // sleep
+#include "Scheduler.h"
 
+using namespace elderly_care_simulation;
 
-// constants
-const int MAX_CONCURRENT_WEIGHT = 2;
+Scheduler scheduler;
 
-// globals
+Scheduler::Scheduler(){
+    concurrentWeight = 0;
+    allowNewEvents = false;
+    stopRosInfoSpam = false;
+}
 
-std::priority_queue<EventNode > eventQueue;
-ros::Publisher eventTriggerPub;
-ros::Subscriber eventTriggerSub;
-ros::Subscriber randomEventSub;
-int concurrentWeight = 0;
-
-std::map<int, bool> randomEventLimit;
-
-// ======================================
-// =          SHOULD BE FALSE           =
-// ======================================
-bool allowNewEvents = true;
-bool stopRosInfoSpam = false;
+Scheduler::~Scheduler() {}
 
 /**
  * Creates a Request EventTrigger message for requesting robot tasks.
  * @param eventType the event type for the message
  */
-elderly_care_simulation::EventTrigger createEventRequestMsg(int eventType, int priority){
-    elderly_care_simulation::EventTrigger msg;
+EventTrigger Scheduler::createEventRequestMsg(int eventType, int priority){
+    EventTrigger msg;
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
     msg.event_type = eventType;
     msg.event_priority = priority;
@@ -45,23 +36,38 @@ elderly_care_simulation::EventTrigger createEventRequestMsg(int eventType, int p
 /**
  * Clears the eventQueue.
  */
-void clearEventQueue() {
+void Scheduler::clearEventQueue() {
     eventQueue = std::priority_queue<EventNode >();
 }
 
 /**
  * Reset all random event occurrence back to false.
  */
-void resetRandomEventOccurrence() {
+void Scheduler::resetRandomEventOccurrence() {
     randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = false;
     randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_ILL] = false;
     randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_VERY_ILL] = false;
 }
 
 /**
+ * Returns the current concurrent weight count
+ */
+int Scheduler::getConcurrentWeight() const {
+    return concurrentWeight;
+}
+
+
+/**
+ * Returns the current event queue size
+ */
+int Scheduler::getEventQueueSize() const {
+    return eventQueue.size();
+}
+
+/**
  * Callback function to deal with external events
  */
-void externalEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
+void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
 
     // Only allows random events to be added to event queue in the allowed
     // timeframe (between WAKE and SLEEP)
@@ -95,7 +101,7 @@ void externalEventReceivedCallback(elderly_care_simulation::EventTrigger msg) {
 /**
  * Callback function to deal with events replied from service provider robots
  */
-void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
+void Scheduler::eventTriggerCallback(EventTrigger msg) {
     
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
         if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
@@ -103,7 +109,7 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
             if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));
 
-                elderly_care_simulation::EventTrigger eatMsg;
+                EventTrigger eatMsg;
                 eatMsg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT, EVENT_TRIGGER_PRIORITY_HIGH);
                 ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]",
                           eventTypeToString(eatMsg.event_type),
@@ -146,7 +152,7 @@ void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
  *  CLEAR LIST & REPOPULATE DAILY TASKS
  *
  */
-void populateDailyTasks() {
+void Scheduler::populateDailyTasks() {
 
     int eventSequence[][2] = {
 
@@ -189,13 +195,13 @@ void populateDailyTasks() {
  * COOK event is not affected as it acts independently of the 
  * Resident.
  */
-void dequeueEvent(void) {
+void Scheduler::dequeueEvent() {
 
     if (eventQueue.size() < 1) {
         return;
     }
 
-    elderly_care_simulation::EventTrigger msg;
+    EventTrigger msg;
     msg = eventQueue.top().getEventTriggerMessage();
 
     
@@ -248,6 +254,14 @@ void dequeueEvent(void) {
     }
 }
 
+void callEventTriggerCallback(EventTrigger msg) {
+    scheduler.eventTriggerCallback(msg);
+}
+
+void callExternalEventReceivedCallback(EventTrigger msg) {
+    scheduler.externalEventReceivedCallback(msg);
+}
+
 /**
  * Main
  */
@@ -259,39 +273,43 @@ int main(int argc, char **argv) {
     //NodeHandle is the main access point to communicate with ros.
     ros::NodeHandle nodeHandle;
 
+    scheduler = Scheduler();
+
     // advertise to event_trigger topic
-    eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
+    scheduler.eventTriggerPub = nodeHandle.advertise<EventTrigger>("event_trigger",1000, true);
 
     // subscribe to event_trigger topic
-    eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
-    randomEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("external_event",1000, externalEventReceivedCallback);
+    scheduler.eventTriggerSub = nodeHandle.subscribe<EventTrigger>("event_trigger",1000, callEventTriggerCallback);
+    scheduler.externalEventSub = nodeHandle.subscribe<EventTrigger>("external_event",1000, callExternalEventReceivedCallback);
     
     ros::Rate loop_rate(10);
 
     // populate queue with day's events
     ROS_INFO("Day Starts....");
-    populateDailyTasks();
-    resetRandomEventOccurrence();
+    scheduler.populateDailyTasks();
+    scheduler.resetRandomEventOccurrence();
 
     //a count of howmany messages we have sent
     int count = 0;
+
+    sleep(3);
 
     while (ros::ok()) {
 
         // ======================================
         // =        COMMENTED OUT STUFF         =
         // ======================================
-        // if(eventQueue.size() == 0 && concurrentWeight == 0) {
+        // if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() == 0) {
         //     ROS_INFO("Day Ends....");
         //     sleep(5);
-        //     clearEventQueue();
-        //     resetRandomEventOccurrence();
-        //     populateDailyTasks();
+        //     scheduler.clearEventQueue();
+        //     scheduler.resetRandomEventOccurrence();
+        //     scheduler.populateDailyTasks();
         //     ROS_INFO("Day Starts....");
         // }else {
-        //     dequeueEvent();
+        //     scheduler.dequeueEvent();
         // }
-        dequeueEvent();
+        scheduler.dequeueEvent();
 
         ros::spinOnce();
         loop_rate.sleep();
