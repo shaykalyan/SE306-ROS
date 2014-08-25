@@ -25,14 +25,15 @@
 #include "StaticPoiConstants.h"
 
 /**
- * This robot represents a robot assistant which is responsible
- * for providing companionship. Companionship is modelled via
+ * This robot represents a nurse robot which is responsible
+ * for providing necessary attention to the resident when he/she 
+ * is ill. Medical treatment is modelled via
  * the robot performing a simple action, such as spinning when
  * the robot has approached the resident. 
  *
- * Providing companionship reflects the situation where
- * the resident communites to external beings via VoIP software
- * such as Skype.
+ * Providing medical attention reflects the situation where
+ * the resident feels sick or ill, and requires external 
+ * healthcare service and relavent expertise from the hospital.
  *
  * Author: Bert Huang
  */
