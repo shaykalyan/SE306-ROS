@@ -80,32 +80,17 @@ class ResidentTest : public ::testing::Test {
  * able to interrupt with a VERY_ILL event type.
  */
 TEST_F(ResidentTest, interruptCompanionshipWithVeryIllEvent) {
+
     // Sleep to allow the Resident to start
     ros::Rate loop_rate(2);
     loop_rate.sleep();
-
-    // ===========================================================================
-
-    int companionshipResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP);
     
-    // Ensure that the resident accepts the moral support
-    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, companionshipResult);
-
-    // ===========================================================================
-
-    // Make a EVENT_TRIGGER_EVENT_TYPE_VERY_ILL request
-    int veryIllResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL);
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP));
     
-    // Ensure that the resident accepts the very ill request
-    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, veryIllResult);
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL));
 
-    // ===========================================================================
+    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP));
 
-    // Make another companionship call
-    companionshipResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP);
-
-    // The response should tell us to finish
-    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, companionshipResult);
 }
 
 /**
@@ -113,45 +98,73 @@ TEST_F(ResidentTest, interruptCompanionshipWithVeryIllEvent) {
  * able to interrupt with an ILL event type.
  */
  TEST_F(ResidentTest, interruptCompanionshipWithIllEvent) {
-    int companionshipResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP);
-    
-    // Ensure that the resident accepts the moral support
-    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, companionshipResult);
 
-    // ===========================================================================
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP));
 
-    // Make a EVENT_TRIGGER_EVENT_TYPE_VERY_ILL request
-    int illResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_ILL);
-    
-    // Ensure that the resident accepts the very ill request
-    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, illResult);
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_ILL));
 
-    // ===========================================================================
+    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP));
 
-    // Make another companionship call
-    companionshipResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP);
-
-    // The response should tell us to finish
-    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, companionshipResult);
 }
 
 /**
  * If a visitor is providing a low priority task like companionship, another helper robot 
  * requesting to perform another low priority task should be told to wait.
  */
- TEST_F(ResidentTest, interruptCompanionshipWithConversation) {
-    int companionshipResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP);
+ TEST_F(ResidentTest, interruptCompanionshipWithConversationShouldWait) {
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP));
     
-    // Ensure that the resident accepts the moral support
-    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, companionshipResult);
+    ASSERT_EQ(PERFORM_TASK_RESULT_BUSY, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_CONVERSATION));
+}
 
-    // ===========================================================================
+/**
+ * If a nurse is providing the ILL task, attempts to provide the CONVERSATION task should
+ * result in a FINISHED response (i.e. told to go away.)
+ */
+ TEST_F(ResidentTest, interruptIllTaskWithConversationShouldGoAway) {    
 
-    // Make a EVENT_TRIGGER_EVENT_TYPE_VERY_ILL request
-    int conversationResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_CONVERSATION);
-    
-    // Ensure that the resident accepts the very ill request
-    ASSERT_EQ(PERFORM_TASK_RESULT_BUSY, conversationResult);
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_ILL));
+
+    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_CONVERSATION));
+
+}
+
+/**
+ * If a nurse is providing the ILL task, attempts to provide the VERY_ILL task should
+ * be accepted and the ILL provider should be told to finish.
+ */
+ TEST_F(ResidentTest, interruptIllTaskWithVeryIllTask) {    
+
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_ILL));
+
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL));
+
+    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_ILL));
+
+}
+
+/**
+ * If a doctor is providing the VERY ILL task, attempts to provide the CONVERSATION task should
+ * result in a FINISHED response (i.e. told to go away.)
+ */
+ TEST_F(ResidentTest, interruptVeryIllTaskWithConversationShouldGoAway) {    
+
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL));
+
+    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_CONVERSATION));
+
+}
+
+/**
+ * If a doctor is providing the VERY ILL task, attempts to provide the ILL task should
+ * result in a FINISHED response (i.e. told to go away.)
+ */
+ TEST_F(ResidentTest, interruptVeryIllTaskWithIllTaskShouldGoAway) {    
+
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL));
+
+    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_ILL));
+
 }
 
 int main(int argc, char **argv) {
