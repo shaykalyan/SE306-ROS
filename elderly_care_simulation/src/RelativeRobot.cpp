@@ -17,7 +17,7 @@
 #include "elderly_care_simulation/FindPath.h"
 
 #include "Robot.h"
-#include "Relative.h"
+#include "RelativeRobot.h"
 
 #include "Poi.h"
 #include "StaticPoi.h"
@@ -30,19 +30,19 @@
  * Author: Matthew Chiam
  */
 
-;Relative::Relative() {
+;RelativeRobot::RelativeRobot() {
     MY_TASK = EVENT_TRIGGER_EVENT_TYPE_RELATIVE;
     performingTask = false;
     currentLocationState = AT_HOME;
 }
 
-Relative::~Relative() {  
+RelativeRobot::~RelativeRobot() {  
 }
 
 /**
  * Request robot to start moving towards the Resident
  */
-void Relative::goToResident(const std_msgs::Empty) {
+void RelativeRobot::goToResident(const std_msgs::Empty) {
     ROS_INFO("Relative: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
     goToLocation(residentPoi.getLocation());
     currentLocationState = GOING_TO_RESIDENT;
@@ -51,7 +51,7 @@ void Relative::goToResident(const std_msgs::Empty) {
 /**
  * Request robot to move back to its home location
  */
-void Relative::goToHome(const std_msgs::Empty) {
+void RelativeRobot::goToHome(const std_msgs::Empty) {
     goToLocation(homePoi.getLocation());
     currentLocationState = GOING_HOME;
 }
@@ -59,7 +59,7 @@ void Relative::goToHome(const std_msgs::Empty) {
 /**
  * Publish completion report of this robot's task
  */
-void Relative::eventTriggerReply() {
+void RelativeRobot::eventTriggerReply() {
 
     // Create response message
     elderly_care_simulation::EventTrigger msg;
@@ -78,7 +78,7 @@ void Relative::eventTriggerReply() {
  * method should be called when getting a request from
  * the Scheduler. 
  */
-void Relative::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
+void RelativeRobot::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 
         if (msg.event_type == MY_TASK) {
@@ -96,7 +96,7 @@ void Relative::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 /**
  * Perform a task on the resident by making a service call to them.
  */
-void Relative::performTask() {
+void RelativeRobot::performTask() {
     
     // Generate the service call
     elderly_care_simulation::PerformTask performTaskSrv;
@@ -134,7 +134,7 @@ void Relative::performTask() {
     }
 }
 
-Relative relative;
+RelativeRobot relative;
 
 // Callback functions that wrap method invocations
 void callStage0domCallback(const nav_msgs::Odometry msg) {
@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(25);
 
-    relative = Relative();
+    relative = RelativeRobot();
 
     // Initialise publishers
     relative.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_3/cmd_vel",1000);
