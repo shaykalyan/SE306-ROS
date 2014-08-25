@@ -31,6 +31,9 @@
  */
 
 ;MedicationRobot::MedicationRobot() {
+    MY_TASK = EVENT_TRIGGER_EVENT_TYPE_MEDICATION;
+    performingTask = false;
+    currentLocationState = AT_HOME;
 }
 
 MedicationRobot::~MedicationRobot() {  
@@ -40,18 +43,33 @@ MedicationRobot::~MedicationRobot() {
  * Request robot to start moving towards the Resident
  */
 void MedicationRobot::goToResident(const std_msgs::Empty) {
+    ROS_INFO("MedicationRobot: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
+    goToLocation(residentPoi.getLocation());
+    currentLocationState = GOING_TO_RESIDENT;
 }
 
 /**
  * Request robot to move back to its home location
  */
 void MedicationRobot::goToHome(const std_msgs::Empty) {
+    goToLocation(homePoi.getLocation());
+    currentLocationState = GOING_HOME;
 }
 
 /**
  * Publish completion report of this robot's task
  */
 void MedicationRobot::eventTriggerReply() {
+    // Create response message
+    elderly_care_simulation::EventTrigger msg;
+    msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
+    msg.event_type = MY_TASK;
+    msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
+    msg.event_weight = getEventWeight(msg.event_type);
+    msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
+
+    eventTriggerPub.publish(msg);
+    ROS_INFO("MedicationRobot: Reply Message Sent");
 }
 
 /**
@@ -60,10 +78,57 @@ void MedicationRobot::eventTriggerReply() {
  * the Scheduler. 
  */
 void MedicationRobot::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
+    if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
+
+        if (msg.event_type == MY_TASK) {
+            ROS_INFO("MedicationRobot: Event Recieved: [%s]", eventTypeToString(MY_TASK));
+            
+            performingTask = true;
+            
+            std_msgs::Empty emptyMessage;
+            goToResident(emptyMessage);
+            
+        }
+    }
 }
 
 /**
  * Perform a task on the resident by making a service call to them.
  */
 void MedicationRobot::performTask() {
+    
+    // Generate the service call
+    elderly_care_simulation::PerformTask performTaskSrv;
+    performTaskSrv.request.taskType = MY_TASK;
+    
+    // Make the call using the client
+    if (!performTaskClient.call(performTaskSrv)) {
+        throw std::runtime_error("MedicationRobot: Service call to the initiate task with Resident failed");
+    }
+    
+    switch (performTaskSrv.response.result) {
+        case PERFORM_TASK_RESULT_ACCEPTED:
+        {
+            // Resident has accepted the task but isn't finished yet
+            startSpinning(false);
+            break;
+        }
+        case PERFORM_TASK_RESULT_FINISHED:
+        {
+            // Resident accepted the task and has had enough            
+            performingTask = false;
+            
+            std_msgs::Empty emptyMessage;
+            goToHome(emptyMessage);
+            
+            stopSpinning();
+            eventTriggerReply();
+            break;
+        }
+        case PERFORM_TASK_RESULT_BUSY:
+        {
+            // Resident is busy, do nothing
+            break;
+        }
+    }
 }
