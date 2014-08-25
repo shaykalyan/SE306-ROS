@@ -74,8 +74,8 @@ target_link_libraries(Visitor Robot Poi StaticPoi)
 rosbuild_add_executable(Assistant src/Assistant.cpp)    #R2
 target_link_libraries(Assistant Robot Poi StaticPoi)
 
-rosbuild_add_executable(Nurse src/Nurse.cpp)            #R3
-target_link_libraries(Nurse Robot Poi StaticPoi)
+rosbuild_add_executable(NurseRobot src/NurseRobot.cpp)  #R3
+target_link_libraries(NurseRobot Robot Poi StaticPoi)
 
 
 

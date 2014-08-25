@@ -17,7 +17,7 @@
 #include "elderly_care_simulation/FindPath.h"
 
 #include "Robot.h"
-#include "Nurse.h"
+#include "NurseRobot.h"
 
 #include "Poi.h"
 #include "StaticPoi.h"
