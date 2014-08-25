@@ -132,3 +132,29 @@ void MedicationRobot::performTask() {
         }
     }
 }
+
+MedicationRobot theMedicationRobot;
+
+// Callback functions that wrap method invocations
+void callStage0domCallback(const nav_msgs::Odometry msg) {
+    theMedicationRobot.stage0domCallback(msg);
+}
+void callUpdateDesiredLocationCallback(const geometry_msgs::Point location){
+    theMedicationRobot.goToLocation(location);
+}
+void callEventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
+    theMedicationRobot.eventTriggerCallback(msg);
+}
+void callGoToResident(const std_msgs::Empty empty) {
+    ROS_INFO("MedicationRobot: Going to Resident");
+    theMedicationRobot.goToResident(empty);
+}
+void callGoToHome(const std_msgs::Empty empty) {
+    ROS_INFO("MedicationRobot: Going home");
+    theMedicationRobot.goToHome(empty);
+}
+void updateResidentPositionCallback(const nav_msgs::Odometry msg) {
+    double x = msg.pose.pose.position.x;
+    double y = msg.pose.pose.position.y;    
+    theMedicationRobot.residentPoi = StaticPoi(x, y, 0);
+}
