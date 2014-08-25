@@ -63,6 +63,6 @@ target_link_libraries(Visitor Robot)
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
 target_link_libraries(Assistant Robot)
 
-rosbuild_add_executable(Chef src/ChefRobot.cpp)         #R4
-target_link_libraries(Chef Robot)
+rosbuild_add_executable(ChefRobot src/ChefRobot.cpp)         #R4
+target_link_libraries(ChefRobot Robot Poi StaticPoi)
 

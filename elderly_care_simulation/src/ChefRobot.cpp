@@ -38,6 +38,23 @@ void ChefRobot::eventTriggered(const elderly_care_simulation::EventTrigger msg) 
     }
 }
 
+void ChefRobot::eventFinished() {
+
+    stopSpinning();
+    goToBase();
+
+    // create response message
+    elderly_care_simulation::EventTrigger msg;
+    msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
+
+    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_COOK;
+    msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
+    msg.event_weight = getEventWeight(msg.event_type);
+    msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
+
+    eventTriggerPub.publish(msg);
+}
+
 int ChefRobot::execute() {    
     ros::Rate loopRate(10);
 
@@ -58,8 +75,7 @@ int ChefRobot::execute() {
                         startSpinning(true);
                         ++count;
                     } else {
-                        stopSpinning();
-                        goToBase();
+                        eventFinished();
                     }
                     break;
                 case AT_BASE:
@@ -97,9 +113,10 @@ int main(int argc, char **argv) {
     
     // Will publish geometry_msgs::Twist messages to the cmd_vel topic
     chef.robotNodeStagePub = chefNodeHandle.advertise<geometry_msgs::Twist>(rid + "/cmd_vel", 1000);
+    chef.eventTriggerPub = chefNodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
-    chef.stageOdoSub = chefNodeHandle.subscribe<nav_msgs::Odometry>(rid + "/base_pose_ground_truth", 1000, eventTriggeredCallback);
-    ros::Subscriber eventTriggerSub = chefNodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger", 1000, stageCallBack);
+    chef.stageOdoSub = chefNodeHandle.subscribe<nav_msgs::Odometry>(rid + "/base_pose_ground_truth", 1000, stageCallBack);
+    chef.eventTriggerSub = chefNodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger", 1000, eventTriggeredCallback);
 
     // Service used to find paths
     chef.pathFinderService = chefNodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
