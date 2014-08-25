@@ -64,6 +64,19 @@ void Robot::checkForMovement() {
 }
 
 /**
+ * Checks to see whether the robot is within tolerance of the given POI.
+ */ 
+bool Robot::atPointOfInterest(geometry_msgs::Point p, double tolerance) {
+
+    geometry_msgs::Point d;
+    d.x = p.x - currentLocation.position.x;
+    d.y = p.y - currentLocation.position.y;
+
+    float distance = sqrt(d.x * d.x + d.y * d.y);
+    return distance <= tolerance;
+}
+
+/**
  * Updates current position of the robot from Stage
  */
 void Robot::stage0domCallback(const nav_msgs::Odometry msg) {
