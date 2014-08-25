@@ -17,7 +17,7 @@
 #include "elderly_care_simulation/FindPath.h"
 
 #include "Robot.h"
-#include "Companionship.h"
+#include "CompanionshipRobot.h"
 
 #include "Poi.h"
 #include "StaticPoi.h"

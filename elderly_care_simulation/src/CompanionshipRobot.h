@@ -1,5 +1,5 @@
-#ifndef COMPANIONSHIP_H
-#define COMPANIONSHIP_H
+#ifndef COMPANIONSHIPROBOT_H
+#define COMPANIONSHIPROBOT_H
 
 #include "ros/ros.h"
 #include <unistd.h>
