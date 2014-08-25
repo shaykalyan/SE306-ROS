@@ -3,6 +3,7 @@ include "include/robot.inc"
 include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
+include "include/medicationRobot.inc"
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -75,7 +76,7 @@ robot(
   pose [ -8 -8 0 0 ]
 )
 
-robot(
+medicationRobot(
   name "MedicationRobot"
   pose [ 5 -8 0 0 ]
 )
