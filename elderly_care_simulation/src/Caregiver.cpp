@@ -23,7 +23,7 @@
 #include "StaticPoiConstants.h"
 
 Caregiver::Caregiver(){
-    MY_TASK = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
+    MY_TASK = -1;
     performingTask = false;
     currentLocationState = AT_HOME;
 }
@@ -55,7 +55,6 @@ void Caregiver::eventTriggerReply() {
     elderly_care_simulation::EventTrigger msg;
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
     msg.event_type = MY_TASK;
-    ROS_INFO  ("%d", MY_TASK);
 
      switch (msg.event_type) {
         case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
@@ -71,7 +70,6 @@ void Caregiver::eventTriggerReply() {
 
          case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
         {
-            ROS_INFO("IN RIGHT PLACE");
             msg.event_type = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
@@ -116,6 +114,7 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
         switch (msg.event_type) {
             case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
             {
+                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_CONVERSATION;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));
                 performingTask = true;
                 std_msgs::Empty emptyMessage;
@@ -126,10 +125,9 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
             {
-                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));
-                
-                performingTask = true;
-                
+                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
+                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
+                performingTask = true;                
                 std_msgs::Empty emptyMessage;
                 goToResident(emptyMessage);
                 break;
@@ -138,10 +136,9 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
             {
-                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));
-                
-                performingTask = true;
-                
+                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_EXERCISE;
+                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
+                performingTask = true;                
                 std_msgs::Empty emptyMessage;
                 goToResident(emptyMessage);
                 break;
@@ -150,10 +147,9 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
             {
-                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));
-                
-                performingTask = true;
-                
+                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
+                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
+                performingTask = true;                
                 std_msgs::Empty emptyMessage;
                 goToResident(emptyMessage);
                 break;
@@ -170,6 +166,9 @@ void Caregiver::performTask() {
     
     // Generate the service call
     elderly_care_simulation::PerformTask performTaskSrv;
+    
+    ROS_INFO("%d",MY_TASK);
+
     performTaskSrv.request.taskType = MY_TASK;
     
     // Make the call using the client
@@ -188,13 +187,11 @@ void Caregiver::performTask() {
         case PERFORM_TASK_RESULT_FINISHED:
         {
             // Resident accepted the task and has had enough
-            ROS_INFO("Caregiver: Resident has accepted the task and has had enough");
-            
-            performingTask = false;
-            
+            ROS_INFO("Caregiver: Resident has accepted the task and has had enough");            
+            performingTask = false;            
             std_msgs::Empty emptyMessage;
             goToHome(emptyMessage);
-            
+
             stopSpinning();
             eventTriggerReply();
             break;
@@ -266,17 +263,19 @@ int main(int argc, char **argv)
     // Create a client to make service requests to the Resident
     caregiver.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
-    ros::Rate loop_rate(25  );
+    ros::Rate loop_rate(25);
 
     while (ros::ok())
     {                   
         if (caregiver.atDesiredLocation()){
              // Bad place for this, but need to get it working..
-            if (caregiver.currentLocationState == caregiver.GOING_TO_RESIDENT) {
+            if (caregiver.currentLocationState == caregiver.GOING_TO_RESIDENT) {// && caregiver.MY_TASK != EVENT_TRIGGER_EVENT_TYPE_SHOWER) {
                 caregiver.currentLocationState = caregiver.AT_RESIDENT;
             } else if (caregiver.currentLocationState == caregiver.GOING_HOME) {
                 caregiver.currentLocationState = caregiver.AT_HOME;
-            }       
+            // } else if (caregiver.currentLocationState == caregiver.GOING_TO_RESIDENT && caregiver.MY_TASK == EVENT_TRIGGER_EVENT_TYPE_SHOWER){
+
+            }
         }
 
         if ((caregiver.currentLocationState == caregiver.AT_RESIDENT) && caregiver.performingTask) {

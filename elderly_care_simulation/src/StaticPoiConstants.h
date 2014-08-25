@@ -28,7 +28,4 @@ const float ADJACENT_STOVE_Y = 7.5f;
 const float CAREGIVER_HOME_X = 5.0f;
 const float CAREGIVER_HOME_Y = -5.0f;
 
-
-
-
 #endif
