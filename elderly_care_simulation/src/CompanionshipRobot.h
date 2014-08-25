@@ -37,10 +37,10 @@
  * Author: Akshay Kalyan
  */
 
-;class Companionship : public Robot {
+;class CompanionshipRobot : public Robot {
 	public:
-		Companionship();
-		~Companionship();
+		CompanionshipRobot();
+		~CompanionshipRobot();
 
 		int MY_TASK;
 		bool performingTask;

@@ -34,20 +34,20 @@
  * Author: Akshay Kalyan
  */
 
-Companionship::Companionship() {
+CompanionshipRobot::CompanionshipRobot() {
     MY_TASK = EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP;
     performingTask = false;
     currentLocationState = AT_HOME;
 }
 
-Companionship::~Companionship() {  
+CompanionshipRobot::~CompanionshipRobot() {  
 }
 
 /**
  * Prompt Companionship robot to travel to the resident
  */
-void Companionship::goToResident(const std_msgs::Empty) {
-    ROS_INFO("Companionship: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
+void CompanionshipRobot::goToResident(const std_msgs::Empty) {
+    ROS_INFO("CompanionshipRobot: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
     goToLocation(residentPoi.getLocation());
     currentLocationState = GOING_TO_RESIDENT;
 }
@@ -55,7 +55,7 @@ void Companionship::goToResident(const std_msgs::Empty) {
 /**
  * Prompt Companionship robot to return back to its home POI
  */
-void Companionship::goToHome(const std_msgs::Empty) {
+void CompanionshipRobot::goToHome(const std_msgs::Empty) {
     goToLocation(homePoi.getLocation());
     currentLocationState = GOING_HOME;
 }
@@ -64,7 +64,7 @@ void Companionship::goToHome(const std_msgs::Empty) {
  * Publish successful completion of task notice destined
  * for the scheduler
  */
-void Companionship::eventTriggerReply() {
+void CompanionshipRobot::eventTriggerReply() {
 
     // Create response message
     elderly_care_simulation::EventTrigger msg;
@@ -75,19 +75,19 @@ void Companionship::eventTriggerReply() {
     msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
     eventTriggerPub.publish(msg);
-    ROS_INFO("Companionship: Reply Message Sent");
+    ROS_INFO("CompanionshipRobot: Reply Message Sent");
 }
 
 /**
  * Perform task when a request is received. Callback executed
  * when a message is received from the Scheduler
  */
-void Companionship::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
+void CompanionshipRobot::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 
         if (msg.event_type == MY_TASK) {
-            ROS_INFO("Companionship: Event Recieved: [%s]", eventTypeToString(MY_TASK));
+            ROS_INFO("CompanionshipRobot: Event Recieved: [%s]", eventTypeToString(MY_TASK));
             
             performingTask = true;
             
@@ -101,7 +101,7 @@ void Companionship::eventTriggerCallback(elderly_care_simulation::EventTrigger m
 /**
  * Carry out task on the resident
  */
-void Companionship::performTask() {
+void CompanionshipRobot::performTask() {
     
     // Generate the service call
     elderly_care_simulation::PerformTask performTaskSrv;
@@ -109,7 +109,7 @@ void Companionship::performTask() {
     
     // Make the call using the client
     if (!performTaskClient.call(performTaskSrv)) {
-        throw std::runtime_error("Companionship: Service call to the initiate task with Resident failed");
+        throw std::runtime_error("CompanionshipRobot: Service call to the initiate task with Resident failed");
     }
     
     switch (performTaskSrv.response.result) {
@@ -139,7 +139,7 @@ void Companionship::performTask() {
     }
 }
 
-Companionship companionshipRobot;
+CompanionshipRobot companionshipRobot;
 
 // Callback functions
 void callStage0domCallback(const nav_msgs::Odometry msg) {
@@ -152,11 +152,11 @@ void callEventTriggerCallback(elderly_care_simulation::EventTrigger msg){
     companionshipRobot.eventTriggerCallback(msg);
 }
 void callGoToResident(const std_msgs::Empty empty){
-    ROS_INFO("Companionship: Going to Resident");
+    ROS_INFO("CompanionshipRobot: Going to Resident");
     companionshipRobot.goToResident(empty);
 }
 void callGoToHome(const std_msgs::Empty empty){
-    ROS_INFO("Companionship: Going home");
+    ROS_INFO("CompanionshipRobot: Going home");
     companionshipRobot.goToHome(empty);
 }
 void updateResidentPositionCallback(const nav_msgs::Odometry msg) {
@@ -168,11 +168,11 @@ void updateResidentPositionCallback(const nav_msgs::Odometry msg) {
 int main(int argc, char **argv) {   
     
     // ROS initialiser calls
-    ros::init(argc, argv, "Companionship");
+    ros::init(argc, argv, "CompanionshipRobot");
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(25);
 
-    companionshipRobot = Companionship();
+    companionshipRobot = CompanionshipRobot();
 
     // Initialise publishers
     companionshipRobot.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_3/cmd_vel",1000);

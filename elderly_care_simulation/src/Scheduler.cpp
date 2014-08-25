@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
     //a count of howmany messages we have sent
     int count = 0;
 
-    sleep(1);
+    sleep(5);
     
     while (ros::ok()) {
 
