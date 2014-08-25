@@ -10,7 +10,7 @@
 #include "StaticPoi.h"
 #include "StaticPoiConstants.h"
 
-class ChefRobot : public Robot {
+;class ChefRobot : public Robot {
     public:
         ChefRobot();
         ~ChefRobot();
@@ -18,8 +18,8 @@ class ChefRobot : public Robot {
         int execute();
 
     private:
-        StaticPoi base(12.0f, 0.0f, 0.0f);
-        StaticPoi stove(STOVE_X, STOVE_Y, 0.0f);
+        StaticPoi base = StaticPoi(1.0f, 0.0f, 0.0f);
+        StaticPoi stove = StaticPoi(STOVE_X, STOVE_Y, 0.0f);
 
         // Location State
         enum LocationState {
