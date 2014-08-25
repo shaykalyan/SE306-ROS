@@ -225,84 +225,133 @@ class DiceRollerGUI:
         """
         self.root.mainloop()
 
+    # Callback method for event_trigger topic
     def event_trigger_callback(self, msg):
         msg_type = msg.msg_type
         event_type = msg.event_type
-        event_priority = msg.event_priority
-        event_weight = msg.event_weight
         result = msg.result
 
         if (msg_type == 0):
             self.events[event_type](result)
 
 
+    #Update undefined state
     def undefined(self, result):
         if (result == 0):
             self.resident_task.set("None")
+        elif (result == 2):
+            self.resident_task.set("None")
 
+    #Update eat state
     def eat(self, result):
         if (result == 0):
             self.caregiver_task.set("Feeding")
+        elif (result == 2):
+            self.caregiver_task.set("None")
 
+    #Update shower state
     def shower(self, result):
         if (result == 0):
             self.caregiver_task.set("Showering")
+        elif (result == 2):
+            self.caregiver_task.set("None")
 
+    #Update exercise state
     def exercise(self, result):
         if (result == 0):
             self.caregiver_task.set("Exercising")
+        elif (result == 2):
+            self.caregiver_task.set("None")
 
+    #Update converse state
     def converse(self, result):
         if (result == 0):
             self.caregiver_task.set("Conversing")
+        elif (result == 2):
+            self.caregiver_task.set("None")
 
+    #Update support state
     def support(self, result):
         if (result == 0):
             self.caregiver_task.set("Supporting")
+        elif (result == 2):
+            self.caregiver_task.set("None")
 
+    #Update relative state
     def relative(self, result):
         if (result == 0):
             self.relative_task.set("Visiting")
+        elif (result == 2):
+            self.relative_task.set("None")
 
+    #Update friend state
     def friend(self, result):
         if (result == 0):
             self.friend_task.set("Visiting")
+        elif (result == 2):
+            self.friend_task.set("None")
 
+    #Update ill state
     def ill(self, result):
         if (result == 0):
             self.nurse_task.set("Nursing")
+        elif (result == 2):
+            self.nurse_task.set("None")
 
+    #Update veryIll state
     def veryIll(self, result):
         if (result == 0):
             self.doctor_task.set("Doctoring")
+        elif (result == 2):
+            self.doctor_task.set("None")
 
+    #Update medication state
     def medication(self, result):
         if (result == 0):
             self.medication_task.set("Drugging")
+        elif (result == 2):
+            self.medication_task.set("None")
 
+    #Update cook state
     def cook(self, result):
         if (result == 0):
             self.cook_task.set("Cooking")
+        elif (result == 2):
+            self.cook_task.set("None")
 
+    #Update entertainment state
     def entertainment(self, result):
         if (result == 0):
             self.entertainment_task.set("Entertaining")
+        elif (result == 2):
+            self.entertainment_task.set("None")
 
+    #Update companionship state
     def companionship(self, result):
         if (result == 0):
             self.companion_task.set("Accompanying")
+        elif (result == 2):
+            self.companion_task.set("None")
 
+    #Update wake state
     def wake(self, result):
         if (result == 0):
             self.resident_task.set("Waking")
+        elif (result == 2):
+            self.resident_task.set("None")
 
+    #Update sleep state
     def sleep(self, result):
         if (result == 0):
             self.resident_task.set("Sleeping")
+        elif (result == 2):
+            self.resident_task.set("None")
 
+    #Update undefined state
     def update_robot_task(self, data):
         self.dice_label.set(data)
 
+    #Update undefined state
     def update_dice_label(self, data):
         self.dice_label.set(data)
 
