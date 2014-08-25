@@ -158,3 +158,56 @@ void updateResidentPositionCallback(const nav_msgs::Odometry msg) {
     double y = msg.pose.pose.position.y;    
     theMedicationRobot.residentPoi = StaticPoi(x, y, 0);
 }
+
+int main(int argc, char **argv) {   
+    
+    // ROS initialiser calls
+    ros::init(argc, argv, "MedicationRobot");
+    ros::NodeHandle nodeHandle;
+    ros::Rate loop_rate(25);
+
+    theMedicationRobot = MedicationRobot();
+
+    // Initialise publishers
+    theMedicationRobot.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_3/cmd_vel",1000);
+    theMedicationRobot.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
+
+    // Initialise subscribers
+    theMedicationRobot.residentStageSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth",1000,
+                                 updateResidentPositionCallback);
+    theMedicationRobot.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_3/base_pose_ground_truth",1000,
+                            callStage0domCallback);
+    theMedicationRobot.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000,
+                                callEventTriggerCallback);
+    theMedicationRobot.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_3/location", 1000,
+                                        callUpdateDesiredLocationCallback);
+    theMedicationRobot.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toResident", 1000, callGoToResident);
+    theMedicationRobot.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toHome", 1000, callGoToHome);
+        
+    // Create a client to make service requests to the Resident
+    theMedicationRobot.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
+
+    // Create a link to the pathfinding service
+    theMedicationRobot.pathFinderService = nodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
+
+    while (ros::ok()) {
+
+        // Required for dynamic pathfinding                   
+        theMedicationRobot.updateCurrentVelocity();
+
+        if (theMedicationRobot.atDesiredLocation()) {
+            if (theMedicationRobot.currentLocationState == theMedicationRobot.GOING_TO_RESIDENT) {
+                theMedicationRobot.currentLocationState = theMedicationRobot.AT_RESIDENT;
+            } else if (theMedicationRobot.currentLocationState == theMedicationRobot.GOING_HOME) {
+                theMedicationRobot.currentLocationState = theMedicationRobot.AT_HOME;
+            }       
+        }
+
+        if ((theMedicationRobot.currentLocationState == theMedicationRobot.AT_RESIDENT) && theMedicationRobot.performingTask) {
+            theMedicationRobot.performTask();
+        }
+        
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+}
