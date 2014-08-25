@@ -63,8 +63,8 @@ target_link_libraries(Visitor Robot Poi StaticPoi)
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R2
 target_link_libraries(Assistant Robot Poi StaticPoi)
 
-rosbuild_add_executable(Friend src/Friend.cpp)	        #R3
-target_link_libraries(Friend Robot Poi StaticPoi)
+rosbuild_add_executable(FriendRobot src/FriendRobot.cpp)	        #R3
+target_link_libraries(FriendRobot Robot Poi StaticPoi)
 
 
 

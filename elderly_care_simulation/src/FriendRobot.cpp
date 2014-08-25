@@ -17,7 +17,7 @@
 #include "elderly_care_simulation/FindPath.h"
 
 #include "Robot.h"
-#include "Friend.h"
+#include "FriendRobot.h"
 
 #include "Poi.h"
 #include "StaticPoi.h"
@@ -30,19 +30,19 @@
  * Author: Matthew Chiam
  */
 
-;Friend::Friend() {
+;FriendRobot::FriendRobot() {
     MY_TASK = EVENT_TRIGGER_EVENT_TYPE_FRIEND;
     performingTask = false;
     currentLocationState = AT_HOME;
 }
 
-Friend::~Friend() {  
+FriendRobot::~FriendRobot() {  
 }
 
 /**
  * Request robot to start moving towards the Resident
  */
-void Friend::goToResident(const std_msgs::Empty) {
+void FriendRobot::goToResident(const std_msgs::Empty) {
     ROS_INFO("Friend: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
     goToLocation(residentPoi.getLocation());
     currentLocationState = GOING_TO_RESIDENT;
@@ -51,7 +51,7 @@ void Friend::goToResident(const std_msgs::Empty) {
 /**
  * Request robot to move back to its home location
  */
-void Friend::goToHome(const std_msgs::Empty) {
+void FriendRobot::goToHome(const std_msgs::Empty) {
     goToLocation(homePoi.getLocation());
     currentLocationState = GOING_HOME;
 }
@@ -59,7 +59,7 @@ void Friend::goToHome(const std_msgs::Empty) {
 /**
  * Publish completion report of this robot's task
  */
-void Friend::eventTriggerReply() {
+void FriendRobot::eventTriggerReply() {
 
     // Create response message
     elderly_care_simulation::EventTrigger msg;
@@ -70,7 +70,7 @@ void Friend::eventTriggerReply() {
     msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
     eventTriggerPub.publish(msg);
-    ROS_INFO("Friend: Reply Message Sent");
+    ROS_INFO("FriendRobot: Reply Message Sent");
 }
 
 /**
@@ -78,7 +78,7 @@ void Friend::eventTriggerReply() {
  * method should be called when getting a request from
  * the Scheduler. 
  */
-void Friend::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
+void FriendRobot::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 
         if (msg.event_type == MY_TASK) {
@@ -96,7 +96,7 @@ void Friend::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
 /**
  * Perform a task on the resident by making a service call to them.
  */
-void Friend::performTask() {
+void FriendRobot::performTask() {
     
     // Generate the service call
     elderly_care_simulation::PerformTask performTaskSrv;
@@ -134,7 +134,7 @@ void Friend::performTask() {
     }
 }
 
-Friend theFriend;
+FriendRobot theFriend;
 
 // Callback functions that wrap method invocations
 void callStage0domCallback(const nav_msgs::Odometry msg) {
@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(25);
 
-    theFriend = Friend();
+    theFriend = FriendRobot();
 
     // Initialise publishers
     theFriend.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_3/cmd_vel",1000);

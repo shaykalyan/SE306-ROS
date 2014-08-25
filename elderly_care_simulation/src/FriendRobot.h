@@ -31,10 +31,10 @@
  * Author: Matthew Chiam
  */
 
-;class Friend : public Robot {
+;class FriendRobot : public Robot {
 	public:
-		Friend();
-		~Friend();
+		FriendRobot();
+		~FriendRobot();
 
 		int MY_TASK;
 		bool performingTask;
