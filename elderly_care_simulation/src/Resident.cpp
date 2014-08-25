@@ -76,6 +76,17 @@ void Resident::resetTaskProgress(int taskType) {
 }
 
 /**
+ * Reset the current task to UNDEFINED and clear all task progress states.
+ */
+void Resident::clearAllTasks() {
+    currentTaskType = EVENT_TRIGGER_RESULT_UNDEFINED;
+
+    for(std::map<int, int >::iterator iter = taskProgress.begin(); iter != taskProgress.end(); ++iter) {
+        taskProgress[iter->first] = 0;
+    }
+}
+
+/**
  * Update a task's progress in response to a task that is being performed
  * by a helper.
  * 
@@ -167,6 +178,13 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
                    elderly_care_simulation::PerformTask::Response &res) {
                        
     int taskType = req.taskType;
+
+    // Sending an undefined event type is a mechanism to clear the resident's tasks
+    if (taskType == EVENT_TRIGGER_RESULT_UNDEFINED) {
+        clearAllTasks();
+        res.result = PERFORM_TASK_RESULT_FINISHED;
+        return true;
+    }
 
     ROS_INFO("Resident: Someone is requesting to perform task %d", taskType);
 

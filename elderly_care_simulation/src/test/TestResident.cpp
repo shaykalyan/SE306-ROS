@@ -25,8 +25,19 @@ using namespace elderly_care_simulation;
 // Service Clients
 ros::ServiceClient performTaskClient;
 
-// Store received messages
-std::vector<EventTrigger> receivedEventTriggers;
+int performTaskOnResident(int taskType) {
+    PerformTask taskRequest;
+    taskRequest.request.taskType = taskType;
+    
+    // Make the call using the client
+    if (!performTaskClient.call(taskRequest)) {
+        throw std::runtime_error("Service call to the initiate task with Resident failed");
+    }
+    
+    // Ensure that the resident accepts the moral support
+    return taskRequest.response.result;
+}
+
 
 /**
  * The fixture for testing the Resident.
@@ -53,32 +64,22 @@ class ResidentTest : public ::testing::Test {
         virtual void SetUp() {
             // Code here will be called immediately after the constructor (right
             // before each test).
-            receivedEventTriggers.clear();
         }
 
         virtual void TearDown() {
             // Code here will be called immediately after each test (right
             // before the destructor).
+
+            // Clear the resident's tasks
+            performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_UNDEFINED);
         }
 };
 
-int performTaskOnResident(int taskType) {
-    PerformTask taskRequest;
-    taskRequest.request.taskType = taskType;
-    
-    // Make the call using the client
-    if (!performTaskClient.call(taskRequest)) {
-        throw std::runtime_error("Service call to the initiate task with Resident failed");
-    }
-    
-    // Ensure that the resident accepts the moral support
-    return taskRequest.response.result;
-}
-
 /** 
- * If a visitor is providing companionship, a doctor should be able to interrupt.
+ * If a visitor is providing a low priority task like companionship, a doctor should be 
+ * able to interrupt with a VERY_ILL event type.
  */
-TEST_F(ResidentTest, interruptCompanionshipWithDoctor) {
+TEST_F(ResidentTest, interruptCompanionshipWithVeryIllEvent) {
     // Sleep to allow the Resident to start
     ros::Rate loop_rate(2);
     loop_rate.sleep();
@@ -108,11 +109,49 @@ TEST_F(ResidentTest, interruptCompanionshipWithDoctor) {
 }
 
 /**
- * Callback for the 'event_trigger' topic messages.
- * Simply logs the received message into a list.
+ * If a visitor is providing a low priority task like companionship, a nurse should be 
+ * able to interrupt with an ILL event type.
  */
-void eventTriggerCallback(EventTrigger msg) {
-    receivedEventTriggers.push_back(msg);
+ TEST_F(ResidentTest, interruptCompanionshipWithIllEvent) {
+    int companionshipResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP);
+    
+    // Ensure that the resident accepts the moral support
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, companionshipResult);
+
+    // ===========================================================================
+
+    // Make a EVENT_TRIGGER_EVENT_TYPE_VERY_ILL request
+    int illResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_ILL);
+    
+    // Ensure that the resident accepts the very ill request
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, illResult);
+
+    // ===========================================================================
+
+    // Make another companionship call
+    companionshipResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP);
+
+    // The response should tell us to finish
+    ASSERT_EQ(PERFORM_TASK_RESULT_FINISHED, companionshipResult);
+}
+
+/**
+ * If a visitor is providing a low priority task like companionship, another helper robot 
+ * requesting to perform another low priority task should be told to wait.
+ */
+ TEST_F(ResidentTest, interruptCompanionshipWithConversation) {
+    int companionshipResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP);
+    
+    // Ensure that the resident accepts the moral support
+    ASSERT_EQ(PERFORM_TASK_RESULT_ACCEPTED, companionshipResult);
+
+    // ===========================================================================
+
+    // Make a EVENT_TRIGGER_EVENT_TYPE_VERY_ILL request
+    int conversationResult = performTaskOnResident(EVENT_TRIGGER_EVENT_TYPE_CONVERSATION);
+    
+    // Ensure that the resident accepts the very ill request
+    ASSERT_EQ(PERFORM_TASK_RESULT_BUSY, conversationResult);
 }
 
 int main(int argc, char **argv) {
