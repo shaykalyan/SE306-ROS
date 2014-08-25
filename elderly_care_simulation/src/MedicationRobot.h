@@ -30,3 +30,39 @@
  *
  * Author: James Butler
  */
+
+;class MedicationRobot : public Robot {
+	public:
+		MedicationRobot();
+		~MedicationRobot();
+
+		int MY_TASK;
+		bool performingTask;
+
+		// Location State
+		enum LocationState {
+			AT_HOME, AT_RESIDENT, GOING_TO_RESIDENT, GOING_HOME
+		};
+
+		LocationState currentLocationState;
+		
+        	ros::Subscriber residentStageSub;
+		ros::Subscriber eventTriggerSub;
+		ros::Subscriber pathToRobotSub;
+		ros::Subscriber pathToHomeSub;
+		ros::Subscriber locationInstructionsSub;
+		ros::Publisher eventTriggerPub;
+		ros::ServiceClient performTaskClient;
+		
+        	StaticPoi residentPoi = StaticPoi(0.0f, 0.0f, 0.0f);
+        	StaticPoi homePoi = StaticPoi(MEDICATIONROBOT_HOME_X, MEDICATIONROBOT_HOME_Y, 0.0f);
+
+		void goToResident(const std_msgs::Empty);
+		void goToHome(const std_msgs::Empty);
+		void eventTriggerReply();
+		void eventTriggerCallback(elderly_care_simulation::EventTrigger msg);
+		void performTask();		
+};
+
+#endif
+
