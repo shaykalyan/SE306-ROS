@@ -25,11 +25,10 @@
 
 /**
  * This node represents an assistant robot for the purpose of
- * providing entertainment to the Resident. THe robot moves to
+ * providing entertainment to the Resident. The robot moves to
  * the the POI, in this case the resident, to perform 
  * a predetermined action. This action represents the robot
- * providing entertainment such as connecting the resident
- * to other beings via VoIP sofware (Skype).
+ * providing entertainment.
  *
  * Author: Hugo Bateman
  */
