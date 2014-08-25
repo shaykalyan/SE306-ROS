@@ -15,6 +15,7 @@
 
 #include <tf/tf.h>
 #include <queue>
+#include "StaticPoi.h"
 
 class Robot{
 
@@ -34,6 +35,8 @@ class Robot{
 		void stopSpinning();
 		void updateCurrentVelocity();
 		bool atDesiredLocation();
+		bool atPointOfInterest(StaticPoi p, double tolerance);
+
 
 		
 

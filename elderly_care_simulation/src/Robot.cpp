@@ -14,6 +14,7 @@
 #include "Robot.h"
 #include <vector>
 #include "elderly_care_simulation/FindPath.h"
+#include "StaticPoi.h"
 
 Robot::Robot() {
     spin = NOT_SPINNING;
@@ -61,6 +62,19 @@ void Robot::checkForMovement() {
             goToLocation(finalDestination);
         }
     }
+}
+
+/**
+ * Checks to see whether the robot is within tolerance of the given POI.
+ */ 
+bool Robot::atPointOfInterest(StaticPoi p, double tolerance) {
+
+    geometry_msgs::Point d;
+    d.x = p.getLocation().x - currentLocation.position.x;
+    d.y = p.getLocation().y - currentLocation.position.y;
+
+    float distance = sqrt(d.x * d.x + d.y * d.y);
+    return distance <= tolerance;
 }
 
 /**
