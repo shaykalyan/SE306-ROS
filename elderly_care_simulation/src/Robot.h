@@ -37,6 +37,7 @@ class Robot{
 		bool atDesiredLocation();
 
 	protected:
+		geometry_msgs::Point finalDestination;
 		std::queue<geometry_msgs::Point> locationQueue;
 		double  currentAngle;
 
@@ -52,6 +53,7 @@ class Robot{
 		bool doubleEquals(double a, double b, double difference);
 		double normalizeAngle(double angle);
 		bool turnAnticlockwise(double currentAngle, double desiredAngle);
+		void checkForMovement();
 };
 
 #endif
