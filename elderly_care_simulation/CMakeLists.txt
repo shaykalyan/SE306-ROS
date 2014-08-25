@@ -37,6 +37,8 @@ rosbuild_add_library(DiceRoller src/DiceRoller.cpp)
 rosbuild_add_library(Poi src/Poi.cpp)
 rosbuild_add_library(StaticPoi src/StaticPoi.cpp)
 
+target_link_libraries(StaticPoi Poi)
+
 # Invisible Nodes
 rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
 target_link_libraries(MoralSupportDiceRoller DiceRoller)
@@ -51,12 +53,15 @@ target_link_libraries(IllDiceRoller DiceRoller)
 rosbuild_add_executable(VeryIllDiceRoller src/VeryIllDiceRoller.cpp)
 target_link_libraries(VeryIllDiceRoller DiceRoller)
 
+<<<<<<< HEAD
 # rostest
 rosbuild_add_executable(TestResident EXCLUDE_FROM_ALL src/test/TestResident.cpp)
 rosbuild_add_gtest_build_flags(TestResident)
 rosbuild_add_rostest(test/TestResident.test)
 
 
+=======
+>>>>>>> Caregiver robot moves to Resident. However, it does not interract with the Resident robot
 
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
@@ -70,3 +75,6 @@ target_link_libraries(Visitor Robot)
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
 target_link_libraries(Assistant Robot)
 
+
+rosbuild_add_executable(Caregiver src/Caregiver.cpp)	#R3
+target_link_libraries(Caregiver Robot Poi StaticPoi)

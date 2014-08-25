@@ -21,7 +21,7 @@ int concurrentWeight = 0;
 // ======================================
 // =          SHOULD BE FALSE           =
 // ======================================
-bool allowNewEvents = true;
+bool allowNewEvents = false;
 bool stopRosInfoSpam = false;
 
 /**
@@ -131,8 +131,8 @@ void populateDailyTasks(void) {
         // { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW }
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Noon
@@ -204,7 +204,7 @@ void dequeueEvent(void) {
                 break;
 
             default:
-                allowNewEvents = true;
+                allowNewEvents = false;
                 eventTriggerPub.publish(msg);
                 ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
                 concurrentWeight += msg.event_weight;
@@ -246,7 +246,7 @@ int main(int argc, char **argv) {
 
     //a count of howmany messages we have sent
     int count = 0;
-
+    sleep(5);
     while (ros::ok()) {
 
         // ======================================
