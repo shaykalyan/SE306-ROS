@@ -179,6 +179,8 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
                    elderly_care_simulation::PerformTask::Response &res) {
                        
     int taskType = req.taskType;
+    bool taskRequiresPoi = req.taskRequiresPoi;
+    geometry_msgs::Point taskPoi = req.taskPoi;
 
     // Sending an undefined event type is a mechanism to clear the resident's tasks
     if (taskType == EVENT_TRIGGER_RESULT_UNDEFINED) {
@@ -207,19 +209,24 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
     // No more special case needs to be considered for illness-related tasks, proceed to accept the task
 
     if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
-        // I don't yet have a task, make this one our current task
         currentTaskType = taskType;
     }
-    
-    if (taskType == currentTaskType) {
-        // We must be dealing with the current helper
-        int result = handleTask(taskType);
-        res.result = result;
-        ROS_INFO("Resident: Handled task with result %d.", result);
+
+    bool atPoiForTask = atDesiredLocation() && navigatingToPoiForTask;
+    if (atPoiForTask) {
+        navigatingToPoiForTask = false;
+    }
+
+    if (taskRequiresPoi && !atPoiForTask) {
+        navigatingToPoiForTask = true;
+        goToLocation(taskPoi);
+        res.result = PERFORM_TASK_RESULT_TAKE_ME_THERE;
+    } else if ((taskType == currentTaskType) && atPoiForTask) {
+        // We must be dealing with the current helper and we've reached any POI we needed to get to
+        res.result = handleTask(taskType);;
     } else {
-        // We are busy with another task
+        // We are busy: either moving to a POI or dealing with another task
         res.result = PERFORM_TASK_RESULT_BUSY;
-        ROS_INFO("Resident: Busy with another task.");
     }
 
     ROS_INFO("Resident: I'm responding with result %d", res.result);
