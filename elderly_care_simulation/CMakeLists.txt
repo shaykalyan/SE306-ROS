@@ -54,6 +54,11 @@ rosbuild_add_executable(Scheduler src/Scheduler.cpp)
 rosbuild_add_gtest(test/TestDiceRoller test/TestDiceRoller.cpp)
 target_link_libraries(test/TestDiceRoller DiceRoller)
 
+# rostest
+rosbuild_add_executable(TestResident EXCLUDE_FROM_ALL src/test/TestResident.cpp)
+rosbuild_add_gtest_build_flags(TestResident)
+rosbuild_add_rostest(test/TestResident.test)
+
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
 target_link_libraries(Resident Robot Poi StaticPoi)
