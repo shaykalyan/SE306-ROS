@@ -174,20 +174,20 @@ int main(int argc, char **argv) {
     nurseRobot = Nurse();
 
     // Initialise publishers
-    nurseRobot.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_3/cmd_vel",1000);
+    nurseRobot.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_8/cmd_vel",1000);
     nurseRobot.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
     // Initialise subscribers
     nurseRobot.residentStageSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth",1000,
                                  updateResidentPositionCallback);
-    nurseRobot.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_3/base_pose_ground_truth",1000,
+    nurseRobot.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_8/base_pose_ground_truth",1000,
                             callStage0domCallback);
     nurseRobot.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000,
                                 callEventTriggerCallback);
-    nurseRobot.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_3/location", 1000,
+    nurseRobot.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_8/location", 1000,
                                         callUpdateDesiredLocationCallback);
-    nurseRobot.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toResident", 1000, callGoToResident);
-    nurseRobot.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toHome", 1000, callGoToHome);
+    nurseRobot.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_8/toResident", 1000, callGoToResident);
+    nurseRobot.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_8/toHome", 1000, callGoToHome);
         
     // Create a client to make service requests to the Resident
     nurseRobot.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
