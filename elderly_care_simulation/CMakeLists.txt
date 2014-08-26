@@ -36,8 +36,8 @@ rosbuild_add_library(Robot src/Robot.cpp)
 rosbuild_add_library(DiceRoller src/DiceRoller.cpp)
 rosbuild_add_library(Poi src/Poi.cpp)
 rosbuild_add_library(StaticPoi src/StaticPoi.cpp)
+rosbuild_add_library(EscortRobot src/EscortRobot.cpp)
 target_link_libraries(StaticPoi Poi)
-
 target_link_libraries(StaticPoi Poi)
 
 # Invisible Nodes
@@ -93,5 +93,5 @@ target_link_libraries(NurseRobot Robot Poi StaticPoi)
 rosbuild_add_executable(Caregiver src/Caregiver.cpp)							#R9
 target_link_libraries(Caregiver Robot Poi StaticPoi)
 
-rosbuild_add_executable(FeedingRobot src/EscortRobot.cpp)  						#R10
-target_link_libraries(FeedingRobot Robot Poi StaticPoi)
+rosbuild_add_executable(FeedingRobot src/FeedingRobot.cpp)  					#R10
+target_link_libraries(FeedingRobot Robot EscortRobot Poi StaticPoi)
