@@ -1,39 +1,43 @@
-#ifndef FEEDER_H
-#define FEEDER_H
+#ifndef ESCORT_H
+#define ESCORT_H
 
 #include <ros/ros.h>
 
 #include "elderly_care_simulation/EventTrigger.h"
 #include "geometry_msgs/Point.h"
-#include "Poi.h"
+#include "nav_msgs/Odometry.h"
 #include "Robot.h"
-#include "StaticPoi.h"
-#include "StaticPoiConstants.h"
 
-class FeedingRobot : public Robot {
+class EscortRobot : public Robot {
     public:
-        FeedingRobot();
-        ~FeedingRobot();
+        EscortRobot();
+        EscortRobot(int escortEventType, geometry_msgs::Point escortBase, geometry_msgs::Point escortPoi);
+        ~EscortRobot();
         void eventTriggered(const elderly_care_simulation::EventTrigger msg);
         int execute();
+        void residentLocationCallback(nav_msgs::Odometry msg);
 
         ros::Publisher eventTriggerPub;
         ros::Subscriber eventTriggerSub;
+        ros::Subscriber residentLocationSub;
 
     private:
-        StaticPoi base = StaticPoi(12.0f, 1.0f, 0.0f);
-        StaticPoi table = StaticPoi(ADJACENT_TABLE_X, ADJACENT_TABLE_Y, 0.0f);
+        geometry_msgs::Point base;
+        geometry_msgs::Point poi;
+        geometry_msgs::Point residentLocation;
+
+        int eventType;
 
         // Location State
         enum LocationState {
-            AT_BASE, GOING_TO_BASE, AT_TABLE, GOING_TO_TABLE
+            AT_BASE, GOING_TO_BASE, AT_POI, GOING_TO_POI
         };
 
         LocationState currentLocationState;
 
         void eventFinished();
         void goToBase();
-        void goToTable();
+        void goToPoi();
 
 };
 

@@ -7,38 +7,54 @@
 #include "EventTriggerUtility.h"
 #include "nav_msgs/Odometry.h"
 #include "Robot.h"
+#include "StaticPoiConstants.h"
 
+EscortRobot::EscortRobot() {
+    // No implementation
+}
 
-FeedingRobot::FeedingRobot() {
+EscortRobot::EscortRobot(int escortEventType, geometry_msgs::Point escortBase, geometry_msgs::Point escortPoi) {
     currentLocationState = AT_BASE;
+    eventType = escortEventType;
+    base = escortBase;
+    poi = escortPoi;
 }
 
-FeedingRobot::~FeedingRobot() {}
+EscortRobot::~EscortRobot() {}
 
-void FeedingRobot::goToTable() {
-    currentLocationState = GOING_TO_TABLE;
-    goToLocation(table.getLocation());
+void EscortRobot::residentStageCallback(nav_msgs::Odometry msg) {
+    residentLocation = msg.pose.pose;
 }
 
-void FeedingRobot::goToBase() {
+void EscortRobot::goToPoi() {
+    currentLocationState = GOING_TO_POI;
+    goToLocation(poi);
+}
+
+void EscortRobot::goToResident() {
+    currentLocationState = GOING_TO_POI;
+    goToLocation(residentLocation);
+}
+
+void EscortRobot::goToBase() {
     currentLocationState = GOING_TO_BASE;
-    goToLocation(base.getLocation());
+    goToLocation(base);
 }
 
-void FeedingRobot::eventTriggered(const elderly_care_simulation::EventTrigger msg) {
+void EscortRobot::eventTriggered(const elderly_care_simulation::EventTrigger msg) {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
-        if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
+        if (msg.event_type == eventType) {
             if (currentLocationState == AT_BASE ||
                 currentLocationState == GOING_TO_BASE) {
                 
                 currentLocationState = GOING_TO_TABLE;
-                goToTable();
+                goToPoi();
             }            
         }
     }
 }
 
-void FeedingRobot::eventFinished() {
+void EscortRobot::eventFinished() {
 
     stopSpinning();
     goToBase();
@@ -55,7 +71,7 @@ void FeedingRobot::eventFinished() {
     eventTriggerPub.publish(msg);
 }
 
-int FeedingRobot::execute() {    
+int EscortRobot::execute() {    
     ros::Rate loopRate(10);
 
     uint count = 0;
@@ -92,17 +108,31 @@ int FeedingRobot::execute() {
     return 0;
 }
 
-FeedingRobot feed;
+EscortRobot feeder;
 
 void eventTriggeredCallback(elderly_care_simulation::EventTrigger msg) {
-    feed.eventTriggered(msg);
+    feeder.eventTriggered(msg);
 }
 
 void stageCallBack(nav_msgs::Odometry msg) {
-    feed.stage0domCallback(msg);
+    feeder.stage0domCallback(msg);
+}
+
+void residentStageCallback(nav_msgs::Odometry msg) {
+    feeder.residentLocationCallback(msg);
 }
 
 int main(int argc, char **argv) {
+
+    geometry_msgs::Point base;
+    base.x = 12.0f;
+    base.y = 1.0f;
+
+    geometry_msgs::Point table;
+    table.x = ADJACENT_TABLE_X;
+    table.y = ADJACENT_TABLE_Y;
+
+    feeder = EscortRobot(EVENT_TRIGGER_EVENT_TYPE_COOK, base, table);
 
     const std::string rid = "robot_9";
 
@@ -112,14 +142,15 @@ int main(int argc, char **argv) {
     ros::NodeHandle chefNodeHandle;
     
     // Will publish geometry_msgs::Twist messages to the cmd_vel topic
-    feed.robotNodeStagePub = chefNodeHandle.advertise<geometry_msgs::Twist>(rid + "/cmd_vel", 1000);
-    feed.eventTriggerPub = chefNodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
+    feeder.robotNodeStagePub = chefNodeHandle.advertise<geometry_msgs::Twist>(rid + "/cmd_vel", 1000);
+    feeder.eventTriggerPub = chefNodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
-    feed.stageOdoSub = chefNodeHandle.subscribe<nav_msgs::Odometry>(rid + "/base_pose_ground_truth", 1000, stageCallBack);
-    feed.eventTriggerSub = chefNodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger", 1000, eventTriggeredCallback);
+    feeder.stageOdoSub = chefNodeHandle.subscribe<nav_msgs::Odometry>(rid + "/base_pose_ground_truth", 1000, stageCallBack);
+    feeder.eventTriggerSub = chefNodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger", 1000, eventTriggeredCallback);
+    feeder.residentLocationSub = chefNodeHanlde.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, residentStageCallback);
 
     // Service used to find paths
-    feed.pathFinderService = chefNodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
+    feeder.pathFinderService = chefNodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
 
-    return feed.execute();
+    return feeder.execute();
 }
