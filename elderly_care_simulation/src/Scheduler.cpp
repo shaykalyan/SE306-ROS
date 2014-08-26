@@ -12,8 +12,12 @@ Scheduler scheduler;
 
 Scheduler::Scheduler(){
     concurrentWeight = 0;
-    allowNewEvents = false;
+    allowNewEvents = true;
     stopRosInfoSpam = false;
+
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = false;
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_ILL] = false;
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_VERY_ILL] = false;
 }
 
 Scheduler::~Scheduler() {}
@@ -44,9 +48,10 @@ void Scheduler::clearEventQueue() {
  * Reset all random event occurrence back to false.
  */
 void Scheduler::resetRandomEventOccurrence() {
-    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = false;
-    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_ILL] = false;
-    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_VERY_ILL] = false;
+
+    for(std::map<int, bool >::iterator iter = randomEventLimit.begin(); iter != randomEventLimit.end(); ++iter) {
+        randomEventLimit[iter->first] = false;
+    }
 }
 
 /**
@@ -208,23 +213,38 @@ void Scheduler::dequeueEvent() {
     // Publish event if enough concurrent weight available
     if (concurrentWeight + msg.event_weight <= MAX_CONCURRENT_WEIGHT) {
 
+        ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+
         stopRosInfoSpam = false;
         switch(msg.event_type) {
             case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
                 allowNewEvents = false;
 
-                eventQueue.pop();
-                eventTriggerPub.publish(msg);
-                ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
                 concurrentWeight += msg.event_weight;
+                eventTriggerPub.publish(msg);
+                eventQueue.pop();
+                
+                break;
+
+            case EVENT_TRIGGER_EVENT_TYPE_ILL:
+                allowNewEvents = false;
+
+                concurrentWeight += msg.event_weight;
+                eventTriggerPub.publish(msg);
+                eventQueue.pop();
+
+                eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_SLEEP,
+                                                                EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
+                eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_WAKE,
+                                                                EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
                 break;
 
             case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
                 allowNewEvents = false;
 
-                ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
                 concurrentWeight += msg.event_weight;
                 eventTriggerPub.publish(msg);
+                eventQueue.pop();
 
                 clearEventQueue();
 
@@ -239,7 +259,6 @@ void Scheduler::dequeueEvent() {
             default:
                 allowNewEvents = true;
                 eventTriggerPub.publish(msg);
-                ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
                 concurrentWeight += msg.event_weight;
                 eventQueue.pop();
                 break;
@@ -287,7 +306,6 @@ int main(int argc, char **argv) {
     // populate queue with day's events
     ROS_INFO("Day Starts....");
     scheduler.populateDailyTasks();
-    scheduler.resetRandomEventOccurrence();
 
     //a count of howmany messages we have sent
     int count = 0;

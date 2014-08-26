@@ -37,6 +37,10 @@ const int EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP        = 13;
 const int EVENT_TRIGGER_EVENT_TYPE_WAKE                 = 14;
 const int EVENT_TRIGGER_EVENT_TYPE_SLEEP                = 15;
 
+const int EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_KITCHEN      = 16;
+const int EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM      = 17;
+const int EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY      = 18;
+
 // ========================================
 // =           EVENT PRIORITY             =
 // ========================================
@@ -95,6 +99,9 @@ const char * eventTypeToString(int eventType) {
         case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:    return "COMPANIONSHIP";
         case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return "WAKE";
         case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return "SLEEP";
+        case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_KITCHEN:  return "MOVE_TO_KITCHEN";
+        case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM:  return "MOVE_TO_BEDROOM";
+        case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY:  return "MOVE_TO_HALLWAY";
         default:                                        return "UNDEFINED";
     }
 }
@@ -120,7 +127,11 @@ int getEventWeight(int eventType) {
 
         case EVENT_TRIGGER_EVENT_TYPE_EAT:              return EVENT_TRIGGER_WEIGHT_2;
         case EVENT_TRIGGER_EVENT_TYPE_SHOWER:           return EVENT_TRIGGER_WEIGHT_2;
+        case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return EVENT_TRIGGER_WEIGHT_2;
         case EVENT_TRIGGER_EVENT_TYPE_SLEEP:            return EVENT_TRIGGER_WEIGHT_2;
+        case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_KITCHEN:  return EVENT_TRIGGER_WEIGHT_2;
+        case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM:  return EVENT_TRIGGER_WEIGHT_2;
+        case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY:  return EVENT_TRIGGER_WEIGHT_2;
 
         case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:         return EVENT_TRIGGER_WEIGHT_1;
         case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:     return EVENT_TRIGGER_WEIGHT_1;
@@ -134,7 +145,6 @@ int getEventWeight(int eventType) {
         case EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP:    return EVENT_TRIGGER_WEIGHT_1;
 
         case EVENT_TRIGGER_EVENT_TYPE_COOK:             return EVENT_TRIGGER_WEIGHT_0;
-        case EVENT_TRIGGER_EVENT_TYPE_WAKE:             return EVENT_TRIGGER_WEIGHT_0;
 
         default:                                        return EVENT_TRIGGER_WEIGHT_UNDEFINED;
     }
