@@ -15,6 +15,8 @@ class DiceRollerGUI:
 
         #Initialises tkInter elements and subscribes to relevant ROS Topics
 
+        ######################### SET UP FRAME LAYOUTS #########################
+
         # create root element with fixed size
         self.root = Tk()
         self.root.geometry('570x535+1+1')
@@ -58,7 +60,9 @@ class DiceRollerGUI:
         # create frame element to host the event injection interface
         self.frame_diceRolls = Frame(self.frame_bottom)        
         self.frame_diceRolls.pack(side=TOP, padx=10, fill=BOTH)
-        
+
+
+        ######################### SET UP ROBOT TASK GRID #########################        
 
         # create task variable labels
         self.resident_task = StringVar()
@@ -82,9 +86,7 @@ class DiceRollerGUI:
         self.caregiver_task = StringVar()
         self.caregiver_task.set("None")
 
-
-        self.dice_label = StringVar()
-
+        # Create constants for grid layout
         gridRelief = RIDGE
         gridAnchor = W
         gridWidth = 15
@@ -135,20 +137,45 @@ class DiceRollerGUI:
         Label(self.frame_robotGrid, text="Caregivier", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=0)
         Label(self.frame_robotGrid, textvariable=self.caregiver_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=1)
 
+        # Dictionary which maps different events to different method which will respond to them.
+        self.events = {0:self.undefined, 1:self.eat, 2:self.shower, 3:self.exercise, 4:self.converse, 5:self.support, 6:self.relative,
+        7:self.friend, 8:self.ill, 9:self.veryIll, 10:self.medication, 11:self.cook, 12:self.entertainment, 13:self.companionship,
+        14:self.wake, 15:self.sleep}
+
+        
+        ######################### SET UP CURRENT EVENT LIST #########################
+
+        # Create variable for current and upcomming events
+        self.current_event_1 = StringVar()
+        self.current_event_1.set("")
+        self.current_event_2 = StringVar()
+        self.current_event_2.set("")
+        self.current_event_3 = StringVar()
+        self.current_event_3.set("")
+
+        # Create a list for monitoring the current tasks
+        self.current_events = [self.current_event_1, self.current_event_2, self.current_event_3]
+
         # Set the Labels that contain information about current events
         Label(self.frame_events, text="Current Events", relief=gridRelief, bg='ivory4').pack(fill=X)
-        Label(self.frame_events, text="Cooking", relief=gridRelief).pack(fill=X)
-        Label(self.frame_events, text="Medication", relief=gridRelief).pack(fill=X)
-        Label(self.frame_events, text="", relief=gridRelief).pack(fill=X)
+        Label(self.frame_events, textvariable=self.current_event_1, relief=gridRelief).pack(fill=X)
+        Label(self.frame_events, textvariable=self.current_event_2, relief=gridRelief).pack(fill=X)
+        Label(self.frame_events, textvariable=self.current_event_3, relief=gridRelief).pack(fill=X)
         Label(self.frame_events, text="").pack(fill=X)
         Label(self.frame_events, text="Upcoming Events", relief=gridRelief, bg='ivory4').pack(fill=X)
         Label(self.frame_events, text="Shower", relief=gridRelief).pack(fill=X)
+
+
+        ######################### SET UP DICE ROLLER MONITOR #########################
 
         # Label for the dice rollers
         Label(self.frame_diceRolls, text="Dice Rollers", relief=gridRelief, bg='ivory4', width=40).pack(side=TOP)
         Label(self.frame_diceRolls, text="Ill", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
         Label(self.frame_diceRolls, text="Very Ill", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
         Label(self.frame_diceRolls, text="Moral Support", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
+
+        
+        ######################### SET UP EVENT INJECTION #########################
 
         # Set up event type dropdown menu
         self.typeOptions = ["Undefined", "Eat", "Shower", "Exercise", "Conversation", "Moral", "Relative", "Friend", "Ill", "Very Ill", 
@@ -207,6 +234,9 @@ class DiceRollerGUI:
 
         Button(self.frame_injectEvent, text="Inject", command=self.injectEventCallback).pack(side=TOP, padx=10, pady=5, fill=X)
         
+        
+        ######################### SET UP EVENT MANIPULATION #########################
+
         # Label for event changing
         Label(self.frame_eventChange, text="Change Events", bg='ivory4', width=10).pack(side=TOP, padx=5, pady=5, fill=X)
         Button(self.frame_eventChange, text="Repopulate\nDaily Events", width=10, command=self.repopulateEventsCallback).pack(side=TOP, padx=5, pady=10, fill=X)
@@ -217,6 +247,9 @@ class DiceRollerGUI:
         #self.dice_label_widget = Label(self.frame_events, textvariable=self.dice_label)
         #self.dice_label_widget.pack()
 
+
+        ######################### SET UP ROSPY #########################
+
         # initialise listener node
         rospy.init_node('DiceRollListener', anonymous=True)
 
@@ -225,11 +258,6 @@ class DiceRollerGUI:
 
         # subscribe to topic
         rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)
-
-        # Dictionary which maps different events to different method which will respond to them.
-        self.events = {0:self.undefined, 1:self.eat, 2:self.shower, 3:self.exercise, 4:self.converse, 5:self.support, 6:self.relative,
-        7:self.friend, 8:self.ill, 9:self.veryIll, 10:self.medication, 11:self.cook, 12:self.entertainment, 13:self.companionship,
-        14:self.wake, 15:self.sleep}
 
 
     def run(self):
@@ -289,10 +317,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.caregiver_task.set("Feeding")
                 self.resident_task.set("Eating")
+                self.addCurrentEvents("Eating")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Eating")
 
     #Update shower state
     def shower(self, result):
@@ -300,10 +330,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.caregiver_task.set("Showering")
                 self.resident_task.set("Showering")
+                self.addCurrentEvents("Showering")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Showering")
 
     #Update exercise state
     def exercise(self, result):
@@ -311,10 +343,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.caregiver_task.set("Exercising")
                 self.resident_task.set("Exercising")
+                self.addCurrentEvents("Exercising")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Exercising")
 
     #Update converse state
     def converse(self, result):
@@ -322,10 +356,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.caregiver_task.set("Conversing")
                 self.resident_task.set("Conversing")
+                self.addCurrentEvents("Conversation")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Conversation")
 
     #Update support state
     def support(self, message):
@@ -333,10 +369,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.caregiver_task.set("Supporting")
                 self.resident_task.set("Complaining")
+                self.addCurrentEvents("Moral Support")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Moral Support")
 
     #Update relative state
     def relative(self, result):
@@ -344,10 +382,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.relative_task.set("Visiting")
                 self.resident_task.set("Interacting")
+                self.addCurrentEvents("Relative")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.relative_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Relative")
 
     #Update friend state
     def friend(self, result):
@@ -355,10 +395,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.friend_task.set("Visiting")
                 self.resident_task.set("Interacting")
+                self.addCurrentEvents("Friend")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.friend_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Friend")
 
     #Update ill state
     def ill(self, result):
@@ -366,10 +408,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.nurse_task.set("Nursing")
                 self.resident_task.set("Ill")
+                self.addCurrentEvents("Ill")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.nurse_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Ill")
 
     #Update veryIll state
     def veryIll(self, result):
@@ -377,10 +421,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.doctor_task.set("Doctoring")
                 self.resident_task.set("Very Ill")
+                self.addCurrentEvents("Very Ill")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.doctor_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Very Ill")
 
     #Update medication state
     def medication(self, result):
@@ -388,10 +434,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.medication_task.set("Drugging")
                 self.resident_task.set("Tripping")
+                self.addCurrentEvents("Medication")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.medication_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Medication")
 
     #Update cook state
     def cook(self, result):
@@ -399,10 +447,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.cook_task.set("Cooking")
                 self.resident_task.set("Waiting")
+                self.addCurrentEvents("Cooking")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.cook_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Cooking")
 
     #Update entertainment state
     def entertainment(self, result):
@@ -410,10 +460,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.entertainment_task.set("Entertaining")
                 self.resident_task.set("Enjoying")
+                self.addCurrentEvents("Entertainment")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.entertainment_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Entertainment")
 
     #Update companionship state
     def companionship(self, result):
@@ -421,10 +473,12 @@ class DiceRollerGUI:
             if (message.result == 0):
                 self.companion_task.set("Accompanying")
                 self.resident_task.set("Talking")
+                self.addCurrentEvents("Companionship")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.companion_task.set("None")
                 self.resident_task.set("None")
+                self.removeCurrentEvents("Companionship")
 
     #Update wake state
     def wake(self, result):
@@ -447,6 +501,25 @@ class DiceRollerGUI:
             if (message.result == 2):
                 self.resident_task.set("None")
                 self.resident_task.set("None")
+
+    def addCurrentEvents(self, newEvent):
+        for current in self.current_events:
+            if (current.get() == ""):
+                current.set(newEvent)
+                break
+            elif (current.get() == newEvent):
+                break
+
+    def removeCurrentEvents(self, currentEvent):
+        for current in self.current_events:
+            if (current.get() == currentEvent):
+                current.set("")
+
+    def addCurrentEvent(self, newEvent):
+        self.current_tasks[self.current_tasks.index("")] = newEvent
+
+    def removeCurrentEvent(self, currentEvent):
+        self.current_tasks[self.current_tasks.index(currentEvent)] = newEvent
 
     #Update undefined state
     def update_robot_task(self, data):
