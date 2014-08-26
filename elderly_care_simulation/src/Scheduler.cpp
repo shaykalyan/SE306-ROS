@@ -83,6 +83,10 @@ void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
         return;
     }
 
+    // reset boolean flag to allow pending event to be re-published
+    // in the case that the external event will sit at the top of queue
+    stopRosInfoSpam = false;
+
     // If the incoming event is a random event
     if(randomEventLimit.count(msg.event_type) != 0) {
 
@@ -132,6 +136,23 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
 }
 
 /**
+ * Callback function to react to actions triggered via the Interactive GUI
+ */
+void Scheduler::guiCommunicationCallback(GuiComm msg) {
+    if (msg.msg_type == GUI_COMM_MSG_TYPE_REQUEST) {
+        switch(msg.action) {
+        case GUI_COMM_ACTION_POPULATE:
+            populateDailyTasks();
+            break;
+        case GUI_COMM_ACTION_CLEAR:
+            clearEventQueue();
+            break;
+        }
+        ROS_INFO("Scheduler: GUI action received [%s]", actionToString(msg.action));
+    }
+}
+
+/**
  * Populates daily scheduled tasks into the event queue.
  * 
  * Daily Schedule will be queued in the following sequence:
@@ -171,26 +192,26 @@ void Scheduler::populateDailyTasks() {
         // { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_KITCHEN, EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW }
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
-        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Noon
-        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_RELATIVE,        EVENT_TRIGGER_PRIORITY_LOW },
-        { EVENT_TRIGGER_EVENT_TYPE_FRIEND,          EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_FRIEND,          EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Evening
-        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
-        { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW }
+        // { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW }
         // { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
     };
     for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
@@ -263,7 +284,7 @@ void Scheduler::dequeueEvent() {
                 break;
 
             default:
-                allowNewEvents = false;
+                allowNewEvents = true;
                 eventTriggerPub.publish(msg);
                 concurrentWeight += msg.event_weight;
                 eventQueue.pop();
@@ -286,24 +307,6 @@ void Scheduler::dequeueEvent() {
         }
     }
 }
-
-/**
- * Callback function to react to actions triggered via the Interactive GUI
- */
-void Scheduler::guiCommunicationCallback(GuiComm msg) {
-    if (msg.msg_type == GUI_COMM_MSG_TYPE_REQUEST) {
-        switch(msg.action) {
-        case GUI_COMM_ACTION_POPULATE:
-            populateDailyTasks();
-            break;
-        case GUI_COMM_ACTION_CLEAR:
-            clearEventQueue();
-            break;
-        }
-        ROS_INFO("Scheduler: GUI action received [%s]", actionToString(msg.action));
-    }
-}
-
 
 void callEventTriggerCallback(EventTrigger msg) {
     scheduler.eventTriggerCallback(msg);
@@ -347,7 +350,7 @@ int main(int argc, char **argv) {
 
     //a count of howmany messages we have sent
     int count = 0;
-    sleep(3);
+    sleep(5);
     ROS_INFO("Day Starts....");
 
     while (ros::ok()) {
