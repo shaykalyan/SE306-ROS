@@ -213,15 +213,15 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
         currentTaskType = taskType;
     }
 
-    bool atPoiForTask = atPointOfInterest(taskPoi, 1.0f);
+    bool isInCorrectPlace = !taskRequiresPoi || atPointOfInterest(taskPoi, 0.5f);
 
-    if (taskRequiresPoi && !atPoiForTask && !navigatingToPoiForTask) {
+    if (taskRequiresPoi && !isInCorrectPlace && !navigatingToPoiForTask) {
         navigatingToPoiForTask = true;
         goToLocation(taskPoi);
         res.result = PERFORM_TASK_RESULT_TAKE_ME_THERE;
-    } else if ((taskType == currentTaskType) && atPoiForTask) {
+    } else if ((taskType == currentTaskType) && isInCorrectPlace) {
         // We must be dealing with the current helper and we've reached any POI we needed to get to
-        res.result = handleTask(taskType);;
+        res.result = handleTask(taskType);
     } else {
         // We are busy: either moving to a POI or dealing with another task
         res.result = PERFORM_TASK_RESULT_BUSY;
@@ -247,12 +247,13 @@ void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg)
             break;
         case ILL:
             ROS_INFO("Resident: I am ill");
-            // TODO:
-            return;
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_ILL;
+            msgOut.event_priority = EVENT_TRIGGER_PRIORITY_VERY_HIGH;
             break;
         case VERY_ILL:
             ROS_INFO("Resident: I am very ill");
-            // TODO:
+            msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VERY_ILL;
+            msgOut.event_priority = EVENT_TRIGGER_PRIORITY_VERY_HIGH;
             return;
             break;
         default:
@@ -261,7 +262,7 @@ void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg)
     }
     msgOut.event_weight = getEventWeight(msgOut.event_type);
     ROS_INFO("Resident: Sending request to scheduler");
-    residentEventPub.publish(msgOut);
+    externalEventPub.publish(msgOut);
 }
 
 Resident resident;
@@ -297,7 +298,7 @@ int main(int argc, char **argv) {
 
       // Initialise publishers
     resident.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
-    resident.residentEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
+    resident.externalEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("external_event",1000, true);
 
     // Initialise subscribers
     resident.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, callStage0domCallback);

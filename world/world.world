@@ -112,3 +112,8 @@ robot(
   name "FeedingRobot"
   pose [12 1 0 0 ]
 )
+
+robot(
+  name "Caregiver"
+  pose [ 5 -5 0 0 ]
+)

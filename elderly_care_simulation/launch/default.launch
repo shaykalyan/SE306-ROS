@@ -6,6 +6,7 @@
 	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
 	<node name="assistant" pkg="elderly_care_simulation" type="Assistant" />
 	<node name="feeder" pkg="elderly_care_simulation" type="FeedingRobot" />
+	<node name="caregiver" pkg="elderly_care_simulation" type="Caregiver" />
 	<node name="nurse" pkg="elderly_care_simulation" type="NurseRobot" />
 	<node name="medication" pkg="elderly_care_simulation" type="MedicationRobot" />
 	<node name="companionship" pkg="elderly_care_simulation" type="CompanionshipRobot" />
@@ -14,7 +15,7 @@
     <node name="friend" pkg="elderly_care_simulation" type="FriendRobot" />
 	<node name="moralSupportDiceRoller" pkg="elderly_care_simulation" type="MoralSupportDiceRoller" />	
 	<node name="illDiceRoller" pkg="elderly_care_simulation" type="IllDiceRoller" />
-    	<node name="VeryIllDiceRoller" pkg="elderly_care_simulation" type="VeryIllDiceRoller" />
+    <node name="VeryIllDiceRoller" pkg="elderly_care_simulation" type="VeryIllDiceRoller" />
 	<node name="console" pkg="rqt_console" type="rqt_console" />
 	
 	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/house-navigation.pgm"/>
