@@ -16,7 +16,7 @@ class IllDiceRoller : public DiceRoller {
 
     public:
 
-        IllDiceRoller() : DiceRoller(5000) {}
+        IllDiceRoller() : DiceRoller(990000) {}
         ~IllDiceRoller();
 };
 
