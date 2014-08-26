@@ -87,5 +87,5 @@ target_link_libraries(MedicationRobot Robot Poi StaticPoi)
 rosbuild_add_executable(NurseRobot src/NurseRobot.cpp)  #R8
 target_link_libraries(NurseRobot Robot Poi StaticPoi)
 
-rosbuild_add_executable(FeedingRobot src/FeedingRobot.cpp)  #R9
+rosbuild_add_executable(FeedingRobot src/EscortRobot.cpp)  #R9
 target_link_libraries(FeedingRobot Robot Poi StaticPoi)

@@ -21,12 +21,15 @@ class EscortRobot : public Robot {
         ros::Subscriber eventTriggerSub;
         ros::Subscriber residentLocationSub;
 
+        ros::ServiceClient performTaskClient;
+
     private:
         geometry_msgs::Point base;
         geometry_msgs::Point poi;
         geometry_msgs::Point residentLocation;
 
         int eventType;
+        bool performingTask;
 
         // Location State
         enum LocationState {
@@ -38,6 +41,9 @@ class EscortRobot : public Robot {
         void eventFinished();
         void goToBase();
         void goToPoi();
+        void goToResident();
+        void performTask();
+        void notifySchedulerOfTaskCompletion();
 
 };
 
