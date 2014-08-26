@@ -126,7 +126,16 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
 
                 eventQueue.push(EventNode(eatMsg));
             }else{
-                concurrentWeight -= msg.event_weight;
+
+                // ILL has a weight of 0, but still blocks all other events (taking up 2 slots)
+                // Therefore need to -2 to concurrent weight to free the slot.
+                if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ILL ||
+                    msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+                    concurrentWeight -= 2;
+                }else {
+                    concurrentWeight -= msg.event_weight;
+                }
+                
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
             }
         }
@@ -237,7 +246,8 @@ void Scheduler::dequeueEvent() {
             case EVENT_TRIGGER_EVENT_TYPE_ILL:
                 allowNewEvents = false;
 
-                concurrentWeight += msg.event_weight;
+                // ILL has a weight of 0, but still blocks all other events
+                concurrentWeight += 2;
                 eventTriggerPub.publish(msg);
                 eventQueue.pop();
 
@@ -250,7 +260,8 @@ void Scheduler::dequeueEvent() {
             case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
                 allowNewEvents = false;
 
-                concurrentWeight += msg.event_weight;
+                // VERY_ILL has a weight of 0, but still blocks all other events
+                concurrentWeight += 2;
                 eventTriggerPub.publish(msg);
                 eventQueue.pop();
 
