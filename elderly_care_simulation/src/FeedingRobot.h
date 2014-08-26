@@ -21,7 +21,7 @@ class FeedingRobot : public Robot {
         ros::Subscriber eventTriggerSub;
 
     private:
-        StaticPoi base = StaticPoi(1.0f, 0.0f, 0.0f);
+        StaticPoi base = StaticPoi(12.0f, 1.0f, 0.0f);
         StaticPoi table = StaticPoi(ADJACENT_TABLE_X, ADJACENT_TABLE_Y, 0.0f);
 
         // Location State
