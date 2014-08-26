@@ -4,6 +4,7 @@ include "include/robot.inc"
 include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
+include "include/medicationRobot.inc"
 
 
 #resolution of the underline bitmap model in meters.
@@ -96,4 +97,8 @@ robot(
   name "Chef"
   pose [ 12 0 0 0 ]
 )
-  
+
+medicationRobot(
+  name "MedicationRobot"
+  pose [ 5 -8 0 0 ]
+)

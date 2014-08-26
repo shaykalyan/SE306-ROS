@@ -23,6 +23,9 @@ const float ADJACENT_SHOWER_Y = -5.0f;
 const float STOVE_X = 8.0f;
 const float STOVE_Y = 7.0f;
 
+const float MEDICATIONROBOT_HOME_X = 5.0f;
+const float MEDICATIONROBOT_HOME_Y = -8.0f;
+
 const float COOK_HOME_X = 12.0f;
 const float COOK_HOME_Y = 0.0f;
 
