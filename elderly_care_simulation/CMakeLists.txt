@@ -51,6 +51,7 @@ rosbuild_add_executable(VeryIllDiceRoller src/VeryIllDiceRoller.cpp)
 target_link_libraries(VeryIllDiceRoller DiceRoller)
 
 rosbuild_add_executable(Scheduler src/Scheduler.cpp)
+target_link_libraries(Scheduler)
 
 # Testing
 rosbuild_add_gtest(test/TestDiceRoller test/TestDiceRoller.cpp)
