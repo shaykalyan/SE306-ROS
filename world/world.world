@@ -91,4 +91,9 @@ companionship(
   name "Companionship"
   pose [ 5 -5 0 0 ]
 )
+
+robot(
+  name "Chef"
+  pose [ 12 0 0 0 ]
+)
   

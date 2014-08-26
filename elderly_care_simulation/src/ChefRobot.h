@@ -21,7 +21,7 @@
         ros::Subscriber eventTriggerSub;
 
     private:
-        StaticPoi base = StaticPoi(12.0f, 0.0f, 0.0f);
+        StaticPoi base = StaticPoi(COOK_HOME_X, COOK_HOME_Y, 0.0f);
         StaticPoi stove = StaticPoi(STOVE_X, STOVE_Y, 0.0f);
 
         // Location State

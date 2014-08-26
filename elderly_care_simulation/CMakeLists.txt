@@ -78,9 +78,6 @@ target_link_libraries(FriendRobot Robot Poi StaticPoi)
 rosbuild_add_executable(CompanionshipRobot src/CompanionshipRobot.cpp)	        #R5
 target_link_libraries(CompanionshipRobot Robot Poi StaticPoi)
 
-
-
-
-rosbuild_add_executable(ChefRobot src/ChefRobot.cpp)         #R4
+rosbuild_add_executable(ChefRobot src/ChefRobot.cpp)         #R6
 target_link_libraries(ChefRobot Robot Poi StaticPoi)
 
