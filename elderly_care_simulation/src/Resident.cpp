@@ -27,17 +27,27 @@
 
 // Current task type: -1 corresponds to no task
 
+;Resident::Resident(){
+    currentTaskType = EVENT_TRIGGER_EVENT_TYPE_UNDEFINED;
 
-Resident::Resident(){
-    currentTaskType = -1;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_EAT] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_SHOWER] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_EXERCISE] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_CONVERSATION] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = 0;    
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_RELATIVE] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_FRIEND] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_ILL] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_VERY_ILL] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_MEDICATION] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_COOK] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP] = 0;
 
-    // Basic health attributes
-    HEALTHY_THRESHOLD = 50;
-    happiness = 0;
-    amusement = 0;
-   
+    navigatingToPoiForTask = false;
 }
-Resident::~Resident(){
+
+Resident::~Resident() {
     
 }
 
@@ -63,57 +73,94 @@ void Resident::taskCompleted(const std_msgs::Empty empty){
     locationQueue.push(locationThree);*/
 }
 
+void Resident::resetTaskProgress(int taskType) {
+    taskProgress[taskType] = 0;
+}
+
 /**
- * Change the resident's state in response to a task that is being performed
+ * Reset the current task to UNDEFINED and clear all task progress states.
+ */
+void Resident::clearAllTasks() {
+    currentTaskType = EVENT_TRIGGER_RESULT_UNDEFINED;
+
+    for(std::map<int, int >::iterator iter = taskProgress.begin(); iter != taskProgress.end(); ++iter) {
+        taskProgress[iter->first] = 0;
+    }
+}
+
+/**
+ * Update a task's progress in response to a task that is being performed
  * by a helper.
- * 
- * At this stage, it is assumed for simplicity that the visitor is 
- * consoling and the assistant is entertaining. TODO: In a later release
- * there will be many other types of task. 
  * 
  * @param taskType the type of task that is being performed
  * @return PERFORM_TASK_RESULT_ACCEPTED or PERFORM_TASK_RESULT_FINISHED
  *         (which correspond to 0 and 1 respectively)
  */
 int Resident::handleTask(int taskType) {
-	int result;
-	
-	switch (taskType) {
-		case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
-			// The visitor is consoling us
-			happiness += 1;
-			if (happiness > HEALTHY_THRESHOLD) {
-				ROS_INFO("Resident: Happiness raised to %d and I'm now happy enough!", happiness);
-				result = PERFORM_TASK_RESULT_FINISHED;
-				currentTaskType = NO_CURRENT_TASK;
+    int result = -1;
+    std::string taskName = eventTypeToString(taskType);
 
-				std_msgs::Empty emptyMessage;
-				taskCompleted(emptyMessage);
-			} else {
-				ROS_INFO("Resident: Happiness raised to %d, continue consoling", happiness);
-				result = PERFORM_TASK_RESULT_ACCEPTED;
-			}
-			break;
-		case EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT:
-			// The assistant is entertaining us
-			amusement += 1;
-			if (amusement > HEALTHY_THRESHOLD) {
-				ROS_INFO("Resident: Amusement raised to %d and I've had enough!", amusement);
-				result = PERFORM_TASK_RESULT_FINISHED;
-				currentTaskType = NO_CURRENT_TASK;
+    // Check that a valid task type has been given
+    if (taskProgress.count(taskType) == 0) {
+        ROS_ERROR("Unknown event type: %d", taskType);
+        throw std::runtime_error("Unknown event type");
+    }
 
-				std_msgs::Empty emptyMessage;
-				taskCompleted(emptyMessage);
-			} else {
-				ROS_INFO("Resident: Amusement raised to %d, keep being funny.", amusement);
-				result = PERFORM_TASK_RESULT_ACCEPTED;
-			}
-		    break;
-        default:
-            result = -1;
-	}
-	
-	return result;
+    int progress = taskProgress[taskType];
+    progress += 1;
+    taskProgress[taskType] = progress;
+
+    if (progress >= TASK_PROGRESS_THRESHOLD) {
+        ROS_INFO("Resident: Helper can finish performing the %s task.",  taskName.c_str());
+        result = PERFORM_TASK_RESULT_FINISHED;
+
+        // Reset task progress
+        currentTaskType = EVENT_TRIGGER_EVENT_TYPE_UNDEFINED;
+        resetTaskProgress(taskType);
+
+        // Carry out any task completion behaviour
+        std_msgs::Empty emptyMessage;
+        taskCompleted(emptyMessage);
+    } else {
+        ROS_INFO("Resident: Continue with the %s task.",  taskName.c_str());
+        result = PERFORM_TASK_RESULT_ACCEPTED;
+    }
+
+    return result;
+}
+
+bool Resident::shouldRespondGoAway(int requestedTaskType) {
+    bool result = false;
+
+    if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL && 
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // We're very ill and the request is not to do with being very ill
+        result = true;
+    } else if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // We're ill and the request is unrelated to any type of illness
+        result = true;
+    }
+
+    return result;
+}
+
+bool Resident::shouldOverrideCurrentTask(int requestedTaskType) {
+    bool result = false;
+
+    if (currentTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL &&
+        requestedTaskType == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // A VERY_ILL request should always override if our current task isn't also VERY_ILL
+        result = true;
+    } else if (currentTaskType != EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        currentTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL &&
+        requestedTaskType == EVENT_TRIGGER_EVENT_TYPE_ILL) {
+        // An ILL request should override if the current task is not ILL or VERY_ILL
+        result = true;
+    }
+
+    return result;
 }
 
 /**
@@ -130,25 +177,61 @@ int Resident::handleTask(int taskType) {
  *   2 - I am busy at the moment, try again
  */
 bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
-				   elderly_care_simulation::PerformTask::Response &res) {
-					   
-	//ROS_INFO("Received service call with task type: %d", req.taskType);
-	
-	if (currentTaskType == NO_CURRENT_TASK) {
-		// I don't yet have a task, make this one our current task
-		currentTaskType = req.taskType;
-	}
-	
-	if (req.taskType == currentTaskType) {
-		// We must be dealing with the current helper
-		res.result = handleTask(req.taskType);
-	} else {
-		// We are busy with another task
-		res.result = PERFORM_TASK_RESULT_BUSY;
-	}
-		
-	return true;
+                   elderly_care_simulation::PerformTask::Response &res) {
+                       
+    int taskType = req.taskType;
+    bool taskRequiresPoi = req.taskRequiresPoi;
+    geometry_msgs::Point taskPoi = req.taskPoi;
+
+    // Sending an undefined event type is a mechanism to clear the resident's tasks
+    if (taskType == EVENT_TRIGGER_RESULT_UNDEFINED) {
+        clearAllTasks();
+        res.result = PERFORM_TASK_RESULT_FINISHED;
+        return true;
+    }
+
+    ROS_INFO("Resident: Someone is requesting to perform task %d", taskType);
+
+    // If we're dealing with health tasks, tell other helpers to go away
+    if (shouldRespondGoAway(taskType)) {
+        res.result = PERFORM_TASK_RESULT_FINISHED;
+        ROS_INFO("Resident: Telling them to go away.");
+        return true;
+    }
+
+    // If we're dealing with a task and an illness task request comes along, switch to it
+    if (shouldOverrideCurrentTask(taskType)) {
+        resetTaskProgress(taskType);
+        currentTaskType = taskType;
+        ROS_INFO("Resident: Overriding current task.");
+
+    }
+
+    // No more special case needs to be considered for illness-related tasks, proceed to accept the task
+
+    if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
+        currentTaskType = taskType;
+    }
+
+    bool atPoiForTask = atPointOfInterest(taskPoi, 1.0f);
+
+    if (taskRequiresPoi && !atPoiForTask && !navigatingToPoiForTask) {
+        navigatingToPoiForTask = true;
+        goToLocation(taskPoi);
+        res.result = PERFORM_TASK_RESULT_TAKE_ME_THERE;
+    } else if ((taskType == currentTaskType) && atPoiForTask) {
+        // We must be dealing with the current helper and we've reached any POI we needed to get to
+        res.result = handleTask(taskType);;
+    } else {
+        // We are busy: either moving to a POI or dealing with another task
+        res.result = PERFORM_TASK_RESULT_BUSY;
+    }
+
+    ROS_INFO("Resident: I'm responding with result %d", res.result);
+        
+    return true;
 }
+
 
 void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg){
     elderly_care_simulation::EventTrigger msgOut;
@@ -235,18 +318,6 @@ int main(int argc, char **argv) {
 	while (ros::ok())
 	{
 		resident.updateCurrentVelocity();
-
-		// Every 5 seconds ...
-		if (count % 50 == 0) {
-			
-            // ... decrease health values
-			
-			resident.amusement = (resident.amusement - 15) > 0 ? resident.amusement - 15 : 0;
-			ROS_INFO("Amusement level fell to %d", resident.amusement);
-
-			resident.happiness = (resident.happiness - 10) > 0 ? resident.happiness - 10 : 0;
-			ROS_INFO("Happiness level fell to %d", resident.happiness);
-		}
 
 		ros::spinOnce();
 		loop_rate.sleep();

@@ -34,6 +34,8 @@ class Robot{
 		void stopSpinning();
 		void updateCurrentVelocity();
 		bool atDesiredLocation();
+		bool atPointOfInterest(geometry_msgs::Point p, double tolerance);
+
 
 		
 
