@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
 
     while (ros::ok()) {
         
-        // Every 10 ticks ...
-        if (tick % 10 == 0) {
+        // Every 30 ticks ...
+        if (tick % 30 == 0) {
 
             // ... roll dice
             bool result = roller.roll();
