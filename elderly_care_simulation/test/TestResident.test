@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="elderly_care_simulation" type="Resident" name="Resident" />
+  <test test-name="TestResident" pkg="elderly_care_simulation" type="TestResident" />
+</launch>
