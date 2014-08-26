@@ -29,18 +29,19 @@ class Resident : public Robot, public Poi {
 	public:
 		Resident();
 		~Resident();
+
 		int currentTaskType;
-		int HEALTHY_THRESHOLD;
-		int happiness;
-		int amusement;
+
+		std::map<int, int> taskProgress;
 
 		ros::Subscriber diceTriggerSub;
-		ros::Publisher residentEventPub;
+		ros::Publisher externalEventPub;
 		ros::Subscriber locationInstructionsSub;
 		ros::Subscriber pathOfResidentSub;
 
 		void diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg);
 		void taskCompleted(const std_msgs::Empty);
+		void clearAllTasks();
 		int handleTask(int taskType);
 		bool performTaskServiceHandler(elderly_care_simulation::PerformTask::Request &req,
 				   elderly_care_simulation::PerformTask::Response &res);
@@ -50,6 +51,10 @@ class Resident : public Robot, public Poi {
         }
 
 	private:
+		void resetTaskProgress(int taskType);
+		bool shouldRespondGoAway(int requestedTaskType);
+		bool shouldOverrideCurrentTask(int requestedTaskType);
+		bool navigatingToPoiForTask;
 		
 };
 

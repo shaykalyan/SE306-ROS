@@ -89,6 +89,14 @@ void Visitor::performTask() {
 	// Generate the service call
 	elderly_care_simulation::PerformTask performTaskSrv;
 	performTaskSrv.request.taskType = MY_TASK;
+    //performTaskSrv.request.taskRequiresPoi = true;
+
+    //geometry_msgs::Point taskPoi;
+    //taskPoi.x = 0;
+    //taskPoi.y = -4;
+    //taskPoi.z = 0;
+
+    //performTaskSrv.request.taskPoi = taskPoi;
 	
 	// Make the call using the client
 	if (!performTaskClient.call(performTaskSrv)) {
@@ -103,6 +111,11 @@ void Visitor::performTask() {
 			startSpinning(false);
 			break;
 		}
+        case PERFORM_TASK_RESULT_TAKE_ME_THERE: 
+        {
+            ROS_INFO("Visitor: Resident wants to be taken to the POI");
+            break;
+        }
 		case PERFORM_TASK_RESULT_FINISHED:
 		{
 			// Resident accepted the task and has had enough
