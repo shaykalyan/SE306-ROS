@@ -152,14 +152,21 @@ class DiceRollerGUI:
 
         # Set up event type dropdown menu
         self.typeOptions = ["Undefined", "Eat", "Shower", "Exercise", "Conversation", "Moral", "Relative", "Friend", "Ill", "Very Ill", 
-        "Medication", "Cook", "Entertainment", "Companionship"]
+        "Medication", "Cook", "Entertainment", "Companionship", "Wake", "Sleep"]
         self.eventType = StringVar(self.root)
         self.eventType.set(self.typeOptions[0])
+
+        # Dictionary for mapping event names to their corresponding numbers
+        self.typeDict = {"Undefined":0, "Eat":1 , "Shower":2, "Exercise":3, "Conversation":4, "Moral":5, "Relative":6, "Friend":7, "Ill":8,
+        "Very Ill":9, "Medication":10, "Cook":11, "Entertainment":12, "Companionship":13, "Wake":14, "Sleep":15}
 
         # Set up event message menu
         self.messageOptions = ["Undefined", "Request", "Response"]
         self.eventMessage = StringVar(self.root)
         self.eventMessage.set(self.messageOptions[0])
+
+        # Dictionary for mapping message names to their corresponding numbers
+        self.messageDict = {"Undefined":0, "Request":1, "Response":2}
 
         # Set up event priority menu
         self.priorityOptions = ["0", "1", "2", "3", "4", "5", "6"]
@@ -175,6 +182,9 @@ class DiceRollerGUI:
         self.resultOptions = ["Undefined", "Success", "Failure"]
         self.eventResult = StringVar(self.root)
         self.eventResult.set(self.resultOptions[0])
+
+        # Dictionary for mapping result names to their corresponding numbers
+        self.resultDict = {"Undefined":0, "Success":1, "Failure":2}
 
         # Create dropdown menus and inject button
         # Label for event injection
@@ -195,12 +205,12 @@ class DiceRollerGUI:
         Label(self.frame_injectEvent, text="Event Result", bg='ivory2', width=15).pack(side=TOP, padx=10, fill=X)
         OptionMenu(self.frame_injectEvent, self.eventResult, *self.resultOptions).pack(side=TOP, padx=10, pady=5, fill=X)
 
-        Button(self.frame_injectEvent, text="Inject").pack(side=TOP, padx=10, pady=5, fill=X)
+        Button(self.frame_injectEvent, text="Inject", command=self.injectEventCallback).pack(side=TOP, padx=10, pady=5, fill=X)
         
         # Label for event changing
         Label(self.frame_eventChange, text="Change Events", bg='ivory4', width=10).pack(side=TOP, padx=5, pady=5, fill=X)
-        Button(self.frame_eventChange, text="Repopulate\nDaily Events", width=10).pack(side=TOP, padx=5, pady=10, fill=X)
-        Button(self.frame_eventChange, text="Clear All\nEvents").pack(side=TOP, padx=10, pady=10, fill=X)
+        Button(self.frame_eventChange, text="Repopulate\nDaily Events", width=10, command=self.repopulateEventsCallback).pack(side=TOP, padx=5, pady=10, fill=X)
+        Button(self.frame_eventChange, text="Clear All\nEvents", width=10, command=self.clearEventsCallback).pack(side=TOP, padx=10, pady=10, fill=X)
 
         # create and assign dice label to label widget. Updating dice_label will
         # automatically update the widget's text
@@ -208,9 +218,10 @@ class DiceRollerGUI:
         #self.dice_label_widget.pack()
 
         # initialise listener node
-        # anonymous ensures a unique listeners allowing multiple instances
-        # of DiceRollListener to running simultanously
         rospy.init_node('DiceRollListener', anonymous=True)
+
+        # Initialise publisher for injecting events
+        self.eventTriggerPub = rospy.Publisher('event_trigger', EventTrigger)
 
         # subscribe to topic
         rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)
@@ -246,6 +257,27 @@ class DiceRollerGUI:
         print("result: ", result)"""
 
         self.events[msg.event_type](msg)
+
+
+    # Callback method for repopulating events
+    def repopulateEventsCallback(self):
+        print("Repopulate!")
+
+    # Callback method for clearing events
+    def clearEventsCallback(self):
+        print("Clear!")
+
+    # Callback method for clearing events
+    def injectEventCallback(self):
+        print("INJECT!")
+        injectEvent = EventTrigger()
+        injectEvent.msg_type = self.messageDict[self.eventMessage.get()]
+        injectEvent.event_type = self.typeDict[self.eventType.get()]
+        injectEvent.event_priority = int(self.eventPriority.get())
+        injectEvent.event_weight = int(self.eventWeight.get())
+        injectEvent.result = self.resultDict[self.eventResult.get()]
+
+        self.eventTriggerPub.publish(injectEvent)
 
     #Update undefined state
     def undefined(self, result):
