@@ -27,12 +27,12 @@
 
 // Current task type: -1 corresponds to no task
 
-
-Resident::Resident(){
+;Resident::Resident(){
     currentTaskType = EVENT_TRIGGER_EVENT_TYPE_UNDEFINED;
 
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_EAT] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_SHOWER] = 0;
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_EXERCISE] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_CONVERSATION] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = 0;    
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_RELATIVE] = 0;
@@ -43,9 +43,11 @@ Resident::Resident(){
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COOK] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP] = 0;
-   
+
+    navigatingToPoiForTask = false;
 }
-Resident::~Resident(){
+
+Resident::~Resident() {
     
 }
 
@@ -73,6 +75,17 @@ void Resident::taskCompleted(const std_msgs::Empty empty){
 
 void Resident::resetTaskProgress(int taskType) {
     taskProgress[taskType] = 0;
+}
+
+/**
+ * Reset the current task to UNDEFINED and clear all task progress states.
+ */
+void Resident::clearAllTasks() {
+    currentTaskType = EVENT_TRIGGER_RESULT_UNDEFINED;
+
+    for(std::map<int, int >::iterator iter = taskProgress.begin(); iter != taskProgress.end(); ++iter) {
+        taskProgress[iter->first] = 0;
+    }
 }
 
 /**
@@ -116,6 +129,40 @@ int Resident::handleTask(int taskType) {
     return result;
 }
 
+bool Resident::shouldRespondGoAway(int requestedTaskType) {
+    bool result = false;
+
+    if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL && 
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // We're very ill and the request is not to do with being very ill
+        result = true;
+    } else if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        requestedTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // We're ill and the request is unrelated to any type of illness
+        result = true;
+    }
+
+    return result;
+}
+
+bool Resident::shouldOverrideCurrentTask(int requestedTaskType) {
+    bool result = false;
+
+    if (currentTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL &&
+        requestedTaskType == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+        // A VERY_ILL request should always override if our current task isn't also VERY_ILL
+        result = true;
+    } else if (currentTaskType != EVENT_TRIGGER_EVENT_TYPE_ILL &&
+        currentTaskType != EVENT_TRIGGER_EVENT_TYPE_VERY_ILL &&
+        requestedTaskType == EVENT_TRIGGER_EVENT_TYPE_ILL) {
+        // An ILL request should override if the current task is not ILL or VERY_ILL
+        result = true;
+    }
+
+    return result;
+}
+
 /**
  * Handler for PerformTask.srv service 
  * 
@@ -133,25 +180,51 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
                    elderly_care_simulation::PerformTask::Response &res) {
                        
     int taskType = req.taskType;
+    bool taskRequiresPoi = req.taskRequiresPoi;
+    geometry_msgs::Point taskPoi = req.taskPoi;
+
+    // Sending an undefined event type is a mechanism to clear the resident's tasks
+    if (taskType == EVENT_TRIGGER_RESULT_UNDEFINED) {
+        clearAllTasks();
+        res.result = PERFORM_TASK_RESULT_FINISHED;
+        return true;
+    }
 
     ROS_INFO("Resident: Someone is requesting to perform task %d", taskType);
+
+    // If we're dealing with health tasks, tell other helpers to go away
+    if (shouldRespondGoAway(taskType)) {
+        res.result = PERFORM_TASK_RESULT_FINISHED;
+        ROS_INFO("Resident: Telling them to go away.");
+        return true;
+    }
+
+    // If we're dealing with a task and an illness task request comes along, switch to it
+    if (shouldOverrideCurrentTask(taskType)) {
+        resetTaskProgress(taskType);
+        currentTaskType = taskType;
+        ROS_INFO("Resident: Overriding current task.");
+
+    }
 
     // No more special case needs to be considered for illness-related tasks, proceed to accept the task
 
     if (currentTaskType == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
-        // I don't yet have a task, make this one our current task
         currentTaskType = taskType;
     }
-    
-    if (taskType == currentTaskType) {
-        // We must be dealing with the current helper
-        int result = handleTask(taskType);
-        res.result = result;
-        ROS_INFO("Resident: Handled task with result %d.", result);
+
+    bool atPoiForTask = atPointOfInterest(taskPoi, 1.0f);
+
+    if (taskRequiresPoi && !atPoiForTask && !navigatingToPoiForTask) {
+        navigatingToPoiForTask = true;
+        goToLocation(taskPoi);
+        res.result = PERFORM_TASK_RESULT_TAKE_ME_THERE;
+    } else if ((taskType == currentTaskType) && atPoiForTask) {
+        // We must be dealing with the current helper and we've reached any POI we needed to get to
+        res.result = handleTask(taskType);;
     } else {
-        // We are busy with another task
+        // We are busy: either moving to a POI or dealing with another task
         res.result = PERFORM_TASK_RESULT_BUSY;
-        ROS_INFO("Resident: Busy with another task.");
     }
 
     ROS_INFO("Resident: I'm responding with result %d", res.result);
