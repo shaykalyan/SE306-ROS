@@ -42,6 +42,12 @@ target_link_libraries(StaticPoi Poi)
 rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
 target_link_libraries(MoralSupportDiceRoller DiceRoller)
 
+rosbuild_add_executable(IllDiceRoller src/IllDiceRoller.cpp)
+target_link_libraries(IllDiceRoller DiceRoller)
+
+rosbuild_add_executable(VeryIllDiceRoller src/VeryIllDiceRoller.cpp)
+target_link_libraries(VeryIllDiceRoller DiceRoller)
+
 rosbuild_add_executable(Scheduler src/Scheduler.cpp)
 
 # Testing
@@ -78,3 +84,5 @@ target_link_libraries(ChefRobot Robot Poi StaticPoi)
 rosbuild_add_executable(MedicationRobot src/MedicationRobot.cpp)    #R7
 target_link_libraries(MedicationRobot Robot Poi StaticPoi)
 
+rosbuild_add_executable(NurseRobot src/NurseRobot.cpp)  #R8
+target_link_libraries(NurseRobot Robot Poi StaticPoi)
