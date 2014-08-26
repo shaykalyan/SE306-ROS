@@ -95,3 +95,6 @@ target_link_libraries(Caregiver Robot Poi StaticPoi)
 
 rosbuild_add_executable(FeedingRobot src/FeedingRobot.cpp)  					#R10
 target_link_libraries(FeedingRobot Robot EscortRobot Poi StaticPoi)
+
+rosbuild_add_executable(DoctorRobot src/DoctorRobot.cpp)                      #R11
+target_link_libraries(DoctorRobot Robot EscortRobot Poi StaticPoi)

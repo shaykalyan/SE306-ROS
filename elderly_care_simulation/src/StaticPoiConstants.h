@@ -55,5 +55,11 @@ const float ADJACENT_TABLE_Y =  5.0f;
 const float FEEDER_BASE_X    = 12.0f;
 const float FEEDER_BASE_Y    = -4.0f;
 
+// Constants for the doctor robot
+const float ADJACENT_HOSPITAL_X = 12.0f;
+const float ADJACENT_HOSPITAL_Y = 3.0f;
+const float DOCTOR_BASE_X = 12.0f;
+const float DOCTOR_BASE_Y = 3.0f;
+
 
 #endif

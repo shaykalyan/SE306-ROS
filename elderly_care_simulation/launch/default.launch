@@ -6,6 +6,7 @@
 	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
 	<node name="assistant" pkg="elderly_care_simulation" type="Assistant" />
 	<node name="feeder" pkg="elderly_care_simulation" type="FeedingRobot" />
+    <node name="doctor" pkg="elderly_care_simulation" type="DoctorRobot" />
 	<node name="caregiver" pkg="elderly_care_simulation" type="Caregiver" />
 	<node name="nurse" pkg="elderly_care_simulation" type="NurseRobot" />
 	<node name="medication" pkg="elderly_care_simulation" type="MedicationRobot" />
