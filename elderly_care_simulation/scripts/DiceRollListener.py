@@ -2,8 +2,7 @@
 import rospy
 import roslib
 import roslib; roslib.load_manifest('elderly_care_simulation')
-from elderly_care_simulation.msg import DiceRollTrigger
-from elderly_care_simulation.msg import EventTrigger
+from elderly_care_simulation.msg import DiceRollTrigger, EventTrigger, DiceRollReport
 from Tkinter import *
 
 class DiceRollerGUI:
@@ -169,10 +168,28 @@ class DiceRollerGUI:
         ######################### SET UP DICE ROLLER MONITOR #########################
 
         # Label for the dice rollers
-        Label(self.frame_diceRolls, text="Dice Rollers", relief=gridRelief, bg='ivory4', width=40).pack(side=TOP)
-        Label(self.frame_diceRolls, text="Ill", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
-        Label(self.frame_diceRolls, text="Very Ill", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
-        Label(self.frame_diceRolls, text="Moral Support", relief=gridRelief, bg='SpringGreen4', width=40, height=2).pack(side=TOP)
+        Label(self.frame_diceRolls, text="Dice Rollers", relief=gridRelief, bg='ivory4', width=68).pack(side=TOP)
+
+        # Set up ill dice roll canvas
+        #Label(self.frame_diceRolls, text="Ill Dice Roller", relief=gridRelief, bg='ivory2', width=68).pack(side=TOP)
+        self.ill_canvas = Canvas(bg='snow', width=550, height=30)
+        self.ill_canvas.pack(side=TOP)
+        self.ill_rectangle = self.ill_canvas.create_rectangle(0, 0, 500, 30, fill='SpringGreen4')
+        self.ill_roll = self.ill_canvas.create_rectangle(0, 0, 2, 30, fill='red')
+
+        # Set up very ill dice roll canvas
+        #Label(self.frame_diceRolls, text="Very Ill Dice Roller", relief=gridRelief, bg='ivory2', width=68).pack(side=TOP)
+        self.very_ill_canvas = Canvas(bg='snow', width=550, height=30)
+        self.very_ill_canvas.pack(side=TOP)
+        self.very_ill_rectangle = self.very_ill_canvas.create_rectangle(0, 0, 500, 30, fill='SpringGreen4')
+        self.very_ill_roll = self.very_ill_canvas.create_rectangle(0, 0, 2, 30, fill='red')
+
+        # Set up very ill dice roll canvas
+        #Label(self.frame_diceRolls, text="Moral Support Dice Roller", relief=gridRelief, bg='ivory2', width=68).pack(side=TOP)
+        self.moral_canvas = Canvas(bg='snow', width=550, height=30)
+        self.moral_canvas.pack(side=TOP)
+        self.moral_rectangle = self.moral_canvas.create_rectangle(0, 0, 500, 30, fill='SpringGreen4')
+        self.moral_roll = self.moral_canvas.create_rectangle(0, 0, 2, 30, fill='red')
 
         
         ######################### SET UP EVENT INJECTION #########################
@@ -242,11 +259,6 @@ class DiceRollerGUI:
         Button(self.frame_eventChange, text="Repopulate\nDaily Events", width=10, command=self.repopulateEventsCallback).pack(side=TOP, padx=5, pady=10, fill=X)
         Button(self.frame_eventChange, text="Clear All\nEvents", width=10, command=self.clearEventsCallback).pack(side=TOP, padx=10, pady=10, fill=X)
 
-        # create and assign dice label to label widget. Updating dice_label will
-        # automatically update the widget's text
-        #self.dice_label_widget = Label(self.frame_events, textvariable=self.dice_label)
-        #self.dice_label_widget.pack()
-
 
         ######################### SET UP ROSPY #########################
 
@@ -256,33 +268,47 @@ class DiceRollerGUI:
         # Initialise publisher for injecting events
         self.eventTriggerPub = rospy.Publisher('event_trigger', EventTrigger)
 
-        # subscribe to topic
+        # subscribe to EventTrigger topic
         rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)
+
+        # subscribe to DiceRollReport topic
+        rospy.Subscriber("dice_roll_report", DiceRollReport, self.roll_report_callback)
 
 
     def run(self):
-        """
-        Initiate tkInter's main loop. This will populate the root window
-        with widgets as declared in __init__
-        """
+
+        """Initiate tkInter's main loop. This will populate the root window
+        with widgets as declared in __init__"""
         self.root.mainloop()
 
-    def dice_roll_callback(self, msg):
-        data = 'Dice Type: %d Threshold: %4d Rolled: %4d' % (msg.type, msg.threshold, msg.rolled)
-        # rospy.loginfo("Dice Type: %d Threshold: %4d Rolled: %4d",msg.type, msg.threshold, msg.rolled)
-        self.update_dice_label(data)
+    def roll_report_callback(self, report):
+        if (report.type == 0):
+            barWidth = int((float(report.threshold)/float(report.numSides))*550)
+            rollPoint = int((float(report.rolled)/float(report.numSides))*550) - 1
+            self.moral_canvas.coords(self.very_ill_rectangle, 0, 0, barWidth, 30)
+            self.moral_canvas.coords(self.very_ill_roll, rollPoint, 0, (rollPoint+2), 30)
+        elif (report.type == 1):
+            barWidth = int((float(report.threshold)/float(report.numSides))*550)
+            rollPoint = int((float(report.rolled)/float(report.numSides))*550) - 1
+            self.ill_canvas.coords(self.ill_rectangle, 0, 0, barWidth, 30)
+            self.ill_canvas.coords(self.ill_roll, rollPoint, 0, (rollPoint+2), 30)
+        elif (report.type == 2):
+            barWidth = int((float(report.threshold)/float(report.numSides))*550)
+            rollPoint = int((float(report.rolled)/float(report.numSides))*550) - 1
+            self.very_ill_canvas.coords(self.very_ill_rectangle, 0, 0, barWidth, 30)
+            self.very_ill_canvas.coords(self.very_ill_roll, rollPoint, 0, (rollPoint+2), 30)
 
     # Callback method for event_trigger topic
     def event_trigger_callback(self, msg):
         
-        msg_type = msg.msg_type
+        """msg_type = msg.msg_type
         event_type = msg.event_type
         result = msg.result
 
         print("Event trigger detected")
         print("Message type: ", msg_type)
         print("Event type: ", event_type)
-        print("result: ", result)
+        print("result: ", result)"""
 
         self.events[msg.event_type](msg)
 
