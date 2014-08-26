@@ -54,6 +54,10 @@ void Scheduler::resetRandomEventOccurrence() {
     }
 }
 
+void Scheduler::resetConcurrentWeight() {
+    concurrentWeight = 0;
+}
+
 /**
  * Returns the current concurrent weight count
  */
@@ -320,10 +324,11 @@ int main(int argc, char **argv) {
 
     while (ros::ok()) {
 
-        if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() == 0) {
+        if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() <= 0) {
             ROS_INFO("Day Ends....");
             sleep(10);
             scheduler.clearEventQueue();
+            scheduler.resetConcurrentWeight();
             scheduler.resetRandomEventOccurrence();
             scheduler.populateDailyTasks();
             ROS_INFO("Day Starts....");
