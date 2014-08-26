@@ -13,4 +13,15 @@ const int GUI_COMM_MSG_TYPE_INFO    = 1;
 const int GUI_COMM_ACTION_POPULATE  = 0;
 const int GUI_COMM_ACTION_CLEAR     = 1;
 
+/**
+ * Returns a C string representation of the corresponding action type
+ */
+const char * actionToString(int action) {
+    switch(action){
+        case GUI_COMM_ACTION_POPULATE:                  return "POPULATE";
+        case GUI_COMM_ACTION_CLEAR:                     return "CLEAR";
+        default:                                        return "UNDEFINED";
+    }
+}
+
 #endif

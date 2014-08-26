@@ -1,7 +1,9 @@
 #include "ros/ros.h"
 
 #include "EventTriggerUtility.h"
+#include "GuiCommConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
+#include "elderly_care_simulation/GuiComm.h"
 #include <queue>
 #include <unistd.h> // sleep
 #include "Scheduler.h"
@@ -277,12 +279,34 @@ void Scheduler::dequeueEvent() {
     }
 }
 
+/**
+ * Callback function to react to actions triggered via the Interactive GUI
+ */
+void Scheduler::guiCommunicationCallback(GuiComm msg) {
+    if (msg.msg_type == GUI_COMM_MSG_TYPE_REQUEST) {
+        switch(msg.action) {
+        case GUI_COMM_ACTION_POPULATE:
+            populateDailyTasks();
+            break;
+        case GUI_COMM_ACTION_CLEAR:
+            clearEventQueue();
+            break;
+        }
+        ROS_INFO("Scheduler: GUI action received [%s]", actionToString(msg.action));
+    }
+}
+
+
 void callEventTriggerCallback(EventTrigger msg) {
     scheduler.eventTriggerCallback(msg);
 }
 
 void callExternalEventReceivedCallback(EventTrigger msg) {
     scheduler.externalEventReceivedCallback(msg);
+}
+
+void callGuiCommunicationCallback(GuiComm msg) {
+    scheduler.guiCommunicationCallback(msg);
 }
 
 /**
@@ -300,16 +324,18 @@ int main(int argc, char **argv) {
 
     // advertise to event_trigger topic
     scheduler.eventTriggerPub = nodeHandle.advertise<EventTrigger>("event_trigger",1000, true);
+    scheduler.guiCommPub = nodeHandle.advertise<GuiComm>("gui_communication",1000, true);
 
     // subscribe to event_trigger topic
     scheduler.eventTriggerSub = nodeHandle.subscribe<EventTrigger>("event_trigger",1000, callEventTriggerCallback);
     scheduler.externalEventSub = nodeHandle.subscribe<EventTrigger>("external_event",1000, callExternalEventReceivedCallback);
+    scheduler.guiCommSub = nodeHandle.subscribe<GuiComm>("gui_communication",1000, callGuiCommunicationCallback);
     
     ros::Rate loop_rate(10);
 
     // populate queue with day's events
     
-    scheduler.populateDailyTasks();
+    // scheduler.populateDailyTasks();
 
     //a count of howmany messages we have sent
     int count = 0;
@@ -319,12 +345,12 @@ int main(int argc, char **argv) {
     while (ros::ok()) {
 
         if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() == 0) {
-            ROS_INFO("Day Ends....");
-            sleep(10);
-            scheduler.clearEventQueue();
-            scheduler.resetRandomEventOccurrence();
-            scheduler.populateDailyTasks();
-            ROS_INFO("Day Starts....");
+            // ROS_INFO("Day Ends....");
+            // sleep(10);
+            // scheduler.clearEventQueue();
+            // scheduler.resetRandomEventOccurrence();
+            // scheduler.populateDailyTasks();
+            // ROS_INFO("Day Starts....");
         }else {
             scheduler.dequeueEvent();
         }
