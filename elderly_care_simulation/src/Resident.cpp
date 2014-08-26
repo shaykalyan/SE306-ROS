@@ -41,7 +41,7 @@
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_VERY_ILL] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_MEDICATION] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COOK] = 0;
-    taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;;   
+    taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP] = 0;
 
     navigatingToPoiForTask = false;
