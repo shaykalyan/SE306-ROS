@@ -144,9 +144,9 @@ void populateDailyTasks(void) {
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Evening
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW }
         // { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
     };
     for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
@@ -247,18 +247,19 @@ int main(int argc, char **argv) {
     //a count of howmany messages we have sent
     int count = 0;
     sleep(5);
+
     while (ros::ok()) {
 
         // ======================================
         // =        COMMENTED OUT STUFF         =
         // ======================================
-        // if(eventQueue.size() == 0 && concurrentWeight == 0) {
-        //     sleep(5);
-        //     clearEventQueue();
-        //     populateDailyTasks();
-        // }else {
-        //     dequeueEvent();
-        // }
+        if(eventQueue.size() == 0 && concurrentWeight == 0) {
+            sleep(10);
+            clearEventQueue();
+            populateDailyTasks();
+        }else {
+            dequeueEvent();
+        }
         dequeueEvent();
 
         ros::spinOnce();

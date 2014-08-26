@@ -1,8 +1,11 @@
 include "include/resident.inc"
+include "include/companionship.inc"
 include "include/robot.inc"
 include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
+include "include/medicationRobot.inc"
+
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -78,4 +81,34 @@ robot(
 robot(
   name "Caregiver"
   pose [ 5 -5 0 0 ]
+)
+
+robot(
+  name "Relative"
+  pose [ 0 -11 0 0 ]
+)
+
+robot(
+  name "Friend"
+  pose [ 3.7 -8.65 0 0 ]
+)
+
+companionship(
+  name "Companionship"
+  pose [ 5 -5 0 0 ]
+)
+
+robot(
+  name "Chef"
+  pose [ 12 0 0 0 ]
+)
+
+medicationRobot(
+  name "MedicationRobot"
+  pose [ 5 -8 0 0 ]
+)
+
+robot(
+  name "Nurse"
+  pose [ 13 13 0 0 ]
 )

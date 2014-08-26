@@ -22,10 +22,31 @@ const float SHOWER_Y = -4.0f;
 const float ADJACENT_SHOWER_X = 8.8f;
 const float ADJACENT_SHOWER_Y = -5.0f;
 
-const float ADJACENT_STOVE_X = 8.8f;
-const float ADJACENT_STOVE_Y = 7.5f;
+const float STOVE_X = 8.0f;
+const float STOVE_Y = 7.0f;
 
 const float CAREGIVER_HOME_X = 5.0f;
 const float CAREGIVER_HOME_Y = -5.0f;
+
+const float NURSE_HOME_X = 13.0f;
+const float NURSE_HOME_Y = 13.0f;
+
+const float MEDICATIONROBOT_HOME_X = 5.0f;
+const float MEDICATIONROBOT_HOME_Y = -8.0f;
+
+const float COOK_HOME_X = 12.0f;
+const float COOK_HOME_Y = 0.0f;
+
+const float COMPANIONSHIP_HOME_X = 5.0f;
+const float COMPANIONSHIP_HOME_Y = -5.0f;
+
+const float FRIEND_HOME_X = 3.7f;
+const float FRIEND_HOME_Y = -8.65f;
+
+const float RELATIVE_HOME_X = 0.0f;
+const float RELATIVE_HOME_Y = -11.0f;
+
+const float OUTSIDE_X = -0.2f;
+const float OUTSIDE_Y = -11.0f;
 
 #endif
