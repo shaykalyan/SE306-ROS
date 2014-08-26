@@ -65,6 +65,7 @@
 		void eventTriggerCallback(elderly_care_simulation::EventTrigger msg);
 		void performTask();	
 		void goToShower(const std_msgs::Empty);
+		int caregiverDoWork();
 };
 
 #endif

@@ -250,6 +250,37 @@ void updateResidentPositionCallback(const nav_msgs::Odometry msg) {
     caregiver.residentPoi = StaticPoi(x, y, 0);
 }
 
+int Caregiver::caregiverDoWork(){
+    ros::Rate loop_rate(10);
+
+    while (ros::ok())
+    {                   
+        if (atDesiredLocation()){
+             // Bad place for this, but need to get it working..
+            if (currentLocationState == GOING_TO_RESIDENT) {
+                currentLocationState = AT_RESIDENT;
+            } else if (currentLocationState == GOING_HOME) {
+                currentLocationState = AT_HOME;
+            } else if (currentLocationState == GOING_TO_SHOWER){
+                currentLocationState = AT_SHOWER;
+            }
+        }
+
+        if ((currentLocationState == AT_RESIDENT) && performingTask) {
+            performTask();
+        } else if ((currentLocationState == AT_SHOWER) && performingTask){
+            performTask();
+        }
+
+        updateCurrentVelocity();
+        
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+
+    return 0;
+}
+
 int main(int argc, char **argv)
 {   
     //You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
@@ -279,33 +310,6 @@ int main(int argc, char **argv)
         
     // Create a client to make service requests to the Resident
     caregiver.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
-
-    ros::Rate loop_rate(10);
-
-    while (ros::ok())
-    {                   
-        if (caregiver.atDesiredLocation()){
-             // Bad place for this, but need to get it working..
-            if (caregiver.currentLocationState == caregiver.GOING_TO_RESIDENT) {
-                caregiver.currentLocationState = caregiver.AT_RESIDENT;
-            } else if (caregiver.currentLocationState == caregiver.GOING_HOME) {
-                caregiver.currentLocationState = caregiver.AT_HOME;
-            } else if (caregiver.currentLocationState == caregiver.GOING_TO_SHOWER){
-                caregiver.currentLocationState = caregiver.AT_SHOWER;
-            }
-        }
-
-        if ((caregiver.currentLocationState == caregiver.AT_RESIDENT) && caregiver.performingTask) {
-            caregiver.performTask();
-        } else if ((caregiver.currentLocationState == caregiver.AT_SHOWER) && caregiver.performingTask){
-            caregiver.performTask();
-        }
-
-        caregiver.updateCurrentVelocity();
-        
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
-
-    return 0;
+    return caregiver.caregiverDoWork();
+   
 }
