@@ -186,7 +186,6 @@ void Scheduler::populateDailyTasks() {
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Evening
-
         // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
         { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW }
@@ -223,7 +222,7 @@ void Scheduler::dequeueEvent() {
         stopRosInfoSpam = false;
         switch(msg.event_type) {
             case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
-                allowNewEvents = false;
+                allowNewEvents = true;
 
                 concurrentWeight += msg.event_weight;
                 eventTriggerPub.publish(msg);
@@ -314,7 +313,6 @@ int main(int argc, char **argv) {
 
     //a count of howmany messages we have sent
     int count = 0;
-
     sleep(3);
     ROS_INFO("Day Starts....");
 

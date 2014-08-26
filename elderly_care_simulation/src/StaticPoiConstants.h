@@ -12,16 +12,21 @@ const float ADJACENT_DINING_CHAIR_Y = 4.5f;
 
 const float BED_X = -3.5f;
 const float BED_Y = -8.0f;
+
 const float ADJACENT_BED_X = -4.8f;
 const float ADJACENT_BED_Y = -8.0f;
 
-const float SHOWER_X = 8.8f;
-const float SHOWER_Y  = -3.7f;
+const float SHOWER_X = 8.0f;
+const float SHOWER_Y = -4.0f;
+
 const float ADJACENT_SHOWER_X = 8.8f;
 const float ADJACENT_SHOWER_Y = -5.0f;
 
 const float STOVE_X = 8.0f;
 const float STOVE_Y = 7.0f;
+
+const float CAREGIVER_HOME_X = 5.0f;
+const float CAREGIVER_HOME_Y = -5.0f;
 
 const float NURSE_HOME_X = 13.0f;
 const float NURSE_HOME_Y = 13.0f;

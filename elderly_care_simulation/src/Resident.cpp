@@ -221,7 +221,7 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
         res.result = PERFORM_TASK_RESULT_TAKE_ME_THERE;
     } else if ((taskType == currentTaskType) && isInCorrectPlace) {
         // We must be dealing with the current helper and we've reached any POI we needed to get to
-        res.result = handleTask(taskType);;
+        res.result = handleTask(taskType);
     } else {
         // We are busy: either moving to a POI or dealing with another task
         res.result = PERFORM_TASK_RESULT_BUSY;
