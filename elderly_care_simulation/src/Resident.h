@@ -64,9 +64,9 @@ class Resident : public Robot, public Poi {
 		void eventTriggerReply(int eventType);
 		void eventTriggerCallback(elderly_care_simulation::EventTrigger msg);
 
-        StaticPoi kitchenPoi = StaticPoi(6.0f, 6.0f, 0.0f);
-        StaticPoi hallwayPoi = StaticPoi(0.0f, 0.0f, 0.0f);
-        StaticPoi bedroomPoi = StaticPoi(-6.0f, -4.0f, 0.0f);
+        StaticPoi kitchenPoi = StaticPoi(KITCHEN_X, KITCHEN_Y, 0.0f);
+        StaticPoi hallwayPoi = StaticPoi(HALLWAY_X, HALLWAY_Y, 0.0f);
+        StaticPoi bedroomPoi = StaticPoi(BEDROOM_X, BEDROOM_Y, 0.0f);
         StaticPoi bedPoi = StaticPoi(BED_X, BED_Y, 0.0f);
 
         virtual geometry_msgs::Point getLocation() {
