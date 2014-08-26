@@ -2,7 +2,7 @@
 import rospy
 import roslib
 import roslib; roslib.load_manifest('elderly_care_simulation')
-from elderly_care_simulation.msg import DiceRollTrigger, EventTrigger, DiceRollReport
+from elderly_care_simulation.msg import DiceRollTrigger, EventTrigger, DiceRollReport, GuiComm
 from Tkinter import *
 
 class DiceRollerGUI:
@@ -151,6 +151,8 @@ class DiceRollerGUI:
         self.current_event_2.set("")
         self.current_event_3 = StringVar()
         self.current_event_3.set("")
+        self.next_event = StringVar()
+        self.next_event.set("")
 
         # Create a list for monitoring the current tasks
         self.current_events = [self.current_event_1, self.current_event_2, self.current_event_3]
@@ -162,7 +164,11 @@ class DiceRollerGUI:
         Label(self.frame_events, textvariable=self.current_event_3, relief=gridRelief).pack(fill=X)
         Label(self.frame_events, text="").pack(fill=X)
         Label(self.frame_events, text="Upcoming Events", relief=gridRelief, bg='ivory4').pack(fill=X)
-        Label(self.frame_events, text="Shower", relief=gridRelief).pack(fill=X)
+        Label(self.frame_events, textvariable=self.next_event, relief=gridRelief).pack(fill=X)
+
+        # Dictionary which maps different events to different method which will respond to them.
+        self.next_events = {0:"undefined", 1:"eat", 2:"shower", 3:"exercise", 4:"converse", 5:"support", 6:"relative", 7:"friend", 8:"ill", 9:"veryIll",
+        10:"medication", 11:"cook", 12:"entertainment", 13:"companionship", 14:"wake", 15:"sleep"}
 
 
         ######################### SET UP DICE ROLLER MONITOR #########################
@@ -268,11 +274,17 @@ class DiceRollerGUI:
         # Initialise publisher for injecting events
         self.eventTriggerPub = rospy.Publisher('event_trigger', EventTrigger)
 
+        # Initialise publisher for clearing or populating the schedule
+        self.guiCommunication = rospy.Publisher('gui_communication', GuiComm)
+
         # subscribe to EventTrigger topic
         rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)
 
         # subscribe to DiceRollReport topic
         rospy.Subscriber("dice_roll_report", DiceRollReport, self.roll_report_callback)
+
+        # subscribe to GuiComm topic
+        rospy.Subscriber("gui_communication", GuiComm, self.upcomming_event_callback)
 
 
     def run(self):
@@ -316,10 +328,26 @@ class DiceRollerGUI:
     # Callback method for repopulating events
     def repopulateEventsCallback(self):
         print("Repopulate!")
+        guiMessage = GuiComm()
+        guiMessage.msg_type = 1
+        guiMessage.action = 1
+        guiMessage.event_type = 0
+
+        self.guiCommunication.publish(guiMessage)
 
     # Callback method for clearing events
     def clearEventsCallback(self):
         print("Clear!")
+        guiMessage = GuiComm()
+        guiMessage.msg_type = 1
+        guiMessage.action = 2
+        guiMessage.event_type = 0
+
+        self.guiCommunication.publish(guiMessage)
+
+    # Method for updating the upcoming event
+    def upcomming_event_callback(self, message):
+        self.next_event.set(self.next_events[message.event_type])
 
     # Callback method for clearing events
     def injectEventCallback(self):
@@ -338,7 +366,7 @@ class DiceRollerGUI:
         return
 
     #Update eat state
-    def eat(self, result):
+    def eat(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.caregiver_task.set("Feeding")
@@ -351,7 +379,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Eating")
 
     #Update shower state
-    def shower(self, result):
+    def shower(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.caregiver_task.set("Showering")
@@ -364,7 +392,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Showering")
 
     #Update exercise state
-    def exercise(self, result):
+    def exercise(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.caregiver_task.set("Exercising")
@@ -377,7 +405,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Exercising")
 
     #Update converse state
-    def converse(self, result):
+    def converse(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.caregiver_task.set("Conversing")
@@ -403,7 +431,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Moral Support")
 
     #Update relative state
-    def relative(self, result):
+    def relative(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.relative_task.set("Visiting")
@@ -416,7 +444,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Relative")
 
     #Update friend state
-    def friend(self, result):
+    def friend(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.friend_task.set("Visiting")
@@ -429,7 +457,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Friend")
 
     #Update ill state
-    def ill(self, result):
+    def ill(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.nurse_task.set("Nursing")
@@ -442,7 +470,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Ill")
 
     #Update veryIll state
-    def veryIll(self, result):
+    def veryIll(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.doctor_task.set("Doctoring")
@@ -455,7 +483,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Very Ill")
 
     #Update medication state
-    def medication(self, result):
+    def medication(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.medication_task.set("Drugging")
@@ -468,7 +496,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Medication")
 
     #Update cook state
-    def cook(self, result):
+    def cook(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.cook_task.set("Cooking")
@@ -481,7 +509,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Cooking")
 
     #Update entertainment state
-    def entertainment(self, result):
+    def entertainment(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.entertainment_task.set("Entertaining")
@@ -494,7 +522,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Entertainment")
 
     #Update companionship state
-    def companionship(self, result):
+    def companionship(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.companion_task.set("Accompanying")
@@ -507,7 +535,7 @@ class DiceRollerGUI:
                 self.removeCurrentEvents("Companionship")
 
     #Update wake state
-    def wake(self, result):
+    def wake(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.resident_task.set("Waking")
@@ -518,7 +546,7 @@ class DiceRollerGUI:
                 self.resident_task.set("None")
 
     #Update sleep state
-    def sleep(self, result):
+    def sleep(self, message):
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.resident_task.set("Sleeping")
@@ -528,6 +556,7 @@ class DiceRollerGUI:
                 self.resident_task.set("None")
                 self.resident_task.set("None")
 
+    # Method for adding a currently occuring event to the current event list
     def addCurrentEvents(self, newEvent):
         for current in self.current_events:
             if (current.get() == ""):
@@ -536,12 +565,13 @@ class DiceRollerGUI:
             elif (current.get() == newEvent):
                 break
 
+    # Method for removing a finished occuring event from the current event list
     def removeCurrentEvents(self, currentEvent):
         for current in self.current_events:
             if (current.get() == currentEvent):
                 current.set("")
 
-    def addCurrentEvent(self, newEvent):
+    """def addCurrentEvent(self, newEvent):
         self.current_tasks[self.current_tasks.index("")] = newEvent
 
     def removeCurrentEvent(self, currentEvent):
@@ -553,7 +583,7 @@ class DiceRollerGUI:
 
     #Update undefined state
     def update_dice_label(self, data):
-        self.dice_label.set(data)
+        self.dice_label.set(data)"""
 
 if __name__=='__main__':
     gui = DiceRollerGUI()
