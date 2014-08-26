@@ -180,7 +180,7 @@ bool Robot::atDesiredLocation() {
     if (locationQueue.empty()) {
         return true;
     } else {
-        double toleratedDifference = 0.05;
+        double toleratedDifference = 0.15;
         geometry_msgs::Point desiredLocation = locationQueue.front();
 
         if (doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
@@ -213,10 +213,10 @@ void Robot::updateCurrentVelocityToDesiredLocation() {
     
     double desiredAngle = atan2(directionVector.y, directionVector.x);
 
-    if (! doubleEquals(currentAngle, desiredAngle, 0.10)) {
+    if (! doubleEquals(currentAngle, desiredAngle, 0.25)) {
         // Turn towards angle
-        currentVelocity.linear.x = 0;
-        
+        currentVelocity.linear.x = 0.0;
+
         if (turnAnticlockwise(currentAngle, desiredAngle)) {
             // Turn anti clockwise
             currentVelocity.angular.z = M_PI / 4;

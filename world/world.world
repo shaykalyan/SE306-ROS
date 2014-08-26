@@ -10,7 +10,12 @@ include "include/appliances.inc"
 resolution 0.02 
 
 # simulation timestep in milliseconds. length of each simulation update cycle.
-interval_sim 100  
+interval_sim 100 
+
+# [ xmin xmax ymin ymax zmin zmax amin amax ]       
+velocity_bounds     [-10 10 -10 10 0 0 -90 90]          
+acceleration_bounds [-10 10 -10 10 0 0 -90 90]
+
 
 window
 ( 
