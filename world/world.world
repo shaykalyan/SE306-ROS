@@ -74,3 +74,8 @@ robot(
   name "Assistant"
   pose [ -8 -8 0 0 ]
 )
+
+robot(
+  name "FeedingRobot"
+  pose [12 1 0 0 ]
+)

@@ -70,3 +70,6 @@ target_link_libraries(Visitor Robot)
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R3
 target_link_libraries(Assistant Robot)
 
+rosbuild_add_executable(FeedingRobot src/FeedingRobot.cpp)  #R4
+target_link_libraries(FeedingRobot Robot Poi StaticPoi)
+
