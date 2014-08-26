@@ -183,12 +183,12 @@ void Scheduler::populateDailyTasks() {
         // { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_RELATIVE,        EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_FRIEND,          EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_FRIEND,          EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Evening
-        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
         { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW }
         // { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
@@ -272,9 +272,17 @@ void Scheduler::dequeueEvent() {
 
     } else {
         if(!stopRosInfoSpam){
+            stopRosInfoSpam = true;
+
             ROS_INFO("Scheduler: Pending event: [%s]", 
                 eventTypeToString(msg.event_type));
-            stopRosInfoSpam = true;
+
+            // publish pending event to GuiComm topic
+            GuiComm pendingMsg;
+            pendingMsg.msg_type = GUI_COMM_MSG_TYPE_INFO;
+            pendingMsg.event_type = msg.event_type;
+            pendingMsg.action = GUI_COMM_ACTION_UNDEFINED;
+            guiCommPub.publish(pendingMsg);
         }
     }
 }
