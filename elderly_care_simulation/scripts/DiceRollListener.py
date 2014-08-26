@@ -179,12 +179,12 @@ class DiceRollerGUI:
         self.eventWeight.set(self.weightOptions[0])
 
         # Set up result result menu
-        self.resultOptions = ["Undefined", "Success", "Failure"]
+        self.resultOptions = ["Undefined", "Failure", "Success"]
         self.eventResult = StringVar(self.root)
         self.eventResult.set(self.resultOptions[0])
 
         # Dictionary for mapping result names to their corresponding numbers
-        self.resultDict = {"Undefined":0, "Success":1, "Failure":2}
+        self.resultDict = {"Undefined":0, "Failure":1, "Success":2}
 
         # Create dropdown menus and inject button
         # Label for event injection
@@ -247,14 +247,14 @@ class DiceRollerGUI:
     # Callback method for event_trigger topic
     def event_trigger_callback(self, msg):
         
-        """msg_type = msg.msg_type
+        msg_type = msg.msg_type
         event_type = msg.event_type
         result = msg.result
 
         print("Event trigger detected")
         print("Message type: ", msg_type)
         print("Event type: ", event_type)
-        print("result: ", result)"""
+        print("result: ", result)
 
         self.events[msg.event_type](msg)
 
