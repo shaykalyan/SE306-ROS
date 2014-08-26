@@ -51,6 +51,7 @@ void EscortRobot::eventTriggered(const elderly_care_simulation::EventTrigger msg
                 
                 currentLocationState = GOING_TO_POI;
                 performingTask = true;
+                goToResident();
                 
             }            
         }
@@ -85,7 +86,7 @@ void EscortRobot::performTask() {
     performTaskService.request.taskRequiresPoi = true;
 
     performTaskService.request.taskPoi = poi;
-    
+
     // Make the call using the client
     if (!performTaskClient.call(performTaskService)) {
         throw std::runtime_error("Service call to the initiate task with Resident failed");
@@ -156,10 +157,10 @@ int EscortRobot::execute() {
                 default:
                     break;
             }
-        }
 
-        if (performingTask && currentLocationState == AT_POI) {
-            performTask();
+            if (performingTask && currentLocationState == AT_POI) {
+                performTask();
+            }
         }
 
         updateCurrentVelocity();
