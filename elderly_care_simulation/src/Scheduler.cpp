@@ -186,6 +186,7 @@ void Scheduler::populateDailyTasks() {
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Evening
+
         // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
@@ -261,7 +262,7 @@ void Scheduler::dequeueEvent() {
                 break;
 
             default:
-                allowNewEvents = true;
+                allowNewEvents = false;
                 eventTriggerPub.publish(msg);
                 concurrentWeight += msg.event_weight;
                 eventQueue.pop();
@@ -316,22 +317,19 @@ int main(int argc, char **argv) {
 
     sleep(3);
     ROS_INFO("Day Starts....");
+
     while (ros::ok()) {
 
-        // ======================================
-        // =        COMMENTED OUT STUFF         =
-        // ======================================
-        // if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() == 0) {
-        //     ROS_INFO("Day Ends....");
-        //     sleep(5);
-        //     scheduler.clearEventQueue();
-        //     scheduler.resetRandomEventOccurrence();
-        //     scheduler.populateDailyTasks();
-        //     ROS_INFO("Day Starts....");
-        // }else {
-        //     scheduler.dequeueEvent();
-        // }
-        scheduler.dequeueEvent();
+        if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() == 0) {
+            ROS_INFO("Day Ends....");
+            sleep(10);
+            scheduler.clearEventQueue();
+            scheduler.resetRandomEventOccurrence();
+            scheduler.populateDailyTasks();
+            ROS_INFO("Day Starts....");
+        }else {
+            scheduler.dequeueEvent();
+        }
 
         ros::spinOnce();
         loop_rate.sleep();
