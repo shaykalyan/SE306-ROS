@@ -60,7 +60,7 @@
 		ros::Publisher eventTriggerPub;
 		ros::ServiceClient performTaskClient;
 		
-        StaticPoi residentPoi = StaticPoi(1.0f, 0.0f, 0.0f);
+        StaticPoi residentPoi = StaticPoi(0.0f, 0.0f, 0.0f);
         StaticPoi homePoi = StaticPoi(COMPANIONSHIP_HOME_X, COMPANIONSHIP_HOME_Y, 0.0f);
 
 		void goToResident(const std_msgs::Empty);
