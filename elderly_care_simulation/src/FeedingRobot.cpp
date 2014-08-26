@@ -11,6 +11,9 @@
 #include "PerformTaskConstants.h" 
 #include "Robot.h"
 
+/**
+ * Escort Robot instantiation that will take the resident to the dining area and feed them food.
+ */
 int main(int argc, char **argv) {
 
     geometry_msgs::Point base;
@@ -28,22 +31,22 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "Feeding_Robot");
 
     // Node handle
-    ros::NodeHandle chefNodeHandle;
+    ros::NodeHandle codeHandle;
     
     // Will publish geometry_msgs::Twist messages to the cmd_vel topic
-    feeder.robotNodeStagePub = chefNodeHandle.advertise<geometry_msgs::Twist>(rid + "/cmd_vel", 1000);
-    feeder.eventTriggerPub = chefNodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
+    feeder.robotNodeStagePub = codeHandle.advertise<geometry_msgs::Twist>(rid + "/cmd_vel", 1000);
+    feeder.eventTriggerPub = codeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
     // Necessary subscribers
-    feeder.stageOdoSub = chefNodeHandle.subscribe<nav_msgs::Odometry>(rid + "/base_pose_ground_truth", 1000, &Robot::stage0domCallback, dynamic_cast<Robot*>( &feeder ));
-    feeder.eventTriggerSub = chefNodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger", 1000, &EscortRobot::eventTriggered, &feeder);
-    feeder.residentLocationSub = chefNodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, &EscortRobot::residentLocationCallback, &feeder);
+    feeder.stageOdoSub = codeHandle.subscribe<nav_msgs::Odometry>(rid + "/base_pose_ground_truth", 1000, &Robot::stage0domCallback, dynamic_cast<Robot*>( &feeder ));
+    feeder.eventTriggerSub = codeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger", 1000, &EscortRobot::eventTriggered, &feeder);
+    feeder.residentLocationSub = codeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, &EscortRobot::residentLocationCallback, &feeder);
 
     // Service used to find paths
-    feeder.pathFinderService = chefNodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
+    feeder.pathFinderService = codeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
     
     // Service to perform tasks on the resident
-    feeder.performTaskClient = chefNodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
+    feeder.performTaskClient = codeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
     return feeder.execute();
 }
