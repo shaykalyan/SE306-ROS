@@ -21,7 +21,7 @@ ChefRobot::~ChefRobot() {}
 void ChefRobot::goToStove() {
     currentLocationState = GOING_TO_STOVE;
     goToLocation(stove.getLocation());
-    ROS_INFO("GOING TO STOVE");
+    ROS_INFO("ChefRobot: Going to Stove");
 }
 
 /**
@@ -30,16 +30,17 @@ void ChefRobot::goToStove() {
 void ChefRobot::goToBase() {
     currentLocationState = GOING_TO_BASE;
     goToLocation(base.getLocation());
-    ROS_INFO("GOING TO BASE");
+    ROS_INFO("ChefRobot: Going to base");
 }
 
 /**
  * Method to be called to start this robot cooking.
  */
 void ChefRobot::eventTriggered(const elderly_care_simulation::EventTrigger msg) {
-    ROS_INFO("Recieved event");
+    
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
         if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
+            ROS_INFO("ChefRobot: Event Recieved: [%s]", eventTypeToString(msg.event_type));
             if (currentLocationState == AT_BASE ||
                 currentLocationState == GOING_TO_BASE) {
                 
@@ -117,7 +118,6 @@ ChefRobot chef;
  * Helper function to pass callback function to Chef
  */
 void eventTriggeredCallback(elderly_care_simulation::EventTrigger msg) {
-    ROS_INFO("Recieved event outside robot");
     chef.eventTriggered(msg);
 }
 /**

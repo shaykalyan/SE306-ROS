@@ -107,3 +107,8 @@ medicationRobot(
   name "MedicationRobot"
   pose [ 5 -8 0 0 ]
 )
+
+robot(
+  name "Nurse"
+  pose [ 13 13 0 0 ]
+)
