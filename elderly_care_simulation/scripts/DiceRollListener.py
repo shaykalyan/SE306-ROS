@@ -601,7 +601,6 @@ class DiceRollerGUI:
         for current in self.current_events:
             if (current.get() == ""):
                 current.set(newEvent)
-                if ()
                 break
             elif (current.get() == newEvent):
                 break
