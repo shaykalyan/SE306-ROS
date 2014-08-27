@@ -60,6 +60,12 @@ toilet
   pose [3 -9 0 90]
 )
 
+sink
+(
+  name "sink"
+  pose [8.8 -7.5 0 180]
+)
+
 oven
 (
   name "oven"

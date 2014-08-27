@@ -169,3 +169,70 @@ define toilet model
   )
 )
 
+define sink model
+(
+  size [1 1.5 1.6]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "azure"
+    points [4]
+    point[0] [0 1.5]
+    point[1] [0 2.5]
+    point[2] [1 2.5]
+    point[3] [1 1.5]
+    z [0 0.9]
+  )
+  block
+  (
+    color "azure"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 4]
+    point[2] [2 4]
+    point[3] [2 0]
+    z [0.9 1.2]
+  )
+  block
+  (
+    color "grey"
+    points [4]
+    point[0] [0 2.5]
+    point[1] [0 3]
+    point[2] [0.5 3]
+    point[3] [0.5 2.5]
+    z [1.2 1.3]
+  )
+  block
+  (
+    color "grey"
+    points [4]
+    point[0] [0 2.5]
+    point[1] [0 3]
+    point[2] [1 3]
+    point[3] [1 2.5]
+    z [1.3 1.4]
+  )
+  block
+  (
+    color "grey"
+    points [4]
+    point[0] [0 1]
+    point[1] [0 1.5]
+    point[2] [0.5 1.5]
+    point[3] [0.5 1]
+    z [1.2 1.3]
+  )
+  block
+  (
+    color "grey"
+    points [4]
+    point[0] [0 1]
+    point[1] [0 1.5]
+    point[2] [1 1.5]
+    point[3] [1 1]
+    z [1.3 1.4]
+  )
+)
+
