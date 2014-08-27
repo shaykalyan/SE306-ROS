@@ -137,50 +137,60 @@ resident(
 
 robot(
   name "Visitor"
-  pose [5 6 0 0]
+  pose [5 6 0 180]
 )
 
 robot(
   name "Assistant"
-  pose [ -8 -8 0 0 ]
+  pose [ -8 -8 0 180 ]
 )
 
 robot(
   name "Relative"
-  pose [ 0 -11 0 0 ]
+  pose [ 12 7 0 180 ]
 )
 
 robot(
   name "Friend"
-  pose [ 3.7 -8.65 0 0 ]
+  pose [ 12 5 0 180 ]
 )
 
 companionship(
   name "Companionship"
-  pose [ 5 -5 0 0 ]
+  pose [ 12 3 0 180 ]
 )
 
 robot(
   name "Chef"
-  pose [ 12 0 0 0 ]
+  pose [ 12 1 0 180 ]
 )
 
 medicationRobot(
   name "MedicationRobot"
-  pose [ 5 -8 0 0 ]
+  pose [ 12 -1 0 180 ]
 )
 
 robot(
   name "Nurse"
-  pose [ 13 13 0 0 ]
+  pose [2 -14 0 90 ]
 )
 
 robot(
   name "Caregiver"
-  pose [ 5 -5 0 0 ]
+  pose [ 12 -3 0 180 ]
 )
 
 entertainment (
   name "Entertainment"
-  pose [ 4 -5 0 0 ]
+  pose [ 12 -5 0 180 ]
+)
+
+robot(
+  name "FeedingRobot"
+  pose [12 -7 0 180 ]
+)
+
+robot(
+  name "DoctorRobot"
+  pose [6 -14 0 90]
 )
