@@ -3,5 +3,5 @@
 
 	<node name="resident" pkg="elderly_care_simulation" type="Resident" />
 	
-	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/maze.pgm"/>
+	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/maze-navigation.pgm"/>
 </launch>
