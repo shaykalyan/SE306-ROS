@@ -50,6 +50,9 @@ const float OUTSIDE_Y = -11.0f;
 const float KITCHEN_X = 6.0f;
 const float KITCHEN_Y = 6.0f;
 
+const float ENTERTAINMENT_HOME_X = 4.0f;
+const float ENTERTAINMENT_HOME_Y = -5.0f;
+
 const float BEDROOM_X = -6.0f;
 const float BEDROOM_Y = -4.0f;
 

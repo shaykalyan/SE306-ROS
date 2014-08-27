@@ -55,6 +55,7 @@ target_link_libraries(Scheduler)
 rosbuild_add_gtest(test/TestDiceRoller test/TestDiceRoller.cpp)
 target_link_libraries(test/TestDiceRoller DiceRoller)
 
+
 # rostest
 rosbuild_add_executable(TestResident EXCLUDE_FROM_ALL src/test/TestResident.cpp)
 rosbuild_add_gtest_build_flags(TestResident)
@@ -90,3 +91,6 @@ target_link_libraries(NurseRobot Robot Poi StaticPoi)
 
 rosbuild_add_executable(Caregiver src/Caregiver.cpp)	#R9
 target_link_libraries(Caregiver Robot Poi StaticPoi)
+
+rosbuild_add_executable(EntertainmentRobot src/EntertainmentRobot.cpp)          #R10
+target_link_libraries(EntertainmentRobot Robot Poi StaticPoi)
