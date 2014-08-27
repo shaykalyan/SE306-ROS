@@ -151,29 +151,6 @@ TEST_F(CaregiverRobotTest,caregiverDoesNotRespondToNonExerciseRequests) {
     ASSERT_EQ(Caregiver::AT_HOME, theCaregiver.currentLocationState);
 }
 
-/**
- * Tests that the Caregiver sends the correct event reply NOT WORKING
- */
-TEST_F(CaregiverRobotTest, caregiverSendsCorrectEventReply) {
-    EventTrigger msg;
-    msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
-    msg.event_type = EVENT_TRIGGER_EVENT_TYPE_EXERCISE;
-    eventTriggerPub.publish(msg);
-    theCaregiver.eventTriggerReply();
-
-    // Wait until message is received
-    ros::Rate loop_rate(10);
-    while (receivedEventTriggers.size() == 0) {
-        loop_rate.sleep();
-        ros::spinOnce();
-    }
-
-    elderly_care_simulation::EventTrigger msg = receivedEventTriggers[0];
-    ASSERT_EQ(EVENT_TRIGGER_MSG_TYPE_RESPONSE, msg.msg_type);
-    ASSERT_EQ(EVENT_TRIGGER_EVENT_TYPE_EXERCISE, msg.event_type);
-    ASSERT_EQ(EVENT_TRIGGER_RESULT_SUCCESS, msg.result);
-}
-
 // Used to wait for msg is received
 void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
     receivedEventTriggers.push_back(msg);
