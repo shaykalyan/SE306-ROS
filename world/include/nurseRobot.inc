@@ -15,7 +15,7 @@ define nurseRobot position
   )
   block
   (
-    color "white"
+    color "pink"
     points [4]
     point[0] [0 1]
     point[1] [0 2]
@@ -35,7 +35,7 @@ define nurseRobot position
   )
   block
   (
-    color "white"
+    color "pink"
     points [4]
     point[0] [1 0]
     point[1] [1 1]
@@ -45,7 +45,7 @@ define nurseRobot position
   )
   block
   (
-    color "white"
+    color "pink"
     points [4]
     point[0] [0 0]
     point[1] [0 1]
@@ -65,7 +65,7 @@ define nurseRobot position
   )
   block
   (
-    color "white"
+    color "pink"
     points [4]
     point[0] [1 1]
     point[1] [1 2]

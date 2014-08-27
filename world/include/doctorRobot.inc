@@ -5,7 +5,7 @@ define doctorRobot position
   obstacle_return 0
   block
   (
-    color "red"
+    color "crimson"
     points [4]
     point[0] [0 0]
     point[1] [0 1]
@@ -15,7 +15,7 @@ define doctorRobot position
   )
   block
   (
-    color "white"
+    color "crimson"
     points [4]
     point[0] [0 1]
     point[1] [0 2]
@@ -25,7 +25,7 @@ define doctorRobot position
   )
   block
   (
-    color "red"
+    color "crimson"
     points [4]
     point[0] [1 1]
     point[1] [1 2]
@@ -35,7 +35,7 @@ define doctorRobot position
   )
   block
   (
-    color "white"
+    color "crimson"
     points [4]
     point[0] [1 0]
     point[1] [1 1]
@@ -45,7 +45,7 @@ define doctorRobot position
   )
   block
   (
-    color "white"
+    color "crimson"
     points [4]
     point[0] [0 0]
     point[1] [0 1]
@@ -55,7 +55,7 @@ define doctorRobot position
   )
   block
   (
-    color "red"
+    color "crimson"
     points [4]
     point[0] [0 1]
     point[1] [0 2]
@@ -65,7 +65,7 @@ define doctorRobot position
   )
   block
   (
-    color "white"
+    color "crimson"
     points [4]
     point[0] [1 1]
     point[1] [1 2]
@@ -75,7 +75,7 @@ define doctorRobot position
   )
   block
   (
-    color "red"
+    color "crimson"
     points [4]
     point[0] [1 0]
     point[1] [1 1]
