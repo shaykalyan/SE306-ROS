@@ -31,9 +31,9 @@ window
 ( 
   #size of the window in pixels
   size [800 600]
-  center [0 0]
+  center [0 -3]
   rotate [65 -50]
-  scale 25
+  scale 20
   show_data 0
   show_flags 1
   show_blocks 1
@@ -133,7 +133,7 @@ table
 hospital
 (
   name "hospital"
-  pose [4 -15 0 0]
+  pose [7 -13 0 0]
 )
 
 # throw in some robots
