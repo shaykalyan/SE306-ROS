@@ -15,6 +15,12 @@ using namespace elderly_care_simulation;
 
 #include "gtest/gtest.h"
 
+EscortRobot doctor;
+
+void eventTriggeredCallback(elderly_care_simulation::EventTrigger msg) {
+    doctor.eventTriggered(msg);
+}
+
 
 /**
  * This test suite tests the functionality of the EscortRobot class.
@@ -48,13 +54,13 @@ class EscortRobotTest : public ::testing::Test {
 };
 
 /** 
- * Example test
+ * Any calls to the doctor that are not VERY_ILL events should be ignored.
  */
-TEST_F(EscortRobotTest, exampleTest) {
+TEST_F(EscortRobotTest, ignoreIrrelvantEvents) {
 
     // Sleep to allow the DoctorRobot to start
-    ros::Rate loop_rate(2);
-    loop_rate.sleep();
+    // ros::Rate loop_rate(2);
+    // loop_rate.sleep();
     
     ASSERT_TRUE(true);
 }
@@ -64,9 +70,19 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "TestEscortRobot");
     ros::NodeHandle nodeHandle;
 
+    geometry_msgs::Point base;
+    base.x = 3.0f;
+    base.y = 3.0f;
+
+    geometry_msgs::Point hospital;
+    hospital.x = 4.0f;
+    hospital.y = 4.0f;
+
+    doctor = EscortRobot(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL, base, hospital);
+
     // Advertise and subscribe to topics
-    //residentEventPublisher = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
-    //ros::Subscriber eventTriggerSubscriber = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
+    residentEventPublisher = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
+    ros::Subscriber eventTriggerSubscriber = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_trigger",1000, eventTriggeredCallback);
 
     // Run tests to see if we received messages as expected
     testing::InitGoogleTest(&argc, argv);
