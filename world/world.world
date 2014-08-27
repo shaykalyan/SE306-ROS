@@ -87,7 +87,7 @@ table
 hospital
 (
   name "hospital"
-  pose [0 -13 0 90]
+  pose [4 -14 0 0]
 )
 
 # throw in some robots
