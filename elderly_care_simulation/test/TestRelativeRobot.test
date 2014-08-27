@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="elderly_care_simulation" type="RelativeRobot" name="RelativeRobot" />
+  <test test-name="TestRelativeRobot" pkg="elderly_care_simulation" type="TestRelativeRobot" />
+</launch>
