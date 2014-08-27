@@ -4,6 +4,7 @@ include "include/robot.inc"
 include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
+include "include/entertainment.inc"
 include "include/medicationRobot.inc"
 
 
@@ -111,4 +112,14 @@ medicationRobot(
 robot(
   name "Nurse"
   pose [ 13 13 0 0 ]
+)
+
+robot(
+  name "Caregiver"
+  pose [ 5 -5 0 0 ]
+)
+
+entertainment (
+  name "Entertainment"
+  pose [ 4 -5 0 0 ]
 )

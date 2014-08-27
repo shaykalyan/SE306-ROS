@@ -162,7 +162,7 @@ void callGoToHome(const std_msgs::Empty empty){
 void updateResidentPositionCallback(const nav_msgs::Odometry msg) {
     double x = msg.pose.pose.position.x;
     double y = msg.pose.pose.position.y;    
-    companionshipRobot.residentPoi = StaticPoi(x+1, y, 0);
+    companionshipRobot.residentPoi = StaticPoi(x, y, 0);
 }
 
 int main(int argc, char **argv) {   

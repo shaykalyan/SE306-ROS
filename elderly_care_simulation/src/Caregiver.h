@@ -1,5 +1,5 @@
-#ifndef COMPANIONSHIPROBOT_H
-#define COMPANIONSHIPROBOT_H
+#ifndef CAREGIVER_H
+#define CAREGIVER_H
 
 #include "ros/ros.h"
 #include <unistd.h>
@@ -25,29 +25,23 @@
 #include "StaticPoiConstants.h"
 
 /**
- * This robot represents a robot assistant which is responsible
- * for providing companionship. Companionship is modelled via
- * the robot performing a simple action, such as spinning when
- * the robot has approached the resident. 
+ * Represents a friend (visitor) of the Resident. Moves to
+ * the Resident to perform a simple action when it is requested.
  *
- * Providing companionship reflects the situation where
- * the resident communites to external beings via VoIP software
- * such as Skype.
- *
- * Author: Akshay Kalyan
+ * Author: Matthew Chiam
  */
 
-;class CompanionshipRobot : public Robot {
+;class Caregiver : public Robot {
 	public:
-		CompanionshipRobot();
-		~CompanionshipRobot();
+		Caregiver();
+		~Caregiver();
 
 		int MY_TASK;
 		bool performingTask;
 
 		// Location State
 		enum LocationState {
-			AT_HOME, AT_RESIDENT, GOING_TO_RESIDENT, GOING_HOME
+			AT_HOME, AT_RESIDENT, GOING_TO_RESIDENT, GOING_HOME, GOING_TO_SHOWER, AT_SHOWER
 		};
 
 		LocationState currentLocationState;
@@ -55,19 +49,23 @@
         ros::Subscriber residentStageSub;
 		ros::Subscriber eventTriggerSub;
 		ros::Subscriber pathToRobotSub;
+		ros::Subscriber pathToShowerSub;
 		ros::Subscriber pathToHomeSub;
 		ros::Subscriber locationInstructionsSub;
 		ros::Publisher eventTriggerPub;
 		ros::ServiceClient performTaskClient;
 		
         StaticPoi residentPoi = StaticPoi(0.0f, 0.0f, 0.0f);
-        StaticPoi homePoi = StaticPoi(COMPANIONSHIP_HOME_X, COMPANIONSHIP_HOME_Y, 0.0f);
+        StaticPoi homePoi = StaticPoi(CAREGIVER_HOME_X, CAREGIVER_HOME_Y, 0.0f);
+        StaticPoi showerPoi = StaticPoi(SHOWER_X, SHOWER_Y, 0.0f);
 
 		void goToResident(const std_msgs::Empty);
 		void goToHome(const std_msgs::Empty);
 		void eventTriggerReply();
 		void eventTriggerCallback(elderly_care_simulation::EventTrigger msg);
-		void performTask();		
+		void performTask();	
+		void goToShower(const std_msgs::Empty);
+		int caregiverDoWork();
 };
 
 #endif

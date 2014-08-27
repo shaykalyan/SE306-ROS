@@ -116,14 +116,18 @@ void Robot::clearLocationQueue()
 /**
  * Adds location's points to the queue to traverse 
  */
-void Robot::goToLocation(const geometry_msgs::Point location) { 
+void Robot::goToLocation(const geometry_msgs::Point location, bool closeEnough /*= false*/) { 
 
     elderly_care_simulation::FindPath srv;
     srv.request.from_point = currentLocation.position;
     srv.request.to_point = location;
     if (pathFinderService.call(srv)) {
         clearLocationQueue();
-        addPointsToQueue(srv.response.path);
+        std::vector<geometry_msgs::Point> points = srv.response.path;
+        if (closeEnough) {
+            points.pop_back();
+        }
+        addPointsToQueue(points);
     } else {
         ROS_INFO("Call failed");
     }
