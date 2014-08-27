@@ -56,6 +56,10 @@ void Scheduler::resetRandomEventOccurrence() {
     }
 }
 
+void Scheduler::resetConcurrentWeight() {
+    concurrentWeight = 0;
+}
+
 /**
  * Returns the current concurrent weight count
  */
@@ -128,7 +132,16 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
 
                 eventQueue.push(EventNode(eatMsg));
             }else{
-                concurrentWeight -= msg.event_weight;
+
+                // ILL has a weight of 0, but still blocks all other events (taking up 2 slots)
+                // Therefore need to -2 to concurrent weight to free the slot.
+                if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ILL ||
+                    msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+                    concurrentWeight -= 2;
+                }else {
+                    concurrentWeight -= msg.event_weight;
+                }
+                
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
             }
         }
@@ -190,11 +203,11 @@ void Scheduler::populateDailyTasks() {
 
         // // Morning
         // { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_KITCHEN, EVENT_TRIGGER_PRIORITY_LOW },
-        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
-        { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW }
+        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW }
+        // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
+        // { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
@@ -208,10 +221,11 @@ void Scheduler::populateDailyTasks() {
         // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
+
         // // Evening
         // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW }
+        // { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
     };
     for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
@@ -256,7 +270,8 @@ void Scheduler::dequeueEvent() {
             case EVENT_TRIGGER_EVENT_TYPE_ILL:
                 allowNewEvents = false;
 
-                concurrentWeight += msg.event_weight;
+                // ILL has a weight of 0, but still blocks all other events
+                concurrentWeight += 2;
                 eventTriggerPub.publish(msg);
                 eventQueue.pop();
 
@@ -269,7 +284,8 @@ void Scheduler::dequeueEvent() {
             case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
                 allowNewEvents = false;
 
-                concurrentWeight += msg.event_weight;
+                // VERY_ILL has a weight of 0, but still blocks all other events
+                concurrentWeight += 2;
                 eventTriggerPub.publish(msg);
                 eventQueue.pop();
 
@@ -284,7 +300,9 @@ void Scheduler::dequeueEvent() {
                 break;
 
             default:
-                allowNewEvents = true;
+                if(msg.event_type == EVENT_TRIGGER_EVENT_TYPE_WAKE) {
+                    allowNewEvents = true;
+                }
                 eventTriggerPub.publish(msg);
                 concurrentWeight += msg.event_weight;
                 eventQueue.pop();
@@ -351,14 +369,15 @@ int main(int argc, char **argv) {
     //a count of howmany messages we have sent
     int count = 0;
     sleep(5);
+
     ROS_INFO("Day Starts....");
 
     while (ros::ok()) {
-
-        if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() == 0) {
+        if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() <= 0) {
             // ROS_INFO("Day Ends....");
             // sleep(10);
             // scheduler.clearEventQueue();
+            // scheduler.resetConcurrentWeight();
             // scheduler.resetRandomEventOccurrence();
             // scheduler.populateDailyTasks();
             // ROS_INFO("Day Starts....");
