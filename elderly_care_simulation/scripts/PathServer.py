@@ -31,7 +31,6 @@ def shortest_path(start, end):
     Code for breadth first search shortest path algorithm adapted from
     http://stackoverflow.com/questions/8922060/breadth-first-search-trace-path
     """
-    rospy.loginfo(end)
     # maintain a queue of paths
     queue = []
     
@@ -53,9 +52,6 @@ def shortest_path(start, end):
         # path found
         if node == end:
             return path
-            
-        rospy.loginfo(node)
-        #rospy.loginfo(path)
 
         # enumerate all adjacent nodes, construct a new path and push it into the queue
         for adjacent in graph.get(node, []):
@@ -89,18 +85,25 @@ def find_path(req):
     req.from_point is a geometry_msgs Point object signifying the initial location
     """ 
     try:
-        rospy.loginfo("Recieved request finding best path")
+        rospy.loginfo("Received request finding best path")
+        rospy.loginfo(str(graph))
 
         from_point = req.from_point;
         to_point = req.to_point;
 
         from_node = get_x_location(from_point.x), get_y_location(from_point.y) 
         to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
+
+        if from_node not in graph:
+            return False
+        
         path = shortest_path(from_node, to_node)
 
+        path.append((to_node[0], to_node[1]))
+
+        rospy.loginfo(str(path))
         return create_response_message(path)
     except Exception as e:
-        rospy.loginfo(str(e))
         return False
 
 
@@ -152,7 +155,20 @@ def get_vacant_neighbours(house_map, cell):
     for neighbour in neighbours:
         if check_vacancy_at_cell(house_map, neighbour):
             vacant_neighbours.append(neighbour)
+
+    diagonal_neighbours = { 
+                            (x + 1, y + 1) : [(x + 1, y), (x, y + 1)],
+                            (x - 1, y - 1) : [(x - 1, y), (x, y - 1)],
+                            (x + 1, y - 1) : [(x + 1, y), (x, y - 1)],
+                            (x - 1, y + 1) : [(x - 1, y), (x, y + 1)]
+                          }
             
+    for diagonal, adjacent in diagonal_neighbours.items():
+        if adjacent[0] in vacant_neighbours \
+            and adjacent[1] in vacant_neighbours \
+            and check_vacancy_at_cell(house_map, diagonal):
+            vacant_neighbours.append(diagonal)
+
     return vacant_neighbours
     
     
@@ -187,6 +203,7 @@ def generate_graph(filename):
     for y, row in enumerate(house_map):
         for x, cell in enumerate(row):
             cell = (x, y)
+            #if house_map[y][x] == '0':
             graph[cell] = get_vacant_neighbours(house_map, cell)
         
 

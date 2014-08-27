@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
     doctor = EscortRobot(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL, base, hospital);
 
-    const std::string rid = "robot_11";
+    const std::string rid = "robot_12";
 
     ros::init(argc, argv, "Doctor_Robot");
 

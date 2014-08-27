@@ -1,5 +1,5 @@
-#ifndef COMPANIONSHIPROBOT_H
-#define COMPANIONSHIPROBOT_H
+#ifndef ENTERTAINMENT_H
+#define ENTERTAINMENT_H
 
 #include "ros/ros.h"
 #include <unistd.h>
@@ -26,21 +26,20 @@
 
 /**
  * This robot represents a robot assistant which is responsible
- * for providing companionship. Companionship is modelled via
+ * for provding entertainment. EntertainmentRobot is modelled via
  * the robot performing a simple action, such as spinning when
  * the robot has approached the resident. 
  *
- * Providing companionship reflects the situation where
- * the resident communites to external beings via VoIP software
- * such as Skype.
- *
- * Author: Akshay Kalyan
+ * Providing entertainment reflects the situation where
+ * the resident requires intertainment, which the entertainment
+ * provides.
+ * Author: Hugo Bateman
  */
 
-;class CompanionshipRobot : public Robot {
+;class EntertainmentRobot : public Robot {
 	public:
-		CompanionshipRobot();
-		~CompanionshipRobot();
+		EntertainmentRobot();
+		~EntertainmentRobot();
 
 		int MY_TASK;
 		bool performingTask;
@@ -61,13 +60,13 @@
 		ros::ServiceClient performTaskClient;
 		
         StaticPoi residentPoi = StaticPoi(0.0f, 0.0f, 0.0f);
-        StaticPoi homePoi = StaticPoi(COMPANIONSHIP_HOME_X, COMPANIONSHIP_HOME_Y, 0.0f);
+        StaticPoi homePoi = StaticPoi(ENTERTAINMENT_HOME_X, ENTERTAINMENT_HOME_Y, 0.0f);
 
 		void goToResident(const std_msgs::Empty);
 		void goToHome(const std_msgs::Empty);
 		void eventTriggerReply();
 		void eventTriggerCallback(elderly_care_simulation::EventTrigger msg);
-		void performTask();		
+		void performTask();
 };
 
 #endif

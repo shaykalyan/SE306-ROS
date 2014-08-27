@@ -27,8 +27,10 @@
 
 // Current task type: -1 corresponds to no task
 
-;Resident::Resident(){
+Resident::Resident(){
     currentTaskType = EVENT_TRIGGER_EVENT_TYPE_UNDEFINED;
+    currentMovementState = STATIONARY;
+    currentMovementTarget = NONE;
 
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_EAT] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_SHOWER] = 0;
@@ -43,8 +45,6 @@
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COOK] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP] = 0;
-
-    navigatingToPoiForTask = false;
 }
 
 Resident::~Resident() {
@@ -215,8 +215,7 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
 
     bool isInCorrectPlace = !taskRequiresPoi || atPointOfInterest(taskPoi, 0.5f);
 
-    if (taskRequiresPoi && !isInCorrectPlace && !navigatingToPoiForTask) {
-        navigatingToPoiForTask = true;
+    if (taskRequiresPoi && !isInCorrectPlace) {
         goToLocation(taskPoi);
         res.result = PERFORM_TASK_RESULT_TAKE_ME_THERE;
     } else if ((taskType == currentTaskType) && isInCorrectPlace) {
@@ -230,6 +229,63 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
     ROS_INFO("Resident: I'm responding with result %d", res.result);
         
     return true;
+}
+
+/**
+ * Publish successful completion of task notice destined
+ * for the scheduler
+ */
+void Resident::eventTriggerReply(int eventType) {
+
+    // Create response message
+    elderly_care_simulation::EventTrigger msg;
+    msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
+    msg.event_type = eventType;
+    msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
+    msg.event_weight = getEventWeight(msg.event_type);
+    msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
+
+    eventTriggerPub.publish(msg);
+    ROS_INFO("Resident: Reply Message Sent");
+}
+
+void Resident::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
+    if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
+
+        switch(msg.event_type){
+            case EVENT_TRIGGER_EVENT_TYPE_WAKE:
+                ROS_INFO("Resident: Event Recieved: [%s]", eventTypeToString(msg.event_type));
+                eventTriggerReply(msg.event_type);
+                break;
+            case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
+                ROS_INFO("Resident: Event Recieved: [%s]", eventTypeToString(msg.event_type));
+                goToLocation(bedPoi.getLocation());
+                currentMovementState = MOVING;
+                currentMovementTarget = BED;
+                break;
+            case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_KITCHEN:
+                ROS_INFO("Resident: Event Recieved: [%s]", eventTypeToString(msg.event_type));
+                goToLocation(kitchenPoi.getLocation());
+                currentMovementState = MOVING;
+                currentMovementTarget = KITCHEN;
+                break;
+            case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM:
+                ROS_INFO("Resident: Event Recieved: [%s]", eventTypeToString(msg.event_type));
+                goToLocation(bedroomPoi.getLocation());
+                currentMovementState = MOVING;
+                currentMovementTarget = BEDROOM;
+                break;
+            case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY:
+                ROS_INFO("Resident: Event Recieved: [%s]", eventTypeToString(msg.event_type));
+                goToLocation(hallwayPoi.getLocation());
+                currentMovementState = MOVING;
+                currentMovementTarget = HALLWAY;
+                break;
+            default:
+                return;
+
+        }
+    }
 }
 
 
@@ -254,7 +310,6 @@ void Resident::diceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg)
             ROS_INFO("Resident: I am very ill");
             msgOut.event_type = EVENT_TRIGGER_EVENT_TYPE_VERY_ILL;
             msgOut.event_priority = EVENT_TRIGGER_PRIORITY_VERY_HIGH;
-            return;
             break;
         default:
             ROS_INFO("Resident: Unknown.");
@@ -270,9 +325,13 @@ Resident resident;
 void callStage0domCallback(const nav_msgs::Odometry msg) {
     resident.stage0domCallback(msg);
 }
+
 void callDiceTriggerCallback(elderly_care_simulation::DiceRollTrigger msg){
     resident.diceTriggerCallback(msg);
+}
 
+void callEventTriggerCallback(elderly_care_simulation::EventTrigger msg){
+    resident.eventTriggerCallback(msg);
 }
 
 void callUpdateDesiredLocationCallback(const geometry_msgs::Point location){
@@ -299,10 +358,13 @@ int main(int argc, char **argv) {
       // Initialise publishers
     resident.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_0/cmd_vel",1000); 
     resident.externalEventPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("external_event",1000, true);
+    resident.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
     // Initialise subscribers
     resident.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth", 1000, callStage0domCallback);
     resident.diceTriggerSub = nodeHandle.subscribe<elderly_care_simulation::DiceRollTrigger>("dice_roll_trigger", 1000, callDiceTriggerCallback);
+    resident.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000,
+                                callEventTriggerCallback);
 
     resident.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_0/location", 1000, callUpdateDesiredLocationCallback);
 
@@ -319,6 +381,25 @@ int main(int argc, char **argv) {
 	while (ros::ok())
 	{
 		resident.updateCurrentVelocity();
+
+        if(resident.currentMovementState != resident.STATIONARY) {
+            if (resident.atDesiredLocation()){
+                
+                if (resident.currentMovementTarget == resident.KITCHEN) {
+                    resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_KITCHEN);
+                } else if (resident.currentMovementTarget == resident.BEDROOM) {
+                    resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM);
+                } else if (resident.currentMovementTarget == resident.HALLWAY) {
+                    resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY);
+                } else if (resident.currentMovementTarget == resident.BED) {
+                    resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_SLEEP);
+                }
+
+                resident.currentMovementState = resident.STATIONARY;
+                resident.currentMovementTarget = resident.NONE;
+                
+            }
+        }
 
 		ros::spinOnce();
 		loop_rate.sleep();

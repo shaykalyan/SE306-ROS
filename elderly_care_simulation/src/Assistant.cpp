@@ -20,7 +20,7 @@
 #include "Assistant.h"
 
 Assistant::Assistant(){
-    MY_TASK = EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT;
+    MY_TASK = EVENT_TRIGGER_EVENT_TYPE_UNDEFINED;
     performingTask = false;
     currentLocationState = AT_HOME;
 }
@@ -72,7 +72,7 @@ void Assistant::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 
         // TODO: NEW ROBOT CHANGE HERE
-        if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT) {
+        if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
             ROS_INFO("Assistant: Event Recieved: [ENTERTAINMENT]");
             
             performingTask = true;

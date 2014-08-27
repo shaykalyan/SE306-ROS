@@ -28,6 +28,7 @@ public:
     int getEventQueueSize() const;
     void clearEventQueue();
     void resetRandomEventOccurrence();
+    void resetConcurrentWeight();
     void populateDailyTasks();
     void dequeueEvent();
 
