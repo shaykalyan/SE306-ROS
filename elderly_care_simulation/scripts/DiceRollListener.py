@@ -18,7 +18,7 @@ class DiceRollerGUI:
 
         # create root element with fixed size
         self.root = Tk()
-        self.root.geometry('570x535+1+1')
+        self.root.geometry('590x590+1+1')
 
         # create the left most frame which will hold an embeded frame with the grid of current tasks being performed ny the robots
         self.frame_top = Frame(self.root)
@@ -167,8 +167,8 @@ class DiceRollerGUI:
         Label(self.frame_events, textvariable=self.next_event, relief=gridRelief).pack(fill=X)
 
         # Dictionary which maps different events to different method which will respond to them.
-        self.next_events = {0:"undefined", 1:"eat", 2:"shower", 3:"exercise", 4:"converse", 5:"support", 6:"relative", 7:"friend", 8:"ill", 9:"veryIll",
-        10:"medication", 11:"cook", 12:"entertainment", 13:"companionship", 14:"wake", 15:"sleep"}
+        self.next_events = {0:"", 1:"Eat", 2:"Shower", 3:"Exercise", 4:"Converse", 5:"Support", 6:"Relative", 7:"Friend", 8:"Ill", 9:"Very Ill",
+        10:"Medication", 11:"Cook", 12:"Entertainment", 13:"Companionship", 14:"Wake", 15:"Sleep"}
 
 
         ######################### SET UP DICE ROLLER MONITOR #########################
@@ -176,25 +176,40 @@ class DiceRollerGUI:
         # Label for the dice rollers
         Label(self.frame_diceRolls, text="Dice Rollers", relief=gridRelief, bg='ivory4', width=68).pack(side=TOP)
 
+        # Create ill dice roller label
+        self.ill_label = Canvas(bg='gray70', width=550, height=15)
+        self.ill_label.pack(side=TOP)
+        self.ill_label.create_text(275, 8, text="Ill Dice Roller")
+
         # Set up ill dice roll canvas
         #Label(self.frame_diceRolls, text="Ill Dice Roller", relief=gridRelief, bg='ivory2', width=68).pack(side=TOP)
         self.ill_canvas = Canvas(bg='snow', width=550, height=30)
         self.ill_canvas.pack(side=TOP)
-        self.ill_rectangle = self.ill_canvas.create_rectangle(0, 0, 500, 30, fill='SpringGreen4')
+        self.ill_rectangle = self.ill_canvas.create_rectangle(0, 0, 500, 30, fill='PaleGreen4')
         self.ill_roll = self.ill_canvas.create_rectangle(0, 0, 2, 30, fill='red')
+
+        # Create very ill dice roller label
+        self.very_ill_label = Canvas(bg='gray70', width=550, height=15)
+        self.very_ill_label.pack(side=TOP)
+        self.very_ill_label.create_text(275, 8, text="Very Ill Dice Roller")
 
         # Set up very ill dice roll canvas
         #Label(self.frame_diceRolls, text="Very Ill Dice Roller", relief=gridRelief, bg='ivory2', width=68).pack(side=TOP)
         self.very_ill_canvas = Canvas(bg='snow', width=550, height=30)
         self.very_ill_canvas.pack(side=TOP)
-        self.very_ill_rectangle = self.very_ill_canvas.create_rectangle(0, 0, 500, 30, fill='SpringGreen4')
+        self.very_ill_rectangle = self.very_ill_canvas.create_rectangle(0, 0, 500, 30, fill='PaleGreen4')
         self.very_ill_roll = self.very_ill_canvas.create_rectangle(0, 0, 2, 30, fill='red')
+
+        # Create moral support dice roller label
+        self.moral_support = Canvas(bg='gray70', width=550, height=15)
+        self.moral_support.pack(side=TOP)
+        self.moral_support.create_text(275, 8, text="Moral Support Dice Roller")
 
         # Set up very ill dice roll canvas
         #Label(self.frame_diceRolls, text="Moral Support Dice Roller", relief=gridRelief, bg='ivory2', width=68).pack(side=TOP)
         self.moral_canvas = Canvas(bg='snow', width=550, height=30)
         self.moral_canvas.pack(side=TOP)
-        self.moral_rectangle = self.moral_canvas.create_rectangle(0, 0, 500, 30, fill='SpringGreen4')
+        self.moral_rectangle = self.moral_canvas.create_rectangle(0, 0, 500, 30, fill='PaleGreen4')
         self.moral_roll = self.moral_canvas.create_rectangle(0, 0, 2, 30, fill='red')
 
         
