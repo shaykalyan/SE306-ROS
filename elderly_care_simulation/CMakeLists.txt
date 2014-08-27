@@ -73,6 +73,10 @@ rosbuild_add_gtest_build_flags(TestRelativeRobot)
 rosbuild_add_rostest(test/TestRelativeRobot.test)
 target_link_libraries(TestRelativeRobot RelativeRobotLib Robot Poi StaticPoi)
 
+rosbuild_add_executable(TestPathServer EXCLUDE_FROM_ALL src/test/TestPathServer.cpp)
+rosbuild_add_gtest_build_flags(TestPathServer)
+rosbuild_add_rostest(test/TestPathServer.test)
+
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp)
 target_link_libraries(Resident Robot Poi StaticPoi)
