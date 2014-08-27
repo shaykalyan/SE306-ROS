@@ -7,7 +7,11 @@
 
 class StaticPoi : public Poi {
     public:
-        StaticPoi(float x, float y, float z);
+        StaticPoi(float x, float y, float z) {
+            this->location.x = x;
+            this->location.y = y;
+            this->location.z = z;
+        }
         ~StaticPoi();
 
         virtual geometry_msgs::Point getLocation() {

@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 
 #include <sstream>
-#include "math.h"
+#include <math.h>
 #include <cstdlib>
 
 #include "std_msgs/Empty.h"
@@ -43,6 +43,40 @@ void Robot::stopSpinning() {
 }
 
 /**
+ * Checks whether the robot has been *manually* moved.
+ * If the robot has, then the robot will find a new path 
+ * to the desired location from the current location.
+ */
+void Robot::checkForMovement() {
+
+    if (!locationQueue.empty()) {
+        geometry_msgs::Point currentDestination = locationQueue.front();
+
+        geometry_msgs::Point d;
+        d.x = currentDestination.x - currentLocation.position.x;
+        d.y = currentDestination.y - currentLocation.position.y;
+
+        float distance = sqrt(d.x * d.x + d.y * d.y);
+        if (distance > 2) {
+            goToLocation(finalDestination);
+        }
+    }
+}
+
+/**
+ * Checks to see whether the robot is within tolerance of the given POI.
+ */ 
+bool Robot::atPointOfInterest(geometry_msgs::Point p, double tolerance) {
+
+    geometry_msgs::Point d;
+    d.x = p.x - currentLocation.position.x;
+    d.y = p.y - currentLocation.position.y;
+
+    float distance = sqrt(d.x * d.x + d.y * d.y);
+    return distance <= tolerance;
+}
+
+/**
  * Updates current position of the robot from Stage
  */
 void Robot::stage0domCallback(const nav_msgs::Odometry msg) {
@@ -55,6 +89,8 @@ void Robot::stage0domCallback(const nav_msgs::Odometry msg) {
   	double roll, pitch, yaw;
     tf::Matrix3x3(tf::Quaternion(x, y, z, w)).getRPY(roll, pitch, yaw);
     currentAngle = yaw;
+
+    checkForMovement();
 }
 
 /**
@@ -80,18 +116,24 @@ void Robot::clearLocationQueue()
 /**
  * Adds location's points to the queue to traverse 
  */
-void Robot::goToLocation(const geometry_msgs::Point location) { 
+void Robot::goToLocation(const geometry_msgs::Point location, bool closeEnough /*= false*/) { 
 
     elderly_care_simulation::FindPath srv;
     srv.request.from_point = currentLocation.position;
     srv.request.to_point = location;
     if (pathFinderService.call(srv)) {
         clearLocationQueue();
-        addPointsToQueue(srv.response.path);
+        std::vector<geometry_msgs::Point> points = srv.response.path;
+        if (closeEnough) {
+            points.pop_back();
+        }
+        addPointsToQueue(points);
     } else {
         ROS_INFO("Call failed");
     }
-    ROS_INFO("ROBOT GOING TO LOCATION %f, %f", location.x, location.y);
+
+    finalDestination.x = location.x;
+    finalDestination.y = location.y;
 }
 
 /**
@@ -155,7 +197,15 @@ bool Robot::atDesiredLocation() {
       
 }
 
+/**
+ * Updates the current velocity to head towards the finalDestination
+ * via the points in the locationQueue.
+ */
 void Robot::updateCurrentVelocityToDesiredLocation() {
+
+    if (locationQueue.empty()) {
+        return;
+    }
 
     // Find the correct angle
     geometry_msgs::Point directionVector; // Vector from currentLocation to desiredLocation

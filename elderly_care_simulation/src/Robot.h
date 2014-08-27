@@ -29,16 +29,19 @@ class Robot{
 		geometry_msgs::Pose currentLocation;
 
 		void stage0domCallback(const nav_msgs::Odometry msg);
-		void goToLocation(const geometry_msgs::Point location);
+		void goToLocation(const geometry_msgs::Point location, bool closeEnough = false);
 		void startSpinning(bool clockwise);
 		void stopSpinning();
 		void updateCurrentVelocity();
 		bool atDesiredLocation();
+		bool atPointOfInterest(geometry_msgs::Point p, double tolerance);
+
 
 		
 
 	private:
 		geometry_msgs::Twist currentVelocity;
+		geometry_msgs::Point finalDestination;
 		std::queue<geometry_msgs::Point> locationQueue;
 		double  currentAngle;
 
@@ -54,6 +57,7 @@ class Robot{
 		bool doubleEquals(double a, double b, double difference);
 		double normalizeAngle(double angle);
 		bool turnAnticlockwise(double currentAngle, double desiredAngle);
+		void checkForMovement();
 };
 
 #endif

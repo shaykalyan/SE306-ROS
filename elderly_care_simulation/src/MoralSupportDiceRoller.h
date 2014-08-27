@@ -16,7 +16,7 @@ class MoralSupportDiceRoller : public DiceRoller {
 
     public:
 
-        MoralSupportDiceRoller() : DiceRoller(300) {}
+        MoralSupportDiceRoller() : DiceRoller(120000) {}
         ~MoralSupportDiceRoller();
 };
 
