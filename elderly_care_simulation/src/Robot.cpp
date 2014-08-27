@@ -17,6 +17,7 @@
 
 Robot::Robot() {
     spin = NOT_SPINNING;
+    outsideBounds = false;
 }
 
 Robot::~Robot() {
@@ -115,21 +116,33 @@ void Robot::clearLocationQueue()
 
 /**
  * Adds location's points to the queue to traverse 
+ * If the robot is outside the bounds of the map, the robot will head towards 0,0 until it is inside the map.
  */
-void Robot::goToLocation(const geometry_msgs::Point location) { 
+void Robot::goToLocation(const geometry_msgs::Point location, bool closeEnough /*= false*/) { 
 
+    clearLocationQueue();
     elderly_care_simulation::FindPath srv;
     srv.request.from_point = currentLocation.position;
     srv.request.to_point = location;
     if (pathFinderService.call(srv)) {
-        clearLocationQueue();
-        addPointsToQueue(srv.response.path);
+        std::vector<geometry_msgs::Point> points = srv.response.path;
+        if (closeEnough) {
+            points.pop_back();
+        }
+        outsideBounds = false;
+        addPointsToQueue(points);
     } else {
         ROS_INFO("Call failed");
+        std::vector<geometry_msgs::Point> points;
+        geometry_msgs::Point origin;
+        points.push_back(origin);
+        addPointsToQueue(points);
+        outsideBounds = true;
     }
 
     finalDestination.x = location.x;
     finalDestination.y = location.y;
+    previousCloseEnough = closeEnough;
 }
 
 /**
@@ -180,7 +193,7 @@ bool Robot::atDesiredLocation() {
     if (locationQueue.empty()) {
         return true;
     } else {
-        double toleratedDifference = 0.05;
+        double toleratedDifference = 0.15;
         geometry_msgs::Point desiredLocation = locationQueue.front();
 
         if (doubleEquals(currentLocation.position.x, desiredLocation.x, toleratedDifference) &&
@@ -191,6 +204,21 @@ bool Robot::atDesiredLocation() {
     }
     return false;
       
+}
+
+/**
+ * Calculates the difference in radians between the two angles.
+ * Angles should be between -pi and pi.
+ */
+double Robot::differenceInAngle(double current, double desired) {
+
+    current = current > 0 ? current : current + 2 * M_PI;
+    desired = desired > 0 ? desired : desired + 2 * M_PI;
+
+    double difference = std::abs(current - desired);
+    difference = difference <= M_PI ? difference : (2 * M_PI) - difference;
+    return difference;
+
 }
 
 /**
@@ -213,17 +241,40 @@ void Robot::updateCurrentVelocityToDesiredLocation() {
     
     double desiredAngle = atan2(directionVector.y, directionVector.x);
 
-    if (! doubleEquals(currentAngle, desiredAngle, 0.10)) {
+    double angle = differenceInAngle(currentAngle, desiredAngle);
+    if (angle > 0.05) {
         // Turn towards angle
-        currentVelocity.linear.x = 0;
-        
-        if (turnAnticlockwise(currentAngle, desiredAngle)) {
-            // Turn anti clockwise
-            currentVelocity.angular.z = M_PI / 4;
+
+        // If the amount we need to turn is more than 45 degrees
+           // Turn without going forward
+        // Otherwise
+           // Turn while going forward
+        double angularVelocity = 0;
+        double linearVelocity = 0;
+
+        // ROS_INFO("Angle: %f", angle);
+        if (angle > M_PI) {
+            angularVelocity = M_PI * 2;
+
+        } else if (angle > (M_PI / 2)) {
+            angularVelocity = M_PI;
+
+        } else if (angle > (M_PI / 8)) {
+            angularVelocity = M_PI / 4;
+
         } else {
-            // Turn clockwise
-            currentVelocity.angular.z = - M_PI / 4;
+            angularVelocity = M_PI / 8;
         }
+
+        if (! turnAnticlockwise(currentAngle, desiredAngle)) {
+            // Turn clockwise
+            angularVelocity *= -1;
+        }
+
+        // ROS_INFO("Velocty: %f", angularVelocity);
+
+        currentVelocity.linear.x = linearVelocity;
+        currentVelocity.angular.z = angularVelocity;
     } else {
         // Go forward
         currentVelocity.linear.x = 10;
@@ -236,15 +287,18 @@ void Robot::updateCurrentVelocityToDesiredLocation() {
  * Otherwise, turns towards the next location and move towards it.
  */
 void Robot::updateCurrentVelocity() {
+    if (outsideBounds) {
+        goToLocation(finalDestination, previousCloseEnough);
+    }
 
     if (spin == CLOCKWISE) {
         // Spin clockwise
         currentVelocity.linear.x = 0;
-        currentVelocity.angular.z = M_PI / 4;
+        currentVelocity.angular.z = M_PI * 2;
     } else if (spin == ANTI_CLOCKWISE) {
         // Spin anti_clockwise
         currentVelocity.linear.x = 0;
-        currentVelocity.angular.z = - M_PI / 4;
+        currentVelocity.angular.z = - M_PI * 2;
     } else if (atDesiredLocation()) {
         // Stop robot
         currentVelocity.linear.x = 0;

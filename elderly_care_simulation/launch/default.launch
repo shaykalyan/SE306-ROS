@@ -3,8 +3,9 @@
 
 	<node name="resident" pkg="elderly_care_simulation" type="Resident" />
 	<node name="scheduler" pkg="elderly_care_simulation" type="Scheduler" />
-	<node name="visitor" pkg="elderly_care_simulation" type="Visitor" />
-	<node name="assistant" pkg="elderly_care_simulation" type="Assistant" />
+	<!-- <node name="visitor" pkg="elderly_care_simulation" type="Visitor" /> -->
+	<!-- <node name="assistant" pkg="elderly_care_simulation" type="Assistant" /> -->
+	<node name="entertainment" pkg="elderly_care_simulation" type="EntertainmentRobot" />
 	<node name="caregiver" pkg="elderly_care_simulation" type="Caregiver" />
 	<node name="nurse" pkg="elderly_care_simulation" type="NurseRobot" />
 	<node name="medication" pkg="elderly_care_simulation" type="MedicationRobot" />
