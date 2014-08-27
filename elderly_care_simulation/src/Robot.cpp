@@ -64,6 +64,19 @@ void Robot::checkForMovement() {
 }
 
 /**
+ * Checks to see whether the robot is within tolerance of the given POI.
+ */ 
+bool Robot::atPointOfInterest(geometry_msgs::Point p, double tolerance) {
+
+    geometry_msgs::Point d;
+    d.x = p.x - currentLocation.position.x;
+    d.y = p.y - currentLocation.position.y;
+
+    float distance = sqrt(d.x * d.x + d.y * d.y);
+    return distance <= tolerance;
+}
+
+/**
  * Updates current position of the robot from Stage
  */
 void Robot::stage0domCallback(const nav_msgs::Odometry msg) {
@@ -103,14 +116,18 @@ void Robot::clearLocationQueue()
 /**
  * Adds location's points to the queue to traverse 
  */
-void Robot::goToLocation(const geometry_msgs::Point location) { 
+void Robot::goToLocation(const geometry_msgs::Point location, bool closeEnough /*= false*/) { 
 
     elderly_care_simulation::FindPath srv;
     srv.request.from_point = currentLocation.position;
     srv.request.to_point = location;
     if (pathFinderService.call(srv)) {
         clearLocationQueue();
-        addPointsToQueue(srv.response.path);
+        std::vector<geometry_msgs::Point> points = srv.response.path;
+        if (closeEnough) {
+            points.pop_back();
+        }
+        addPointsToQueue(points);
     } else {
         ROS_INFO("Call failed");
     }
