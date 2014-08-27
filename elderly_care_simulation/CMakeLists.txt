@@ -61,6 +61,13 @@ rosbuild_add_executable(TestResident EXCLUDE_FROM_ALL src/test/TestResident.cpp)
 rosbuild_add_gtest_build_flags(TestResident)
 rosbuild_add_rostest(test/TestResident.test)
 
+rosbuild_add_executable(TestCaregiverRobot EXCLUDE_FROM_ALL src/test/TestCaregiverRobot.cpp)
+rosbuild_add_library(CaregiverLib src/Caregiver.cpp)
+rosbuild_add_gtest_build_flags(TestCaregiverRobot)
+rosbuild_add_rostest(test/TestCaregiverRobot.test)
+target_link_libraries(TestCaregiverRobot CaregiverLib Robot Poi StaticPoi)
+
+
 rosbuild_add_executable(TestFriendRobot EXCLUDE_FROM_ALL src/test/TestFriendRobot.cpp)
 rosbuild_add_library(FriendRobotLib src/FriendRobot.cpp)
 rosbuild_add_gtest_build_flags(TestFriendRobot)

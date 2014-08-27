@@ -59,7 +59,6 @@ void Caregiver::eventTriggerReply() {
      switch (msg.event_type) {
         case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
         {
-            msg.event_type = EVENT_TRIGGER_EVENT_TYPE_CONVERSATION;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
             msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
@@ -70,7 +69,6 @@ void Caregiver::eventTriggerReply() {
 
          case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
         {
-            msg.event_type = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
             msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
@@ -82,7 +80,6 @@ void Caregiver::eventTriggerReply() {
 
         case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
         {
-            msg.event_type = EVENT_TRIGGER_EVENT_TYPE_EXERCISE;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
             msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
@@ -94,7 +91,6 @@ void Caregiver::eventTriggerReply() {
 
         case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
         {
-            msg.event_type = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
             msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
