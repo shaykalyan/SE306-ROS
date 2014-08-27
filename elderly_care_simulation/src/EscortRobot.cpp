@@ -30,12 +30,12 @@ void EscortRobot::residentLocationCallback(nav_msgs::Odometry msg) {
 
 void EscortRobot::goToPoi() {
     currentLocationState = GOING_TO_POI;
-    goToLocation(poi);
+    goToLocation(poi, true);
 }
 
 void EscortRobot::goToResident() {
     currentLocationState = GOING_TO_POI;
-    goToLocation(residentLocation);
+    goToLocation(residentLocation, true);
 }
 
 void EscortRobot::goToBase() {

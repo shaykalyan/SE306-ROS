@@ -48,7 +48,7 @@ const float OUTSIDE_X = -0.2f;
 const float OUTSIDE_Y = -11.0f;
 
 // Constants for the feeder robot
-const float ADJACENT_TABLE_X = -5.0f;
+const float ADJACENT_TABLE_X =  6.0f;
 const float ADJACENT_TABLE_Y =  5.0f;
 const float FEEDER_BASE_X    = 12.0f;
 const float FEEDER_BASE_Y    = -4.0f;
