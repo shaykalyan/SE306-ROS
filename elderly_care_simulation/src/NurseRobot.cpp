@@ -17,45 +17,44 @@
 #include "elderly_care_simulation/FindPath.h"
 
 #include "Robot.h"
-#include "CompanionshipRobot.h"
+#include "NurseRobot.h"
 
 #include "Poi.h"
 #include "StaticPoi.h"
 #include "StaticPoiConstants.h"
 
 /**
- * This node represents an assistant robot for the purpose of
- * providing companionship to the Resident. THe robot moves to
+ * This node represents a nurse robot for the purpose of
+ * providing medical assistant to the Resident. The robot moves to
  * the the POI, in this case the resident, to perform 
  * a predetermined action. This action represents the robot
- * providing companionship such as connecting the resident
- * to other beings via VoIP sofware (Skype).
+ * providing medical attentions when the resident is ill.
  *
- * Author: Akshay Kalyan
+ * Author: Bert Huang
  */
 
-CompanionshipRobot::CompanionshipRobot() {
-    MY_TASK = EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP;
+Nurse::Nurse() {
+    MY_TASK = EVENT_TRIGGER_EVENT_TYPE_ILL;
     performingTask = false;
     currentLocationState = AT_HOME;
 }
 
-CompanionshipRobot::~CompanionshipRobot() {  
+Nurse::~Nurse() {  
 }
 
 /**
- * Prompt Companionship robot to travel to the resident
+ * Prompt Nurse robot to travel to the resident
  */
-void CompanionshipRobot::goToResident(const std_msgs::Empty) {
-    ROS_INFO("CompanionshipRobot: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
+void Nurse::goToResident(const std_msgs::Empty) {
+    ROS_INFO("Nurse: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
     goToLocation(residentPoi.getLocation());
     currentLocationState = GOING_TO_RESIDENT;
 }
 
 /**
- * Prompt Companionship robot to return back to its home POI
+ * Prompt Nurse robot to return back to its home POI
  */
-void CompanionshipRobot::goToHome(const std_msgs::Empty) {
+void Nurse::goToHome(const std_msgs::Empty) {
     goToLocation(homePoi.getLocation());
     currentLocationState = GOING_HOME;
 }
@@ -64,7 +63,7 @@ void CompanionshipRobot::goToHome(const std_msgs::Empty) {
  * Publish successful completion of task notice destined
  * for the scheduler
  */
-void CompanionshipRobot::eventTriggerReply() {
+void Nurse::eventTriggerReply() {
 
     // Create response message
     elderly_care_simulation::EventTrigger msg;
@@ -75,19 +74,19 @@ void CompanionshipRobot::eventTriggerReply() {
     msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
 
     eventTriggerPub.publish(msg);
-    ROS_INFO("CompanionshipRobot: Reply Message Sent");
+    ROS_INFO("Nurse: Reply Message Sent");
 }
 
 /**
  * Perform task when a request is received. Callback executed
  * when a message is received from the Scheduler
  */
-void CompanionshipRobot::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
+void Nurse::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
 
         if (msg.event_type == MY_TASK) {
-            ROS_INFO("CompanionshipRobot: Event Recieved: [%s]", eventTypeToString(MY_TASK));
+            ROS_INFO("Nurse: Event Recieved: [%s]", eventTypeToString(MY_TASK));
             
             performingTask = true;
             
@@ -101,7 +100,7 @@ void CompanionshipRobot::eventTriggerCallback(elderly_care_simulation::EventTrig
 /**
  * Carry out task on the resident
  */
-void CompanionshipRobot::performTask() {
+void Nurse::performTask() {
     
     // Generate the service call
     elderly_care_simulation::PerformTask performTaskSrv;
@@ -109,7 +108,7 @@ void CompanionshipRobot::performTask() {
     
     // Make the call using the client
     if (!performTaskClient.call(performTaskSrv)) {
-        throw std::runtime_error("CompanionshipRobot: Service call to the initiate task with Resident failed");
+        throw std::runtime_error("Nurse: Service call to the initiate task with Resident failed");
     }
     
     switch (performTaskSrv.response.result) {
@@ -139,78 +138,78 @@ void CompanionshipRobot::performTask() {
     }
 }
 
-CompanionshipRobot companionshipRobot;
+Nurse nurseRobot;
 
 // Callback functions
 void callStage0domCallback(const nav_msgs::Odometry msg) {
-    companionshipRobot.stage0domCallback(msg);
+    nurseRobot.stage0domCallback(msg);
 }
 void callUpdateDesiredLocationCallback(const geometry_msgs::Point location){
-    companionshipRobot.goToLocation(location);
+    nurseRobot.goToLocation(location);
 }
 void callEventTriggerCallback(elderly_care_simulation::EventTrigger msg){
-    companionshipRobot.eventTriggerCallback(msg);
+    nurseRobot.eventTriggerCallback(msg);
 }
 void callGoToResident(const std_msgs::Empty empty){
-    ROS_INFO("CompanionshipRobot: Going to Resident");
-    companionshipRobot.goToResident(empty);
+    ROS_INFO("Nurse: Going to Resident");
+    nurseRobot.goToResident(empty);
 }
 void callGoToHome(const std_msgs::Empty empty){
-    ROS_INFO("CompanionshipRobot: Going home");
-    companionshipRobot.goToHome(empty);
+    ROS_INFO("Nurse: Going home");
+    nurseRobot.goToHome(empty);
 }
 void updateResidentPositionCallback(const nav_msgs::Odometry msg) {
     double x = msg.pose.pose.position.x;
     double y = msg.pose.pose.position.y;    
-    companionshipRobot.residentPoi = StaticPoi(x, y, 0);
+    nurseRobot.residentPoi = StaticPoi(x, y, 0);
 }
 
 int main(int argc, char **argv) {   
     
     // ROS initialiser calls
-    ros::init(argc, argv, "CompanionshipRobot");
+    ros::init(argc, argv, "Nurse");
     ros::NodeHandle nodeHandle;
     ros::Rate loop_rate(25);
 
-    companionshipRobot = CompanionshipRobot();
+    nurseRobot = Nurse();
 
     // Initialise publishers
-    companionshipRobot.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_5/cmd_vel",1000);
-    companionshipRobot.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
+    nurseRobot.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_8/cmd_vel",1000);
+    nurseRobot.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
     // Initialise subscribers
-    companionshipRobot.residentStageSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth",1000,
+    nurseRobot.residentStageSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth",1000,
                                  updateResidentPositionCallback);
-    companionshipRobot.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_5/base_pose_ground_truth",1000,
+    nurseRobot.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_8/base_pose_ground_truth",1000,
                             callStage0domCallback);
-    companionshipRobot.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000,
+    nurseRobot.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000,
                                 callEventTriggerCallback);
-    companionshipRobot.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_5/location", 1000,
+    nurseRobot.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_8/location", 1000,
                                         callUpdateDesiredLocationCallback);
-    companionshipRobot.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_5/toResident", 1000, callGoToResident);
-    companionshipRobot.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_5/toHome", 1000, callGoToHome);
+    nurseRobot.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_8/toResident", 1000, callGoToResident);
+    nurseRobot.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_8/toHome", 1000, callGoToHome);
         
     // Create a client to make service requests to the Resident
-    companionshipRobot.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
+    nurseRobot.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");
 
     // Create a link to the pathfinding service
-    companionshipRobot.pathFinderService = nodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
+    nurseRobot.pathFinderService = nodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
 
     while (ros::ok())
     {
         // Required for dynamic pathfinding                   
-        companionshipRobot.updateCurrentVelocity();
+        nurseRobot.updateCurrentVelocity();
 
-        if (companionshipRobot.atDesiredLocation()){
-            if (companionshipRobot.currentLocationState == companionshipRobot.GOING_TO_RESIDENT) {
-                companionshipRobot.currentLocationState = companionshipRobot.AT_RESIDENT;
-            } else if (companionshipRobot.currentLocationState == companionshipRobot.GOING_HOME) {
-                companionshipRobot.currentLocationState = companionshipRobot.AT_HOME;
+        if (nurseRobot.atDesiredLocation()){
+            if (nurseRobot.currentLocationState == nurseRobot.GOING_TO_RESIDENT) {
+                nurseRobot.currentLocationState = nurseRobot.AT_RESIDENT;
+            } else if (nurseRobot.currentLocationState == nurseRobot.GOING_HOME) {
+                nurseRobot.currentLocationState = nurseRobot.AT_HOME;
             }       
         }
 
-        if ((companionshipRobot.currentLocationState == companionshipRobot.AT_RESIDENT) && companionshipRobot.performingTask) {
-            companionshipRobot.performTask();
+        if ((nurseRobot.currentLocationState == nurseRobot.AT_RESIDENT) && nurseRobot.performingTask) {
+            nurseRobot.performTask();
         }
         
         ros::spinOnce();

@@ -1,5 +1,5 @@
-#ifndef COMPANIONSHIPROBOT_H
-#define COMPANIONSHIPROBOT_H
+#ifndef NURSE_H
+#define NURSE_H
 
 #include "ros/ros.h"
 #include <unistd.h>
@@ -25,22 +25,23 @@
 #include "StaticPoiConstants.h"
 
 /**
- * This robot represents a robot assistant which is responsible
- * for providing companionship. Companionship is modelled via
+ * This robot represents a nurse robot which is responsible
+ * for providing necessary attention to the resident when he/she 
+ * is ill. Medical treatment is modelled via
  * the robot performing a simple action, such as spinning when
  * the robot has approached the resident. 
  *
- * Providing companionship reflects the situation where
- * the resident communites to external beings via VoIP software
- * such as Skype.
+ * Providing medical attention reflects the situation where
+ * the resident feels sick or ill, and requires external 
+ * healthcare service and relavent expertise from the hospital.
  *
- * Author: Akshay Kalyan
+ * Author: Bert Huang
  */
 
-;class CompanionshipRobot : public Robot {
+;class Nurse : public Robot {
 	public:
-		CompanionshipRobot();
-		~CompanionshipRobot();
+		Nurse();
+		~Nurse();
 
 		int MY_TASK;
 		bool performingTask;
@@ -61,7 +62,7 @@
 		ros::ServiceClient performTaskClient;
 		
         StaticPoi residentPoi = StaticPoi(0.0f, 0.0f, 0.0f);
-        StaticPoi homePoi = StaticPoi(COMPANIONSHIP_HOME_X, COMPANIONSHIP_HOME_Y, 0.0f);
+        StaticPoi homePoi = StaticPoi(NURSE_HOME_X, NURSE_HOME_Y, 0.0f);
 
 		void goToResident(const std_msgs::Empty);
 		void goToHome(const std_msgs::Empty);

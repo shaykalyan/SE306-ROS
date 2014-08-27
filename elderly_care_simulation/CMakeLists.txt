@@ -36,6 +36,8 @@ rosbuild_add_library(Robot src/Robot.cpp)
 rosbuild_add_library(DiceRoller src/DiceRoller.cpp)
 rosbuild_add_library(Poi src/Poi.cpp)
 rosbuild_add_library(StaticPoi src/StaticPoi.cpp)
+rosbuild_add_library(EscortRobot src/EscortRobot.cpp)
+target_link_libraries(StaticPoi Poi)
 
 # Invisible Nodes
 rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
@@ -48,31 +50,65 @@ rosbuild_add_executable(VeryIllDiceRoller src/VeryIllDiceRoller.cpp)
 target_link_libraries(VeryIllDiceRoller DiceRoller)
 
 rosbuild_add_executable(Scheduler src/Scheduler.cpp)
+target_link_libraries(Scheduler)
 
 # Testing
 rosbuild_add_gtest(test/TestDiceRoller test/TestDiceRoller.cpp)
 target_link_libraries(test/TestDiceRoller DiceRoller)
 
+# rostest
+rosbuild_add_executable(TestResident EXCLUDE_FROM_ALL src/test/TestResident.cpp)
+rosbuild_add_gtest_build_flags(TestResident)
+rosbuild_add_rostest(test/TestResident.test)
 
+rosbuild_add_executable(TestFriendRobot EXCLUDE_FROM_ALL src/test/TestFriendRobot.cpp)
+rosbuild_add_library(FriendRobotLib src/FriendRobot.cpp)
+rosbuild_add_gtest_build_flags(TestFriendRobot)
+rosbuild_add_rostest(test/TestFriendRobot.test)
+target_link_libraries(TestFriendRobot FriendRobotLib Robot Poi StaticPoi)
+
+rosbuild_add_executable(TestRelativeRobot EXCLUDE_FROM_ALL src/test/TestRelativeRobot.cpp)
+rosbuild_add_library(RelativeRobotLib src/RelativeRobot.cpp)
+rosbuild_add_gtest_build_flags(TestRelativeRobot)
+rosbuild_add_rostest(test/TestRelativeRobot.test)
+target_link_libraries(TestRelativeRobot RelativeRobotLib Robot Poi StaticPoi)
 
 # Robot Nodes
-rosbuild_add_executable(Resident src/Resident.cpp) 		#R0
+rosbuild_add_executable(Resident src/Resident.cpp)
 target_link_libraries(Resident Robot Poi StaticPoi)
 
-rosbuild_add_executable(Visitor src/Visitor.cpp)		#R1
+rosbuild_add_executable(Visitor src/Visitor.cpp)								#R1
 target_link_libraries(Visitor Robot Poi StaticPoi)
 
-rosbuild_add_executable(Assistant src/Assistant.cpp)	#R2
+rosbuild_add_executable(Assistant src/Assistant.cpp)							#R2
 target_link_libraries(Assistant Robot Poi StaticPoi)
 
-rosbuild_add_executable(CompanionshipRobot src/CompanionshipRobot.cpp)	        #R3
+rosbuild_add_executable(RelativeRobot src/RelativeRobot.cpp)	   				#R3
+target_link_libraries(RelativeRobot Robot Poi StaticPoi)
+
+rosbuild_add_executable(FriendRobot src/FriendRobot.cpp)	        			#R4
+target_link_libraries(FriendRobot Robot Poi StaticPoi)
+
+rosbuild_add_executable(CompanionshipRobot src/CompanionshipRobot.cpp)	        #R5
 target_link_libraries(CompanionshipRobot Robot Poi StaticPoi)
 
-rosbuild_add_executable(TestCompanionshipRobot EXCLUDE_FROM_ALL src/test/TestCompanionshipRobot.cpp)
-rosbuild_add_gtest_build_flags(TestCompanionshipRobot)
-target_link_libraries(TestCompanionshipRobot)
-rosbuild_add_rostest(test/TestCompanionshipRobot.test)
+rosbuild_add_executable(ChefRobot src/ChefRobot.cpp)         					#R6
+target_link_libraries(ChefRobot Robot Poi StaticPoi)
 
-#rosbuild_add_executable(TestCompanionshipRobotTarget EXCLUDE_FROM_ALL src/test/TestCompanionshipRobot.cpp)
-#rosbuild_add_gtest_build_flags(TestCompanionshipRobotTarget CompanionshipRobot)
-#rosbuild_add_rostest(test/TestCompanionshipRobot.test)
+rosbuild_add_executable(MedicationRobot src/MedicationRobot.cpp)    			#R7
+target_link_libraries(MedicationRobot Robot Poi StaticPoi)
+
+rosbuild_add_executable(NurseRobot src/NurseRobot.cpp)  						#R8
+target_link_libraries(NurseRobot Robot Poi StaticPoi)
+
+rosbuild_add_executable(Caregiver src/Caregiver.cpp)							#R9
+target_link_libraries(Caregiver Robot Poi StaticPoi)
+
+rosbuild_add_executable(EntertainmentRobot src/EntertainmentRobot.cpp)          #R10
+target_link_libraries(EntertainmentRobot Robot Poi StaticPoi)
+
+rosbuild_add_executable(FeedingRobot src/FeedingRobot.cpp)  					#R11
+target_link_libraries(FeedingRobot Robot EscortRobot Poi StaticPoi)
+
+rosbuild_add_executable(DoctorRobot src/DoctorRobot.cpp)                        #R12
+target_link_libraries(DoctorRobot Robot EscortRobot Poi StaticPoi)

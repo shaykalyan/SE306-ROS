@@ -1,5 +1,5 @@
-#ifndef COMPANIONSHIPROBOT_H
-#define COMPANIONSHIPROBOT_H
+#ifndef RELATIVE_H
+#define RELATIVE_H
 
 #include "ros/ros.h"
 #include <unistd.h>
@@ -25,22 +25,16 @@
 #include "StaticPoiConstants.h"
 
 /**
- * This robot represents a robot assistant which is responsible
- * for providing companionship. Companionship is modelled via
- * the robot performing a simple action, such as spinning when
- * the robot has approached the resident. 
+ * Represents a relative (visitor) of the Resident. Moves to
+ * the Resident to perform a simple action when it is requested.
  *
- * Providing companionship reflects the situation where
- * the resident communites to external beings via VoIP software
- * such as Skype.
- *
- * Author: Akshay Kalyan
+ * Author: Matthew Chiam
  */
 
-;class CompanionshipRobot : public Robot {
+;class RelativeRobot : public Robot {
 	public:
-		CompanionshipRobot();
-		~CompanionshipRobot();
+		RelativeRobot();
+		~RelativeRobot();
 
 		int MY_TASK;
 		bool performingTask;
@@ -61,7 +55,7 @@
 		ros::ServiceClient performTaskClient;
 		
         StaticPoi residentPoi = StaticPoi(0.0f, 0.0f, 0.0f);
-        StaticPoi homePoi = StaticPoi(COMPANIONSHIP_HOME_X, COMPANIONSHIP_HOME_Y, 0.0f);
+        StaticPoi homePoi = StaticPoi(RELATIVE_HOME_X, RELATIVE_HOME_Y, 0.0f);
 
 		void goToResident(const std_msgs::Empty);
 		void goToHome(const std_msgs::Empty);
