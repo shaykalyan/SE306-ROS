@@ -99,8 +99,6 @@ def find_path(req):
         
         path = shortest_path(from_node, to_node)
 
-        path.append((to_node[0], to_node[1]))
-
         rospy.loginfo(str(path))
         return create_response_message(path)
     except Exception as e:
