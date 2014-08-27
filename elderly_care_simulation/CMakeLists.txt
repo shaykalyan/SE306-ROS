@@ -38,8 +38,6 @@ rosbuild_add_library(Poi src/Poi.cpp)
 rosbuild_add_library(StaticPoi src/StaticPoi.cpp)
 target_link_libraries(StaticPoi Poi)
 
-target_link_libraries(StaticPoi Poi)
-
 # Invisible Nodes
 rosbuild_add_executable(MoralSupportDiceRoller src/MoralSupportDiceRoller.cpp)
 target_link_libraries(MoralSupportDiceRoller DiceRoller)

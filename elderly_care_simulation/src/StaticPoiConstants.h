@@ -1,8 +1,6 @@
 #ifndef STATIC_POI_INCLUDE
 #define STATIC_POI_INCLUDE 1
 
-#include <geometry_msgs/Twist.h>
-
 /* NOT CURRENTLY IN JAMES' MODEL
 const float DINING_CHAIR_X = 5.0f;
 const float DINING_CHAIR_Y = 4.5f;
@@ -48,5 +46,15 @@ const float RELATIVE_HOME_Y = -11.0f;
 
 const float OUTSIDE_X = -0.2f;
 const float OUTSIDE_Y = -11.0f;
+
+const float KITCHEN_X = 6.0f;
+const float KITCHEN_Y = 6.0f;
+
+const float BEDROOM_X = -6.0f;
+const float BEDROOM_Y = -4.0f;
+
+const float HALLWAY_X = 0.0f;
+const float HALLWAY_Y = 0.0f;
+
 
 #endif
