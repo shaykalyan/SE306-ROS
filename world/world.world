@@ -13,6 +13,8 @@ include "include/caregiverRobot.inc"
 include "include/chefRobot.inc"
 include "include/friendRobot.inc"
 include "include/relativeRobot.inc"
+include "include/feedingRobot.inc"
+include "include/doctorRobot.inc"
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -188,13 +190,14 @@ caregiverRobot(
 entertainmentRobot(
   name "EntertainmentRobot"
   pose [ 4 -5 0 0 ]
+)
 
-robot(
+feedingRobot(
   name "FeedingRobot"
   pose [12 -7 0 180 ]
 )
 
-robot(
+doctorRobot(
   name "DoctorRobot"
   pose [6 -14 0 90]
 )
