@@ -63,5 +63,5 @@ target_link_libraries(Visitor Robot Poi StaticPoi)
 rosbuild_add_executable(Assistant src/Assistant.cpp)	#R2
 target_link_libraries(Assistant Robot Poi StaticPoi)
 
-rosbuild_add_executable(Entertainment src/Entertainment.cpp)	        #R3
-target_link_libraries(Entertainment Robot Poi StaticPoi)
+rosbuild_add_executable(EntertainmentRobot src/EntertainmentRobot.cpp)	        #R3
+target_link_libraries(EntertainmentRobot Robot Poi StaticPoi)
