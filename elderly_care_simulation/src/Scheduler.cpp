@@ -131,6 +131,10 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
                           priorityToString(eatMsg.event_priority));
 
                 eventQueue.push(EventNode(eatMsg));
+                
+                // reset boolean flag to allow pending feed event to be re-published to GUI
+                // since the eat event is of a higher priority, it will float to the top of queue
+                stopRosInfoSpam = false;
             }else{
 
                 // ILL has a weight of 0, but still blocks all other events (taking up 2 slots)
