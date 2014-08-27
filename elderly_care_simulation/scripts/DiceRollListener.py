@@ -18,6 +18,7 @@ class DiceRollerGUI:
 
         # create root element with fixed size
         self.root = Tk()
+        self.root.wm_title("ROS: Control Panel")
         self.root.geometry('590x590+1+1')
 
         # create the left most frame which will hold an embeded frame with the grid of current tasks being performed ny the robots
@@ -163,7 +164,7 @@ class DiceRollerGUI:
         Label(self.frame_events, textvariable=self.current_event_2, relief=gridRelief).pack(fill=X)
         Label(self.frame_events, textvariable=self.current_event_3, relief=gridRelief).pack(fill=X)
         Label(self.frame_events, text="").pack(fill=X)
-        Label(self.frame_events, text="Upcoming Events", relief=gridRelief, bg='ivory4').pack(fill=X)
+        Label(self.frame_events, text="Upcoming Event", relief=gridRelief, bg='ivory4').pack(fill=X)
         Label(self.frame_events, textvariable=self.next_event, relief=gridRelief).pack(fill=X)
 
         # Dictionary which maps different events to different method which will respond to them.
@@ -277,7 +278,7 @@ class DiceRollerGUI:
 
         # Label for event changing
         Label(self.frame_eventChange, text="Change Events", bg='ivory4', width=10).pack(side=TOP, padx=5, pady=5, fill=X)
-        Button(self.frame_eventChange, text="Repopulate\nDaily Events", width=10, command=self.repopulateEventsCallback).pack(side=TOP, padx=5, pady=10, fill=X)
+        Button(self.frame_eventChange, text="Repopulate\nDaily Events", width=10, command=self.repopulateEventsCallback).pack(side=TOP, padx=10, pady=10, fill=X)
         Button(self.frame_eventChange, text="Clear All\nEvents", width=10, command=self.clearEventsCallback).pack(side=TOP, padx=10, pady=10, fill=X)
 
 
@@ -287,10 +288,10 @@ class DiceRollerGUI:
         rospy.init_node('DiceRollListener', anonymous=True)
 
         # Initialise publisher for injecting events
-        self.eventTriggerPub = rospy.Publisher('event_trigger', EventTrigger)
+        self.eventTriggerPub = rospy.Publisher('event_trigger', EventTrigger, queue_size=1000)
 
         # Initialise publisher for clearing or populating the schedule
-        self.guiCommunication = rospy.Publisher('gui_communication', GuiComm)
+        self.guiCommunication = rospy.Publisher('gui_communication', GuiComm, queue_size=1000)
 
         # subscribe to EventTrigger topic
         rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)

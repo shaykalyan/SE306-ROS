@@ -252,7 +252,7 @@ void Robot::updateCurrentVelocityToDesiredLocation() {
         double angularVelocity = 0;
         double linearVelocity = 0;
 
-        ROS_INFO("Angle: %f", angle);
+        // ROS_INFO("Angle: %f", angle);
         if (angle > M_PI) {
             angularVelocity = M_PI * 2;
 
@@ -271,7 +271,7 @@ void Robot::updateCurrentVelocityToDesiredLocation() {
             angularVelocity *= -1;
         }
 
-        ROS_INFO("Velocty: %f", angularVelocity);
+        // ROS_INFO("Velocty: %f", angularVelocity);
 
         currentVelocity.linear.x = linearVelocity;
         currentVelocity.angular.z = angularVelocity;
