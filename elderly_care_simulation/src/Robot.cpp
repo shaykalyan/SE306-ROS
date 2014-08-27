@@ -194,6 +194,21 @@ bool Robot::atDesiredLocation() {
 }
 
 /**
+ * Calculates the difference in radians between the two angles.
+ * Angles should be between -pi and pi.
+ */
+double Robot::differenceInAngle(double current, double desired) {
+
+    current = current > 0 ? current : current + 2 * M_PI;
+    desired = desired > 0 ? desired : desired + 2 * M_PI;
+
+    double difference = std::abs(current - desired);
+    difference = difference <= M_PI ? difference : difference - M_PI;
+    return difference;
+
+}
+
+/**
  * Updates the current velocity to head towards the finalDestination
  * via the points in the locationQueue.
  */
@@ -213,17 +228,40 @@ void Robot::updateCurrentVelocityToDesiredLocation() {
     
     double desiredAngle = atan2(directionVector.y, directionVector.x);
 
-    if (! doubleEquals(currentAngle, desiredAngle, 0.25)) {
+    double angle = differenceInAngle(currentAngle, desiredAngle);
+    if (angle > 0.05) {
         // Turn towards angle
-        currentVelocity.linear.x = 0.0;
 
-        if (turnAnticlockwise(currentAngle, desiredAngle)) {
-            // Turn anti clockwise
-            currentVelocity.angular.z = M_PI / 4;
+        // If the amount we need to turn is more than 45 degrees
+           // Turn without going forward
+        // Otherwise
+           // Turn while going forward
+        double angularVelocity = 0;
+        double linearVelocity = 0;
+
+        ROS_INFO("Angle: %f", angle);
+        if (angle > M_PI) {
+            angularVelocity = M_PI * 2;
+
+        } else if (angle > (M_PI / 2)) {
+            angularVelocity = M_PI;
+
+        } else if (angle > (M_PI / 8)) {
+            angularVelocity = M_PI / 4;
+
         } else {
-            // Turn clockwise
-            currentVelocity.angular.z = - M_PI / 4;
+            angularVelocity = M_PI / 8;
         }
+
+        if (! turnAnticlockwise(currentAngle, desiredAngle)) {
+            // Turn clockwise
+            angularVelocity *= -1;
+        }
+
+        ROS_INFO("Velocty: %f", angularVelocity);
+
+        currentVelocity.linear.x = linearVelocity;
+        currentVelocity.angular.z = angularVelocity;
     } else {
         // Go forward
         currentVelocity.linear.x = 10;
@@ -240,11 +278,11 @@ void Robot::updateCurrentVelocity() {
     if (spin == CLOCKWISE) {
         // Spin clockwise
         currentVelocity.linear.x = 0;
-        currentVelocity.angular.z = M_PI / 4;
+        currentVelocity.angular.z = M_PI * 2;
     } else if (spin == ANTI_CLOCKWISE) {
         // Spin anti_clockwise
         currentVelocity.linear.x = 0;
-        currentVelocity.angular.z = - M_PI / 4;
+        currentVelocity.angular.z = - M_PI * 2;
     } else if (atDesiredLocation()) {
         // Stop robot
         currentVelocity.linear.x = 0;

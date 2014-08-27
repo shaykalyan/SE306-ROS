@@ -58,6 +58,7 @@ class Robot{
 		double normalizeAngle(double angle);
 		bool turnAnticlockwise(double currentAngle, double desiredAngle);
 		void checkForMovement();
+		double differenceInAngle(double current, double desired);
 };
 
 #endif
