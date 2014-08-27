@@ -5,7 +5,7 @@ define wood-floor model
   gui_move 0
   block
   (
-    color "sienna"
+    color "tan"
     points [4]
     point[0] [0 0]
     point[1] [0 1]
@@ -22,7 +22,7 @@ define grass model
   gui_move 0
   block
   (
-    color "LimeGreen"
+    color "YellowGreen"
     points [4]
     point[0] [0 0]
     point[1] [0 1]
