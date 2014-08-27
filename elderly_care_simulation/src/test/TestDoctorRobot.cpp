@@ -17,7 +17,7 @@ using namespace elderly_care_simulation;
 
 
 /**
- * The fixture for testing the Resident.
+ * The fixture for testing the Doctor.
  * 
  * Most of these methods could be removed, but they have been left as
  * an example.
@@ -50,8 +50,7 @@ class DoctorRobotTest : public ::testing::Test {
 };
 
 /** 
- * If a visitor is providing a low priority task like companionship, a doctor should be 
- * able to interrupt with a VERY_ILL event type.
+ * Example test
  */
 TEST_F(DoctorRobotTest, exampleTest) {
 
