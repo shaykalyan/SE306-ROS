@@ -17,21 +17,19 @@ using namespace elderly_care_simulation;
 
 
 /**
- * The fixture for testing the Doctor.
- * 
- * Most of these methods could be removed, but they have been left as
- * an example.
+ * This test suite tests the functionality of the EscortRobot class.
+ * The EscortRobot ROS node under test is DoctorRobot.
  */
-class DoctorRobotTest : public ::testing::Test {
+class EscortRobotTest : public ::testing::Test {
     protected:
         // You can remove any or all of the following functions if its body
         // is empty.
 
-        DoctorRobotTest() {
+        EscortRobotTest() {
             // You can put any initialisation here.
         }
 
-        virtual ~DoctorRobotTest() {
+        virtual ~EscortRobotTest() {
             // You can do clean-up work that doesn't throw exceptions here.
         }
 
@@ -52,7 +50,7 @@ class DoctorRobotTest : public ::testing::Test {
 /** 
  * Example test
  */
-TEST_F(DoctorRobotTest, exampleTest) {
+TEST_F(EscortRobotTest, exampleTest) {
 
     // Sleep to allow the DoctorRobot to start
     ros::Rate loop_rate(2);
@@ -63,9 +61,8 @@ TEST_F(DoctorRobotTest, exampleTest) {
 
 int main(int argc, char **argv) {
 
-    ros::init(argc, argv, "TestDoctorRobot");
+    ros::init(argc, argv, "TestEscortRobot");
     ros::NodeHandle nodeHandle;
-    ros::Rate loop_rate(10);
 
     // Advertise and subscribe to topics
     //residentEventPublisher = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);

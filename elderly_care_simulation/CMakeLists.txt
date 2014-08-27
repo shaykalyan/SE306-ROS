@@ -61,9 +61,9 @@ rosbuild_add_executable(TestResident EXCLUDE_FROM_ALL src/test/TestResident.cpp)
 rosbuild_add_gtest_build_flags(TestResident)
 rosbuild_add_rostest(test/TestResident.test)
 
-rosbuild_add_executable(TestDoctorRobot EXCLUDE_FROM_ALL src/test/TestDoctorRobot.cpp)
-rosbuild_add_gtest_build_flags(TestDoctorRobot)
-rosbuild_add_rostest(test/TestDoctorRobot.test)
+rosbuild_add_executable(TestEscortRobot EXCLUDE_FROM_ALL src/test/TestEscortRobot.cpp)
+rosbuild_add_gtest_build_flags(TestEscortRobot)
+rosbuild_add_rostest(test/TestEscortRobot.test)
 
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp)
