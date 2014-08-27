@@ -4,9 +4,10 @@ include "include/robot.inc"
 include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
+include "include/hospital.inc"
+include "include/floor.inc"
 include "include/entertainment.inc"
 include "include/medicationRobot.inc"
-
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -47,25 +48,85 @@ floorplan
   name "alpha-house"
   bitmap "house.png"
   size [20 20 0.5]
-  pose [ 0 0 0 0.000 ]
+  pose [0 0 0.01 0]
+)
+
+wood-floor
+(
+  name "wood-floor"
+  pose [0 0 0 0]
+)
+
+grass
+(
+  name "grass"
+  pose [-1.9 8.5 0.01 0]
+)
+
+tiles
+(
+  name "tiles"
+  pose [5.5 -5.94 0.01 0]
 )
 
 bed
 ( 
   name "bed"
-  pose [-3.100 -8.000 0.000 0.000]
+  pose [-3.1 -8.2 0.01 0]
+)
+
+couch
+(
+  name "couch"
+  pose [-7.5 -9 0.01 0]
+)
+
+tv
+(
+  name "tv"
+  pose [-7.55 0.55 0.01 0]
 )
 
 shower
 (
   name "shower"
-  pose [8.850 -3.650 0.000 0.000]
+  pose [8.65 -3.05 0.02 0]
+)
+
+toilet
+(
+  name "toilet"
+  pose [3 -9 0.02 90]
+)
+
+sink
+(
+  name "sink"
+  pose [8.8 -7.5 0.02 180]
 )
 
 oven
 (
   name "oven"
-  pose [8.850 8.850 0.000 0.000]
+  pose [8.7 8.7 0.01 0]
+)
+
+bench
+(
+  name "kitchen bench"
+  pose [5.7 8.7 0.01 0]
+)
+
+table
+(
+  name "kitchen table"
+  pose [5.7 2.9 0.01 0]
+)
+
+hospital
+(
+  name "hospital"
+  pose [4 -14 0 0]
 )
 
 # throw in some robots
@@ -76,50 +137,60 @@ resident(
 
 robot(
   name "Visitor"
-  pose [5 6 0 0]
+  pose [5 6 0 180]
 )
 
 robot(
   name "Assistant"
-  pose [ -8 -8 0 0 ]
+  pose [ -8 -8 0 180 ]
 )
 
 robot(
   name "Relative"
-  pose [ 0 -11 0 0 ]
+  pose [ 12 7 0 180 ]
 )
 
 robot(
   name "Friend"
-  pose [ 3.7 -8.65 0 0 ]
+  pose [ 12 5 0 180 ]
 )
 
 companionship(
   name "Companionship"
-  pose [ 5 -5 0 0 ]
+  pose [ 12 3 0 180 ]
 )
 
 robot(
   name "Chef"
-  pose [ 12 0 0 0 ]
+  pose [ 12 1 0 180 ]
 )
 
 medicationRobot(
   name "MedicationRobot"
-  pose [ 5 -8 0 0 ]
+  pose [ 12 -1 0 180 ]
 )
 
 robot(
   name "Nurse"
-  pose [ 13 13 0 0 ]
+  pose [2 -14 0 90 ]
 )
 
 robot(
   name "Caregiver"
-  pose [ 5 -5 0 0 ]
+  pose [ 12 -3 0 180 ]
 )
 
 entertainment (
   name "Entertainment"
-  pose [ 4 -5 0 0 ]
+  pose [ 12 -5 0 180 ]
+)
+
+robot(
+  name "FeedingRobot"
+  pose [12 -7 0 180 ]
+)
+
+robot(
+  name "DoctorRobot"
+  pose [6 -14 0 90]
 )
