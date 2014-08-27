@@ -93,6 +93,7 @@ def find_path(req):
 
         from_node = get_x_location(from_point.x), get_y_location(from_point.y) 
         to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
+
         path = shortest_path(from_node, to_node)
 
         path.append((to_node[0], to_node[1]))
@@ -100,7 +101,6 @@ def find_path(req):
         rospy.loginfo(str(path))
         return create_response_message(path)
     except Exception as e:
-        rospy.loginfo(str(e))
         return False
 
 

@@ -17,6 +17,7 @@
 
 Robot::Robot() {
     spin = NOT_SPINNING;
+    outsideBounds = false;
 }
 
 Robot::~Robot() {
@@ -115,25 +116,33 @@ void Robot::clearLocationQueue()
 
 /**
  * Adds location's points to the queue to traverse 
+ * If the robot is outside the bounds of the map, the robot will head towards 0,0 until it is inside the map.
  */
 void Robot::goToLocation(const geometry_msgs::Point location, bool closeEnough /*= false*/) { 
 
+    clearLocationQueue();
     elderly_care_simulation::FindPath srv;
     srv.request.from_point = currentLocation.position;
     srv.request.to_point = location;
     if (pathFinderService.call(srv)) {
-        clearLocationQueue();
         std::vector<geometry_msgs::Point> points = srv.response.path;
         if (closeEnough) {
             points.pop_back();
         }
+        outsideBounds = false;
         addPointsToQueue(points);
     } else {
         ROS_INFO("Call failed");
+        std::vector<geometry_msgs::Point> points;
+        geometry_msgs::Point origin;
+        points.push_back(origin);
+        addPointsToQueue(points);
+        outsideBounds = true;
     }
 
     finalDestination.x = location.x;
     finalDestination.y = location.y;
+    previousCloseEnough = closeEnough;
 }
 
 /**
@@ -278,6 +287,9 @@ void Robot::updateCurrentVelocityToDesiredLocation() {
  * Otherwise, turns towards the next location and move towards it.
  */
 void Robot::updateCurrentVelocity() {
+    if (outsideBounds) {
+        goToLocation(finalDestination, previousCloseEnough);
+    }
 
     if (spin == CLOCKWISE) {
         // Spin clockwise

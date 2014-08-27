@@ -44,6 +44,8 @@ class Robot{
 		geometry_msgs::Point finalDestination;
 		std::queue<geometry_msgs::Point> locationQueue;
 		double  currentAngle;
+		bool previousCloseEnough;
+		bool outsideBounds;
 
 		enum Spin {
 			NOT_SPINNING, CLOCKWISE, ANTI_CLOCKWISE
