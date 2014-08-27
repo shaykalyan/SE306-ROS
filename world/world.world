@@ -133,7 +133,7 @@ table
 hospital
 (
   name "hospital"
-  pose [4 -14 0 0]
+  pose [4 -15 0 0]
 )
 
 # throw in some robots
@@ -154,50 +154,50 @@ robot(
 
 relativeRobot(
   name "RelativeRobot"
-  pose [ 0 -11 0 0 ]
+  pose [ 12 8 0 0 ]
 )
 
 friendRobot(
   name "FriendRobot"
-  pose [ 3.7 -8.65 0 0 ]
+  pose [ 12 2 0 0 ]
 )
 
 companionshipRobot(
   name "CompanionshipRobot"
-  pose [ 5 -5 0 0 ]
+  pose [ -8 -13 0 0 ]
 )
 
 chefRobot(
   name "ChefRobot"
-  pose [ 12 0 0 0 ]
+  pose [ -4 -13 0 0 ]
 )
 
 medicationRobot(
   name "MedicationRobot"
-  pose [ 12 -1 0 180 ]
+  pose [ -6 -13 0 0 ]
 )
 
 nurseRobot(
   name "NurseRobot"
-  pose [ 13 13 0 0 ]
+  pose [ 3 -13 0 0 ]
 )
 
 caregiverRobot(
   name "CaregiverRobot"
-  pose [ 5 -5 0 0 ]
+  pose [ 12 4 0 0 ]
 )
 
 entertainmentRobot(
   name "EntertainmentRobot"
-  pose [ 4 -5 0 0 ]
+  pose [ -10 -13 0 0 ]
 )
 
 feedingRobot(
   name "FeedingRobot"
-  pose [12 -7 0 180 ]
+  pose [12 6 0 0 ]
 )
 
 doctorRobot(
   name "DoctorRobot"
-  pose [6 -14 0 90]
+  pose [5 -13 0 0]
 )
