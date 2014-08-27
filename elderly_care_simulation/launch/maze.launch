@@ -1,0 +1,7 @@
+<launch>
+	<node name="stage" pkg="stage_ros" type="stageros" args="$(find elderly_care_simulation)/../world/maze.world"/>
+
+	<node name="resident" pkg="elderly_care_simulation" type="Resident" />
+	
+	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/maze.pgm"/>
+</launch>

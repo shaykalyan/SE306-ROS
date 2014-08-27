@@ -1,0 +1,50 @@
+include "include/floorplan.inc"
+include "include/resident.inc"
+
+#resolution of the underline bitmap model in meters.
+resolution 0.02 
+
+# simulation timestep in milliseconds. length of each simulation update cycle.
+interval_sim 100 
+
+# [ xmin xmax ymin ymax zmin zmax amin amax ]       
+velocity_bounds     [-10 10 -10 10 0 0 -90 90]          
+acceleration_bounds [-10 10 -10 10 0 0 -90 90]
+
+
+window
+( 
+  #size of the window in pixels
+  size [800 600]
+  center [0 0]
+  rotate [65 -50]
+  scale 25
+  show_data 0
+  show_flags 1
+  show_blocks 1
+  show_clock 1
+  show_footprints 0
+  show_grid 0
+  show_trailarrows 0
+  show_trailrise 0
+  show_trailfast 0
+  show_occupancy 0
+  show_tree 0
+  pcam_on 0
+  screenshots 0
+)
+
+# load an environment bitmap
+floorplan
+( 
+  name "alpha-house"
+  bitmap "maze.pgm"
+  size [20 20 0.5]
+  pose [ 0 0 0 0.000 ]
+)
+
+# throw in some robots
+resident(
+  name "Resident"
+  pose [0 0 0 270]
+)
