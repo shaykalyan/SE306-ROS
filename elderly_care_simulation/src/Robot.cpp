@@ -216,7 +216,7 @@ double Robot::differenceInAngle(double current, double desired) {
     desired = desired > 0 ? desired : desired + 2 * M_PI;
 
     double difference = std::abs(current - desired);
-    difference = difference <= M_PI ? difference : difference - M_PI;
+    difference = difference <= M_PI ? difference : (2 * M_PI) - difference;
     return difference;
 
 }
