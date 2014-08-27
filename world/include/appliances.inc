@@ -122,3 +122,50 @@ define oven model
   )
 )
 
+define toilet model
+(
+  size [1.5 1.25 1.5]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "azure"
+    points [4]
+    point[0] [0 1]
+    point[1] [0 2]
+    point[2] [3 2]
+    point[3] [3 1]
+    z [0 0.3]
+  )
+  block
+  (
+    color "azure"
+    points [4]
+    point[0] [0 0.5]
+    point[1] [0 2.5]
+    point[2] [3.25 2.5]
+    point[3] [3.25 0.5]
+    z [0.3 0.7]
+  )
+  block
+  (
+    color "azure"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 3]
+    point[2] [1.25 3]
+    point[3] [1.25 0]
+    z [0.7 1.4]
+  )
+  block
+  (
+    color "azure"
+    points [4]
+    point[0] [1.25 0.5]
+    point[1] [1.25 2.5]
+    point[2] [3.25 2.5]
+    point[3] [3.25 0.5]
+    z [0.7 0.8]
+  )
+)
+
