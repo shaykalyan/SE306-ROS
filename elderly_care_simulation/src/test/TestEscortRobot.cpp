@@ -8,10 +8,10 @@
 #include "../PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h" 
 using namespace elderly_care_simulation;
-#include "elderly_care_simulation/PerformTask.h" 
-using namespace elderly_care_simulation;
 #include "../EventNode.h"
 #include <unistd.h> // sleep
+
+#define private public
 #include "../EscortRobot.h"
 
 #include "gtest/gtest.h"
@@ -48,8 +48,16 @@ class EscortRobotTest : public ::testing::Test {
         // and cleaning up each test, you can define the following methods:
 
         virtual void SetUp() {
-            // Code here will be called immediately after the constructor (right
-            // before each test).
+            // Instantiate a new doctor for each test
+            geometry_msgs::Point base;
+            base.x = 3.0f;
+            base.y = 3.0f;
+
+            geometry_msgs::Point hospital;
+            hospital.x = 4.0f;
+            hospital.y = 4.0f;
+
+            doctor = EscortRobot(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL, base, hospital);
         }
 
         virtual void TearDown() {
@@ -58,34 +66,35 @@ class EscortRobotTest : public ::testing::Test {
         }
 };
 
+EventTrigger eventTriggerForEventType(int eventType) {
+    EventTrigger msg;
+    msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
+    msg.event_type = eventType;
+    msg.event_priority = EVENT_TRIGGER_PRIORITY_HIGH;
+    msg.event_weight = getEventWeight(eventType);
+    msg.result = EVENT_TRIGGER_RESULT_UNDEFINED;
+    return msg;
+}
+
 /** 
  * Any calls to the doctor that are not VERY_ILL events should be ignored.
  */
 TEST_F(EscortRobotTest, ignoreIrrelvantEvents) {
 
-    // Sleep to allow the DoctorRobot to start
-    // ros::Rate loop_rate(2);
-    // loop_rate.sleep();
+    ASSERT_EQ(EscortRobot::AT_BASE, doctor.currentLocationState);
+    ASSERT_FALSE(doctor.performingTask);
 
+    residentEventPublisher.publish(eventTriggerForEventType(EVENT_TRIGGER_EVENT_TYPE_MEDICATION));
 
-    
-    ASSERT_TRUE(true);
+    // The doctor should not change its state
+    ASSERT_EQ(EscortRobot::AT_BASE, doctor.currentLocationState);
+    ASSERT_FALSE(doctor.performingTask);
 }
 
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "TestEscortRobot");
     ros::NodeHandle nodeHandle;
-
-    geometry_msgs::Point base;
-    base.x = 3.0f;
-    base.y = 3.0f;
-
-    geometry_msgs::Point hospital;
-    hospital.x = 4.0f;
-    hospital.y = 4.0f;
-
-    doctor = EscortRobot(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL, base, hospital);
 
     // Advertise and subscribe to topics
     residentEventPublisher = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
