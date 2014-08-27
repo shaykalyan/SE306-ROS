@@ -55,6 +55,12 @@ grass
   pose [-1.9 8.5 0.01 0]
 )
 
+tiles
+(
+  name "tiles"
+  pose [5.5 -5.94 0.01 0]
+)
+
 bed
 ( 
   name "bed"
@@ -76,19 +82,19 @@ tv
 shower
 (
   name "shower"
-  pose [8.65 -3.05 0.01 0]
+  pose [8.65 -3.05 0.02 0]
 )
 
 toilet
 (
   name "toilet"
-  pose [3 -9 0.01 90]
+  pose [3 -9 0.02 90]
 )
 
 sink
 (
   name "sink"
-  pose [8.8 -7.5 0.01 180]
+  pose [8.8 -7.5 0.02 180]
 )
 
 oven
