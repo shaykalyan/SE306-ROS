@@ -45,7 +45,13 @@ floorplan
 bed
 ( 
   name "bed"
-  pose [-3.1 -8 0 0]
+  pose [-3.1 -8.2 0 0]
+)
+
+couch
+(
+  name "couch"
+  pose [-7.5 -9 0 0]
 )
 
 shower
