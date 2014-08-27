@@ -1,0 +1,3 @@
+<launch>
+    <test test-name="TestEntertainmentRobot" pkg="elderly_care_simulation" type="TestEntertainmentRobot" />
+</launch>
