@@ -45,8 +45,6 @@ Resident::Resident(){
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COOK] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT] = 0;
     taskProgress[EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP] = 0;
-
-    navigatingToPoiForTask = false;
 }
 
 Resident::~Resident() {
@@ -217,8 +215,7 @@ bool Resident::performTaskServiceHandler(elderly_care_simulation::PerformTask::R
 
     bool isInCorrectPlace = !taskRequiresPoi || atPointOfInterest(taskPoi, 0.5f);
 
-    if (taskRequiresPoi && !isInCorrectPlace && !navigatingToPoiForTask) {
-        navigatingToPoiForTask = true;
+    if (taskRequiresPoi && !isInCorrectPlace) {
         goToLocation(taskPoi);
         res.result = PERFORM_TASK_RESULT_TAKE_ME_THERE;
     } else if ((taskType == currentTaskType) && isInCorrectPlace) {
