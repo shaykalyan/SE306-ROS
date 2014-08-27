@@ -20,7 +20,6 @@
         ros::Publisher eventTriggerPub;
         ros::Subscriber eventTriggerSub;
 
-    private:
         StaticPoi base = StaticPoi(COOK_HOME_X, COOK_HOME_Y, 0.0f);
         StaticPoi stove = StaticPoi(STOVE_X, STOVE_Y, 0.0f);
 

@@ -91,6 +91,12 @@ rosbuild_add_gtest_build_flags(TestEntertainmentRobot)
 rosbuild_add_rostest(test/TestEntertainmentRobot.test)
 target_link_libraries(TestEntertainmentRobot EntertainmentRobotLib Robot Poi StaticPoi)
 
+rosbuild_add_executable(TestChefRobot EXCLUDE_FROM_ALL src/test/TestChefRobot.cpp)
+rosbuild_add_library(ChefRobotLib src/ChefRobot.cpp)
+rosbuild_add_gtest_build_flags(TestChefRobot)
+rosbuild_add_rostest(test/TestChefRobot.test)
+target_link_libraries(TestChefRobot ChefRobotLib Robot Poi StaticPoi)
+
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp)
 target_link_libraries(Resident Robot Poi StaticPoi)
