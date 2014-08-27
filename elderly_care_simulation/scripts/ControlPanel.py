@@ -4,6 +4,7 @@ import roslib
 import roslib; roslib.load_manifest('elderly_care_simulation')
 from elderly_care_simulation.msg import DiceRollTrigger, EventTrigger, DiceRollReport, GuiComm
 from Tkinter import *
+from EventTriggerUtility import *
 
 class DiceRollerGUI:
     """
@@ -137,9 +138,13 @@ class DiceRollerGUI:
         Label(self.frame_robotGrid, textvariable=self.caregiver_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=1)
 
         # Dictionary which maps different events to different method which will respond to them.
-        self.events = {0:self.undefined, 1:self.eat, 2:self.shower, 3:self.exercise, 4:self.converse, 5:self.support, 6:self.relative,
-        7:self.friend, 8:self.ill, 9:self.veryIll, 10:self.medication, 11:self.cook, 12:self.entertainment, 13:self.companionship,
-        14:self.wake, 15:self.sleep, 16:self.move_kitchen, 17:self.move_bedroom, 18:self.move_hallway}
+        self.events = {ET_EVENT_TYPE_UNDEFINED : self.undefined, ET_EVENT_TYPE_EAT : self.eat, ET_EVENT_TYPE_SHOWER : self.shower,
+        ET_EVENT_TYPE_EXERCISE : self.exercise, ET_EVENT_TYPE_CONVERSATION : self.converse, ET_EVENT_TYPE_MORAL_SUPPORT : self.support,
+        ET_EVENT_TYPE_RELATIVE : self.relative, ET_EVENT_TYPE_FRIEND : self.friend, ET_EVENT_TYPE_ILL : self.ill,
+        ET_EVENT_TYPE_VERY_ILL : self.veryIll, ET_EVENT_TYPE_MEDICATION : self.medication, ET_EVENT_TYPE_COOK : self.cook,
+        ET_EVENT_TYPE_ENTERTAINMENT : self.entertainment, ET_EVENT_TYPE_COMPANIONSHIP : self.companionship, ET_EVENT_TYPE_WAKE : self.wake,
+        ET_EVENT_TYPE_SLEEP : self.sleep, ET_EVENT_TYPE_MOVE_TO_KITCHEN : self.move_kitchen, ET_EVENT_TYPE_MOVE_TO_BEDROOM : self.move_bedroom,
+        ET_EVENT_TYPE_MOVE_TO_HALLWAY : self.move_hallway}
 
         
         ######################### SET UP CURRENT EVENT LIST #########################
@@ -167,9 +172,9 @@ class DiceRollerGUI:
         Label(self.frame_events, textvariable=self.next_event, relief=gridRelief).pack(fill=X)
 
         # Dictionary which maps different events to different method which will respond to them.
-        self.next_events = {0:"", 1:"Eat", 2:"Shower", 3:"Exercise", 4:"Converse", 5:"Support", 6:"Relative", 7:"Friend", 8:"Ill", 9:"Very Ill",
+        """self.next_events = {0:"", 1:"Eat", 2:"Shower", 3:"Exercise", 4:"Converse", 5:"Support", 6:"Relative", 7:"Friend", 8:"Ill", 9:"Very Ill",
         10:"Medication", 11:"Cook", 12:"Entertainment", 13:"Companionship", 14:"Wake", 15:"Sleep", 16:"Walk kitchen", 17:"Walk bedroom",
-        18:"Walk hallway"}
+        18:"Walk hallway"}"""
 
 
         ######################### SET UP DICE ROLLER MONITOR #########################
@@ -223,9 +228,12 @@ class DiceRollerGUI:
         self.eventType.set(self.typeOptions[0])
 
         # Dictionary for mapping event names to their corresponding numbers
-        self.typeDict = {"Undefined":0, "Eat":1 , "Shower":2, "Exercise":3, "Conversation":4, "Moral":5, "Relative":6, "Friend":7, "Ill":8,
-        "Very Ill":9, "Medication":10, "Cook":11, "Entertainment":12, "Companionship":13, "Wake":14, "Sleep":15, "Kitchen":16,
-         "Bedroom":17, "Hallway":18}
+        self.typeDict = {"Undefined" : ET_EVENT_TYPE_UNDEFINED, "Eat" : ET_EVENT_TYPE_EAT , "Shower" : ET_EVENT_TYPE_SHOWER,
+        "Exercise" : ET_EVENT_TYPE_EXERCISE, "Conversation" : ET_EVENT_TYPE_CONVERSATION, "Moral" : ET_EVENT_TYPE_MORAL_SUPPORT,
+        "Relative" : ET_EVENT_TYPE_RELATIVE, "Friend" : ET_EVENT_TYPE_FRIEND, "Ill" : ET_EVENT_TYPE_ILL, "Very Ill" : ET_EVENT_TYPE_VERY_ILL,
+        "Medication" : ET_EVENT_TYPE_MEDICATION, "Cook" : ET_EVENT_TYPE_COOK, "Entertainment" : ET_EVENT_TYPE_ENTERTAINMENT,
+        "Companionship" : ET_EVENT_TYPE_COMPANIONSHIP, "Wake" : ET_EVENT_TYPE_WAKE, "Sleep" : ET_EVENT_TYPE_SLEEP, "Kitchen" : ET_EVENT_TYPE_MOVE_TO_KITCHEN,
+         "Bedroom" : ET_EVENT_TYPE_MOVE_TO_BEDROOM, "Hallway" : ET_EVENT_TYPE_MOVE_TO_HALLWAY}
 
         # Set up event message menu
         self.messageOptions = ["Undefined", "Request", "Response"]
@@ -289,7 +297,7 @@ class DiceRollerGUI:
         rospy.init_node('DiceRollListener', anonymous=True)
 
         # Initialise publisher for injecting events
-        self.eventTriggerPub = rospy.Publisher('event_trigger', EventTrigger)
+        self.eventTriggerPub = rospy.Publisher('external_event', EventTrigger)
 
         # Initialise publisher for clearing or populating the schedule
         self.guiCommunication = rospy.Publisher('gui_communication', GuiComm)
@@ -330,14 +338,13 @@ class DiceRollerGUI:
     # Callback method for event_trigger topic
     def event_trigger_callback(self, msg):
         
-        """msg_type = msg.msg_type
+        msg_type = msg.msg_type
         event_type = msg.event_type
         result = msg.result
-
         print("Event trigger detected")
         print("Message type: ", msg_type)
         print("Event type: ", event_type)
-        print("result: ", result)"""
+        print("result: ", result)
 
         self.events[msg.event_type](msg)
 
@@ -362,7 +369,7 @@ class DiceRollerGUI:
 
     # Method for updating the upcoming event
     def upcomming_event_callback(self, message):
-        self.next_event.set(self.next_events[message.event_type])
+        self.next_event.set(typeToStringDict[message.event_type])
 
     # Callback method for clearing events
     def injectEventCallback(self):
@@ -370,8 +377,15 @@ class DiceRollerGUI:
         injectEvent.msg_type = self.messageDict[self.eventMessage.get()]
         injectEvent.event_type = self.typeDict[self.eventType.get()]
         injectEvent.event_priority = int(self.eventPriority.get())
-        injectEvent.event_weight = int(self.eventWeight.get())
+        injectEvent.event_weight = getEventWeight(injectEvent.event_type)
         injectEvent.result = self.resultDict[self.eventResult.get()]
+
+        print("Event trigger detected")
+        print("Message type: ", injectEvent.msg_type)
+        print("Event type: ", injectEvent.event_type)
+        print("Priority type: ", injectEvent.event_priority)
+        print("Weight type: ", injectEvent.event_weight)
+        print("result: ", injectEvent.result)
 
         self.eventTriggerPub.publish(injectEvent)
 
@@ -381,219 +395,255 @@ class DiceRollerGUI:
 
     #Update eat state
     def eat(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.caregiver_task.set("Feeding")
                 self.resident_task.set("Eating")
                 self.addCurrentEvents("Eating")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Eating"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Eating")
 
     #Update shower state
     def shower(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.caregiver_task.set("Showering")
                 self.resident_task.set("Showering")
                 self.addCurrentEvents("Showering")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Showering"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Showering")
 
     #Update exercise state
     def exercise(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.caregiver_task.set("Exercising")
                 self.resident_task.set("Exercising")
                 self.addCurrentEvents("Exercising")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Exercising"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Exercising")
 
     #Update converse state
     def converse(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.caregiver_task.set("Conversing")
                 self.resident_task.set("Conversing")
                 self.addCurrentEvents("Conversation")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Conversation"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Conversation")
 
     #Update support state
     def support(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.caregiver_task.set("Supporting")
                 self.resident_task.set("Complaining")
-                self.addCurrentEvents("Moral Support")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                self.addCurrentEvents("Moral")
+                if (self.next_event.get() == "Moral"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.caregiver_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Moral Support")
 
     #Update relative state
     def relative(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.relative_task.set("Visiting")
                 self.resident_task.set("Interacting")
                 self.addCurrentEvents("Relative")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Relative"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.relative_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Relative")
 
     #Update friend state
     def friend(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.friend_task.set("Visiting")
                 self.resident_task.set("Interacting")
                 self.addCurrentEvents("Friend")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Friend"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.friend_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Friend")
 
     #Update ill state
     def ill(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.nurse_task.set("Nursing")
                 self.resident_task.set("Ill")
                 self.addCurrentEvents("Ill")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Ill"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.nurse_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Ill")
 
     #Update veryIll state
     def veryIll(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.doctor_task.set("Doctoring")
                 self.resident_task.set("Very Ill")
                 self.addCurrentEvents("Very Ill")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Very Ill"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.doctor_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Very Ill")
 
     #Update medication state
     def medication(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.medication_task.set("Drugging")
                 self.resident_task.set("Tripping")
                 self.addCurrentEvents("Medication")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Medication"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.medication_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Medication")
 
     #Update cook state
     def cook(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.cook_task.set("Cooking")
                 self.resident_task.set("Waiting")
                 self.addCurrentEvents("Cooking")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Cooking"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.cook_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Cooking")
 
     #Update entertainment state
     def entertainment(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.entertainment_task.set("Entertaining")
                 self.resident_task.set("Enjoying")
                 self.addCurrentEvents("Entertainment")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Entertainment"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.entertainment_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Entertainment")
 
     #Update companionship state
     def companionship(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.companion_task.set("Accompanying")
                 self.resident_task.set("Talking")
                 self.addCurrentEvents("Companionship")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Companionship"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.companion_task.set("None")
                 self.resident_task.set("None")
                 self.removeCurrentEvents("Companionship")
 
     #Update wake state
     def wake(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.resident_task.set("Waking")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Waking"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task.set("None")
 
     #Update sleep state
     def sleep(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.resident_task.set("Sleeping")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Sleeping"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task.set("None")
 
     #Update sleep state
     def move_kitchen(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.resident_task.set("Walk kitchen")
                 self.addCurrentEvents("Walk kitchen")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Walk kitchen"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task.set("None")
 
     #Update sleep state
     def move_bedroom(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.resident_task.set("Walk bedroom")
                 self.addCurrentEvents("Walk bedroom")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Walk bedroom"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task.set("None")
 
     #Update sleep state
     def move_hallway(self, message):
-        if (message.msg_type == 1):
-            if (message.result == 0):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.resident_task.set("Walk hallway")
                 self.addCurrentEvents("Walk hallway")
-        elif (message.msg_type == 2):
-            if (message.result == 2):
+                if (self.next_event.get() == "Walk hallway"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task.set("None")
 
     # Method for adding a currently occuring event to the current event list
