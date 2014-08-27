@@ -4,6 +4,7 @@ include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
 include "include/hospital.inc"
+include "include/floor.inc"
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -23,7 +24,7 @@ window
   show_blocks 1
   show_clock 1
   show_footprints 0
-  show_grid 1
+  show_grid 0
   show_trailarrows 0
   show_trailrise 0
   show_trailfast 0
@@ -39,61 +40,73 @@ floorplan
   name "alpha-house"
   bitmap "house.png"
   size [20 20 0.5]
+  pose [0 0 0.01 0]
+)
+
+wood-floor
+(
+  name "wood-floor"
   pose [0 0 0 0]
+)
+
+grass
+(
+  name "grass"
+  pose [-1.9 8.5 0.01 0]
 )
 
 bed
 ( 
   name "bed"
-  pose [-3.1 -8.2 0 0]
+  pose [-3.1 -8.2 0.01 0]
 )
 
 couch
 (
   name "couch"
-  pose [-7.5 -9 0 0]
+  pose [-7.5 -9 0.01 0]
 )
 
 tv
 (
   name "tv"
-  pose [-7.55 0.55 0 0]
+  pose [-7.55 0.55 0.01 0]
 )
 
 shower
 (
   name "shower"
-  pose [8.65 -3.05 0 0]
+  pose [8.65 -3.05 0.01 0]
 )
 
 toilet
 (
   name "toilet"
-  pose [3 -9 0 90]
+  pose [3 -9 0.01 90]
 )
 
 sink
 (
   name "sink"
-  pose [8.8 -7.5 0 180]
+  pose [8.8 -7.5 0.01 180]
 )
 
 oven
 (
   name "oven"
-  pose [8.7 8.7 0 0]
+  pose [8.7 8.7 0.01 0]
 )
 
 bench
 (
   name "kitchen bench"
-  pose [5.7 8.7 0 0]
+  pose [5.7 8.7 0.01 0]
 )
 
 table
 (
   name "kitchen table"
-  pose [5.7 2.9 0 0]
+  pose [5.7 2.9 0.01 0]
 )
 
 hospital
