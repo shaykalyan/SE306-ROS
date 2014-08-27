@@ -79,6 +79,12 @@ rosbuild_add_gtest_build_flags(TestCompanionshipRobot)
 rosbuild_add_rostest(test/TestCompanionshipRobot.test)
 target_link_libraries(TestCompanionshipRobot CompanionshipRobotLib Robot Poi StaticPoi)
 
+rosbuild_add_executable(TestMedicationRobot EXCLUDE_FROM_ALL src/test/TestMedicationRobot.cpp)
+rosbuild_add_library(MedicationRobotLib src/MedicationRobot.cpp)
+rosbuild_add_gtest_build_flags(TestMedicationRobot)
+rosbuild_add_rostest(test/TestMedicationRobot.test)
+target_link_libraries(TestMedicationRobot MedicationRobotLib Robot Poi StaticPoi)
+
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp)
 target_link_libraries(Resident Robot Poi StaticPoi)
