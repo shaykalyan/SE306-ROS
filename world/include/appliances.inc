@@ -236,3 +236,39 @@ define sink model
   )
 )
 
+define tv model
+(
+  size [3.5 0.2 2]
+  obstacle_return 0
+  gui_move 1
+  block
+  (
+    color "grey"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 2]
+    point[2] [4 2]
+    point[3] [4 0]
+    z [0 0.1]
+  )
+  block
+  (
+    color "grey"
+    points [4]
+    point[0] [0.25 0.75]
+    point[1] [0.25 1.5]
+    point[2] [3.75 1.5]
+    point[3] [3.75 0.75]
+    z [0.1 1.5]
+  )
+  block
+  (
+    color "black"
+    points [4]
+    point[0] [0.3 0.5]
+    point[1] [0.3 0.75]
+    point[2] [3.7 0.75]
+    point[3] [3.7 0.5]
+    z [0.2 1.45]
+  )
+)

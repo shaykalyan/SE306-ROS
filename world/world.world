@@ -54,6 +54,12 @@ couch
   pose [-7.5 -9 0 0]
 )
 
+tv
+(
+  name "tv"
+  pose [-7.55 0.55 0 0]
+)
+
 shower
 (
   name "shower"
