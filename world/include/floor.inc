@@ -36,7 +36,7 @@ define tiles model
 (
 size [8.9 8.1 0.01]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   # first column #############
   block
   (

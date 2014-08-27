@@ -240,7 +240,7 @@ define tv model
 (
   size [3.5 0.2 2]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "grey"
