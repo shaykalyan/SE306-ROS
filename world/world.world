@@ -54,6 +54,12 @@ shower
   pose [8.65 -3.05 0 0]
 )
 
+toilet
+(
+  name "toilet"
+  pose [3 -9 0 90]
+)
+
 oven
 (
   name "oven"
