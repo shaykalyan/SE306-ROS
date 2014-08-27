@@ -12,10 +12,15 @@ using namespace elderly_care_simulation;
 using namespace elderly_care_simulation;
 #include "../EventNode.h"
 #include <unistd.h> // sleep
+#include "../EscortRobot.h"
 
 #include "gtest/gtest.h"
 
 EscortRobot doctor;
+
+// Publishers and subcribers
+ros::Publisher residentEventPublisher;
+ros::Subscriber residentEventSubscriber;
 
 void eventTriggeredCallback(elderly_care_simulation::EventTrigger msg) {
     doctor.eventTriggered(msg);
@@ -61,6 +66,8 @@ TEST_F(EscortRobotTest, ignoreIrrelvantEvents) {
     // Sleep to allow the DoctorRobot to start
     // ros::Rate loop_rate(2);
     // loop_rate.sleep();
+
+
     
     ASSERT_TRUE(true);
 }
@@ -82,7 +89,7 @@ int main(int argc, char **argv) {
 
     // Advertise and subscribe to topics
     residentEventPublisher = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
-    ros::Subscriber eventTriggerSubscriber = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_trigger",1000, eventTriggeredCallback);
+    residentEventSubscriber = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_trigger",1000, eventTriggeredCallback);
 
     // Run tests to see if we received messages as expected
     testing::InitGoogleTest(&argc, argv);

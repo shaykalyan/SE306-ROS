@@ -62,8 +62,10 @@ rosbuild_add_gtest_build_flags(TestResident)
 rosbuild_add_rostest(test/TestResident.test)
 
 rosbuild_add_executable(TestEscortRobot EXCLUDE_FROM_ALL src/test/TestEscortRobot.cpp)
+rosbuild_add_library(EscortRobotLib src/EscortRobot.cpp)
 rosbuild_add_gtest_build_flags(TestEscortRobot)
 rosbuild_add_rostest(test/TestEscortRobot.test)
+target_link_libraries(TestEscortRobot EscortRobotLib Robot Poi StaticPoi)
 
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp)
