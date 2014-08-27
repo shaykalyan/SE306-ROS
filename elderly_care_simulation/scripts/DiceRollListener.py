@@ -139,7 +139,7 @@ class DiceRollerGUI:
         # Dictionary which maps different events to different method which will respond to them.
         self.events = {0:self.undefined, 1:self.eat, 2:self.shower, 3:self.exercise, 4:self.converse, 5:self.support, 6:self.relative,
         7:self.friend, 8:self.ill, 9:self.veryIll, 10:self.medication, 11:self.cook, 12:self.entertainment, 13:self.companionship,
-        14:self.wake, 15:self.sleep}
+        14:self.wake, 15:self.sleep, 16:self.move_kitchen, 17:self.move_bedroom, 18:self.move_hallway}
 
         
         ######################### SET UP CURRENT EVENT LIST #########################
@@ -168,7 +168,8 @@ class DiceRollerGUI:
 
         # Dictionary which maps different events to different method which will respond to them.
         self.next_events = {0:"", 1:"Eat", 2:"Shower", 3:"Exercise", 4:"Converse", 5:"Support", 6:"Relative", 7:"Friend", 8:"Ill", 9:"Very Ill",
-        10:"Medication", 11:"Cook", 12:"Entertainment", 13:"Companionship", 14:"Wake", 15:"Sleep"}
+        10:"Medication", 11:"Cook", 12:"Entertainment", 13:"Companionship", 14:"Wake", 15:"Sleep", 16:"Walk kitchen", 17:"Walk bedroom",
+        18:"Walk hallway"}
 
 
         ######################### SET UP DICE ROLLER MONITOR #########################
@@ -217,13 +218,14 @@ class DiceRollerGUI:
 
         # Set up event type dropdown menu
         self.typeOptions = ["Undefined", "Eat", "Shower", "Exercise", "Conversation", "Moral", "Relative", "Friend", "Ill", "Very Ill", 
-        "Medication", "Cook", "Entertainment", "Companionship", "Wake", "Sleep"]
+        "Medication", "Cook", "Entertainment", "Companionship", "Wake", "Sleep", "Kitchen", "Bedroom", "Hallway"]
         self.eventType = StringVar(self.root)
         self.eventType.set(self.typeOptions[0])
 
         # Dictionary for mapping event names to their corresponding numbers
         self.typeDict = {"Undefined":0, "Eat":1 , "Shower":2, "Exercise":3, "Conversation":4, "Moral":5, "Relative":6, "Friend":7, "Ill":8,
-        "Very Ill":9, "Medication":10, "Cook":11, "Entertainment":12, "Companionship":13, "Wake":14, "Sleep":15}
+        "Very Ill":9, "Medication":10, "Cook":11, "Entertainment":12, "Companionship":13, "Wake":14, "Sleep":15, "Kitchen":16,
+         "Bedroom":17, "Hallway":18}
 
         # Set up event message menu
         self.messageOptions = ["Undefined", "Request", "Response"]
@@ -342,7 +344,6 @@ class DiceRollerGUI:
 
     # Callback method for repopulating events
     def repopulateEventsCallback(self):
-        print("Repopulate!")
         guiMessage = GuiComm()
         guiMessage.msg_type = 1
         guiMessage.action = 1
@@ -352,7 +353,6 @@ class DiceRollerGUI:
 
     # Callback method for clearing events
     def clearEventsCallback(self):
-        print("Clear!")
         guiMessage = GuiComm()
         guiMessage.msg_type = 1
         guiMessage.action = 2
@@ -366,7 +366,6 @@ class DiceRollerGUI:
 
     # Callback method for clearing events
     def injectEventCallback(self):
-        print("INJECT!")
         injectEvent = EventTrigger()
         injectEvent.msg_type = self.messageDict[self.eventMessage.get()]
         injectEvent.event_type = self.typeDict[self.eventType.get()]
@@ -554,10 +553,8 @@ class DiceRollerGUI:
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.resident_task.set("Waking")
-                self.resident_task.set("Waking")
         elif (message.msg_type == 2):
             if (message.result == 2):
-                self.resident_task.set("None")
                 self.resident_task.set("None")
 
     #Update sleep state
@@ -565,10 +562,38 @@ class DiceRollerGUI:
         if (message.msg_type == 1):
             if (message.result == 0):
                 self.resident_task.set("Sleeping")
-                self.resident_task.set("Sleeping")
         elif (message.msg_type == 2):
             if (message.result == 2):
                 self.resident_task.set("None")
+
+    #Update sleep state
+    def move_kitchen(self, message):
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.resident_task.set("Walk kitchen")
+                self.addCurrentEvents("Walk kitchen")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.resident_task.set("None")
+
+    #Update sleep state
+    def move_bedroom(self, message):
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.resident_task.set("Walk bedroom")
+                self.addCurrentEvents("Walk bedroom")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
+                self.resident_task.set("None")
+
+    #Update sleep state
+    def move_hallway(self, message):
+        if (message.msg_type == 1):
+            if (message.result == 0):
+                self.resident_task.set("Walk hallway")
+                self.addCurrentEvents("Walk hallway")
+        elif (message.msg_type == 2):
+            if (message.result == 2):
                 self.resident_task.set("None")
 
     # Method for adding a currently occuring event to the current event list
@@ -576,6 +601,7 @@ class DiceRollerGUI:
         for current in self.current_events:
             if (current.get() == ""):
                 current.set(newEvent)
+                if ()
                 break
             elif (current.get() == newEvent):
                 break
