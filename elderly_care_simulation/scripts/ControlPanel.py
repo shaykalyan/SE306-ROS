@@ -159,10 +159,10 @@ class DiceRollerGUI:
         Label(self.frame_robotGrid, text="Nurse", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=1)
         Label(self.frame_robotGrid, textvariable=self.nurse_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=2)
 
-        # : Row 10: Caregivier
+        # : Row 10: Caregiver
         self.caregiver_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/caregiver.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.caregiver_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=10, column=0)
-        Label(self.frame_robotGrid, text="Caregivier", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=1)
+        Label(self.frame_robotGrid, text="Caregiver", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=1)
         Label(self.frame_robotGrid, textvariable=self.caregiver_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=2)
 
         # Dictionary which maps different events to different method which will respond to them.
