@@ -76,6 +76,10 @@ int Scheduler::getEventQueueSize() const {
     return eventQueue.size();
 }
 
+void Scheduler::setAllowNewEvents(bool val) {
+    allowNewEvents = val;
+}
+
 void Scheduler::setDayNightCycle(bool val) {
     dayNightCycle = val;
 }
@@ -89,38 +93,40 @@ bool Scheduler::hasDayNightCycle() const {
  */
 void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
 
-    // Only allows random events to be added to event queue in the allowed
-    // timeframe (between WAKE and SLEEP)
-    if(!allowNewEvents) {
-        ROS_INFO("Scheduler: Additional events are not allowed at this time.");
-        return;
-    }
-
-
-    // If the incoming event is a random event
-    if(randomEventLimit.count(msg.event_type) != 0) {
-
-        // If it havent occured before, change the flag and continue
-        if(randomEventLimit[msg.event_type] == false) {
-            randomEventLimit[msg.event_type] = true;
-
-        // If event occured before, then block it
-        } else {
-            ROS_INFO("Scheduler: [%s] cannot occur more than once per day.", 
-                eventTypeToString(msg.event_type));
+    if(msg.event_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
+        // Only allows random events to be added to event queue in the allowed
+        // timeframe (between WAKE and SLEEP)
+        if(!allowNewEvents) {
+            ROS_INFO("Scheduler: Additional events are not allowed at this time.");
             return;
         }
+
+
+        // If the incoming event is a random event
+        if(randomEventLimit.count(msg.event_type) != 0) {
+
+            // If it havent occured before, change the flag and continue
+            if(randomEventLimit[msg.event_type] == false) {
+                randomEventLimit[msg.event_type] = true;
+
+            // If event occured before, then block it
+            } else {
+                ROS_INFO("Scheduler: [%s] cannot occur more than once per day.", 
+                    eventTypeToString(msg.event_type));
+                return;
+            }
+        }
+        
+        // reset boolean flag to allow pending event to be re-published
+        // in the case that the external event will sit at the top of queue
+        stopRosInfoSpam = false;
+
+        ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
+                 eventTypeToString(msg.event_type),
+                 priorityToString(msg.event_priority));
+
+        eventQueue.push(EventNode(msg));
     }
-    
-    // reset boolean flag to allow pending event to be re-published
-    // in the case that the external event will sit at the top of queue
-    stopRosInfoSpam = false;
-
-    ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
-             eventTypeToString(msg.event_type),
-             priorityToString(msg.event_priority));
-
-    eventQueue.push(EventNode(msg));
 }
 
 /**
@@ -155,9 +161,9 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
 
                 } else {
 
-                    if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP) {
-                        sleep(10);
-                    }
+                    // if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP) {
+                    //     sleep(10);
+                    // }
 
                     concurrentWeight -= msg.event_weight;
 
@@ -181,10 +187,14 @@ void Scheduler::guiCommunicationCallback(GuiComm msg) {
             clearEventQueue();
             populateDailyTasks();
             setDayNightCycle(true);
+            setAllowNewEvents(true);
             break;
         case GUI_COMM_ACTION_CLEAR:
             clearEventQueue();
+            resetRandomEventOccurrence();
+            resetConcurrentWeight();
             setDayNightCycle(false);
+            setAllowNewEvents(true);
             break;
         }
         ROS_INFO("Scheduler: GUI action received [%s]", actionToString(msg.action));

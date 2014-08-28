@@ -415,7 +415,7 @@ int main(int argc, char **argv) {
                     
                 } else if (resident.currentMovementTarget == resident.TOILET) {
 
-                    if (toiletCount < 50) {
+                    if (toiletCount < 30) {
                         toiletCount++;
                         resident.startSpinning(true);
                         ros::spinOnce();
