@@ -150,7 +150,12 @@ TEST_F(CaregiverRobotTest,caregiverDoesNotRespondToNonExerciseRequests) {
 
     ASSERT_EQ(Caregiver::AT_HOME, theCaregiver.currentLocationState);
 }
-TEST_F(CaregiverRobotTest, caregiverSendsCorrectEventReply) {
+
+/**
+ *Tests that the Caregiver get the right reply for CONVERSATION event
+**/
+
+TEST_F(CaregiverRobotTest, caregiverSendsCorrectConversationEventReply) {
     theCaregiver.MY_TASK = EVENT_TRIGGER_EVENT_TYPE_CONVERSATION;
     theCaregiver.eventTriggerReply();
 
@@ -164,6 +169,69 @@ TEST_F(CaregiverRobotTest, caregiverSendsCorrectEventReply) {
     elderly_care_simulation::EventTrigger msg = receivedEventTriggers[0];
     ASSERT_EQ(EVENT_TRIGGER_MSG_TYPE_RESPONSE, msg.msg_type);
     ASSERT_EQ(EVENT_TRIGGER_EVENT_TYPE_CONVERSATION, msg.event_type);
+    ASSERT_EQ(EVENT_TRIGGER_RESULT_SUCCESS, msg.result);
+}
+
+/**
+ *Tests that the Caregiver get the right reply for SHOWER event
+**/
+
+TEST_F(CaregiverRobotTest, caregiverSendsCorrectShowerEventReply) {
+    theCaregiver.MY_TASK = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
+    theCaregiver.eventTriggerReply();
+
+    // Wait until message is received
+    ros::Rate loop_rate(10);
+    while (receivedEventTriggers.size() == 0) {
+        loop_rate.sleep();
+        ros::spinOnce();
+    }
+
+    elderly_care_simulation::EventTrigger msg = receivedEventTriggers[0];
+    ASSERT_EQ(EVENT_TRIGGER_MSG_TYPE_RESPONSE, msg.msg_type);
+    ASSERT_EQ(EVENT_TRIGGER_EVENT_TYPE_SHOWER, msg.event_type);
+    ASSERT_EQ(EVENT_TRIGGER_RESULT_SUCCESS, msg.result);
+}
+
+/**
+ *Tests that the Caregiver get the right reply for EXERCISE event
+**/
+
+TEST_F(CaregiverRobotTest, caregiverSendsCorrecMoralSupportEventReply) {
+    theCaregiver.MY_TASK = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
+    theCaregiver.eventTriggerReply();
+
+    // Wait until message is received
+    ros::Rate loop_rate(10);
+    while (receivedEventTriggers.size() == 0) {
+        loop_rate.sleep();
+        ros::spinOnce();
+    }
+
+    elderly_care_simulation::EventTrigger msg = receivedEventTriggers[0];
+    ASSERT_EQ(EVENT_TRIGGER_MSG_TYPE_RESPONSE, msg.msg_type);
+    ASSERT_EQ(EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT, msg.event_type);
+    ASSERT_EQ(EVENT_TRIGGER_RESULT_SUCCESS, msg.result);
+}
+
+/**
+ *Tests that the Caregiver get the right reply for EXERCISE event
+**/
+
+TEST_F(CaregiverRobotTest, caregiverSendsCorrectExerciseEventReply) {
+    theCaregiver.MY_TASK = EVENT_TRIGGER_EVENT_TYPE_EXERCISE;
+    theCaregiver.eventTriggerReply();
+
+    // Wait until message is received
+    ros::Rate loop_rate(10);
+    while (receivedEventTriggers.size() == 0) {
+        loop_rate.sleep();
+        ros::spinOnce();
+    }
+
+    elderly_care_simulation::EventTrigger msg = receivedEventTriggers[0];
+    ASSERT_EQ(EVENT_TRIGGER_MSG_TYPE_RESPONSE, msg.msg_type);
+    ASSERT_EQ(EVENT_TRIGGER_EVENT_TYPE_EXERCISE, msg.event_type);
     ASSERT_EQ(EVENT_TRIGGER_RESULT_SUCCESS, msg.result);
 }
 
