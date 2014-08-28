@@ -5,12 +5,12 @@
 #include "math.h"
 #include <vector>
 
-#include "../StaticPoiConstants.h"
-#include "../EventTriggerUtility.h"
-#include "../PerformTaskConstants.h"
-#include "../Scheduler.h"
-#include "../Poi.h"
-#include "../StaticPoi.h"
+#include "StaticPoiConstants.h"
+#include "EventTriggerUtility.h"
+#include "PerformTaskConstants.h"
+#include "Scheduler.h"
+#include "Poi.h"
+#include "StaticPoi.h"
 #include "elderly_care_simulation/EventTrigger.h"
 
 using namespace elderly_care_simulation;
@@ -164,7 +164,7 @@ TEST_F(SchedulerTest, testSchedulerReceivingEatResponseInEventTrigger) {
 
     if(isSameMessage(msg, receivedEventTrigger[0])) {
         EXPECT_EQ(0, scheduler.getEventQueueSize());
-        EXPECT_EQ(-2, scheduler.getConcurrentWeight());      
+        EXPECT_EQ(-5, scheduler.getConcurrentWeight());      
     } else {
         FAIL();
     }
@@ -198,7 +198,7 @@ TEST_F(SchedulerTest, testSchedulerReceivingShowerResponseInEventTrigger) {
 
     if(isSameMessage(msg, receivedEventTrigger[0])) {
         EXPECT_EQ(0, scheduler.getEventQueueSize());
-        EXPECT_EQ(-2, scheduler.getConcurrentWeight());      
+        EXPECT_EQ(-5, scheduler.getConcurrentWeight());      
     } else {
         FAIL();
     }
@@ -215,7 +215,7 @@ TEST_F(SchedulerTest, testSchedulerReceivingEntertainResponseInEventTrigger) {
 
     if(isSameMessage(msg, receivedEventTrigger[0])) {
         EXPECT_EQ(0, scheduler.getEventQueueSize());
-        EXPECT_EQ(-1, scheduler.getConcurrentWeight());      
+        EXPECT_EQ(-2, scheduler.getConcurrentWeight());      
     } else {
         FAIL();
     }

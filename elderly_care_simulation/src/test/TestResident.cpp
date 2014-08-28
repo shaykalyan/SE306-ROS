@@ -4,13 +4,13 @@
 #include <sstream>
 #include "math.h"
 #include <vector>
-#include "../EventTriggerUtility.h"
-#include "../PerformTaskConstants.h"
+#include "EventTriggerUtility.h"
+#include "PerformTaskConstants.h"
 #include "elderly_care_simulation/EventTrigger.h" 
 using namespace elderly_care_simulation;
 #include "elderly_care_simulation/PerformTask.h" 
 using namespace elderly_care_simulation;
-#include "../EventNode.h"
+#include "EventNode.h"
 #include <unistd.h> // sleep
 
 #include "gtest/gtest.h"
