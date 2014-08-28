@@ -207,7 +207,7 @@ void Scheduler::populateDailyTasks() {
 
         // // Morning
         // { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW }
+        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
         // { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
@@ -373,8 +373,6 @@ int main(int argc, char **argv) {
     //a count of howmany messages we have sent
     int count = 0;
     sleep(5);
-
-    ROS_INFO("Day Starts....");
 
     while (ros::ok()) {
         if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() <= 0) {

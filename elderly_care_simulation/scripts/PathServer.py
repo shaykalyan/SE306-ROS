@@ -85,9 +85,6 @@ def find_path(req):
     req.from_point is a geometry_msgs Point object signifying the initial location
     """ 
     try:
-        rospy.loginfo("Received request finding best path")
-        rospy.loginfo(str(graph))
-
         from_point = req.from_point;
         to_point = req.to_point;
 
@@ -95,17 +92,13 @@ def find_path(req):
         to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
 
         if from_node not in graph:
-            return False
+            raise rospy.ServiceException()
         
         path = shortest_path(from_node, to_node)
 
-        path.append((to_node[0], to_node[1]))
-
-        rospy.loginfo(str(path))
         return create_response_message(path)
     except Exception as e:
-        return False
-
+        raise rospy.ServiceException()
 
 def find_path_server():
     """
