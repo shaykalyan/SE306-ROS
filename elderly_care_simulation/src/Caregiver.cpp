@@ -292,16 +292,16 @@ int main(int argc, char **argv)
 
     //advertise() function will tell ROS that you want to publish on a given topic_
     //to stage
-    caregiver.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_9/cmd_vel",1000);
+    caregiver.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_7/cmd_vel",1000);
     caregiver.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
     //subscribe to listen to messages coming from stage
-    caregiver.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_9/base_pose_ground_truth",1000, callStage0domCallback);
+    caregiver.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_7/base_pose_ground_truth",1000, callStage0domCallback);
     caregiver.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, callEventTriggerCallback);
-    caregiver.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_9/location", 1000, callUpdateDesiredLocationCallback);
-    // caregiver.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_9/toResident", 1000, callGoToResident);
-    // caregiver.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_9/toHome", 1000, callGoToHome);
-    // caregiver.pathToShowerSub = nodeHandle.subscribe<std_msgs::Empty>("robot_9/toShower", 1000, callGoToShower);
+    caregiver.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_7/location", 1000, callUpdateDesiredLocationCallback);
+    // caregiver.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_7/toResident", 1000, callGoToResident);
+    // caregiver.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_7/toHome", 1000, callGoToHome);
+    // caregiver.pathToShowerSub = nodeHandle.subscribe<std_msgs::Empty>("robot_7/toShower", 1000, callGoToShower);
     caregiver.pathFinderService = nodeHandle.serviceClient<elderly_care_simulation::FindPath>("find_path");
         
     // Create a client to make service requests to the Resident

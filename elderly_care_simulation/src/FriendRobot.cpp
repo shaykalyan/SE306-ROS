@@ -170,20 +170,20 @@ int main(int argc, char **argv) {
     theFriend = FriendRobot();
 
     // Initialise publishers
-    theFriend.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_4/cmd_vel",1000);
+    theFriend.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_2/cmd_vel",1000);
     theFriend.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
     // Initialise subscribers
     theFriend.residentStageSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth",1000,
                                  updateResidentPositionCallback);
-    theFriend.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_4/base_pose_ground_truth",1000,
+    theFriend.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_2/base_pose_ground_truth",1000,
                             callStage0domCallback);
     theFriend.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000,
                                 callEventTriggerCallback);
-    theFriend.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_4/location", 1000,
+    theFriend.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_2/location", 1000,
                                         callUpdateDesiredLocationCallback);
-    theFriend.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_4/toResident", 1000, callGoToResident);
-    theFriend.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_4/toHome", 1000, callGoToHome);
+    theFriend.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_2/toResident", 1000, callGoToResident);
+    theFriend.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_2/toHome", 1000, callGoToHome);
         
     // Create a client to make service requests to the Resident
     theFriend.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");

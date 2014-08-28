@@ -175,20 +175,20 @@ int main(int argc, char **argv) {
     companionshipRobot = CompanionshipRobot();
 
     // Initialise publishers
-    companionshipRobot.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_5/cmd_vel",1000);
+    companionshipRobot.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_3/cmd_vel",1000);
     companionshipRobot.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
     // Initialise subscribers
     companionshipRobot.residentStageSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth",1000,
                                  updateResidentPositionCallback);
-    companionshipRobot.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_5/base_pose_ground_truth",1000,
+    companionshipRobot.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_3/base_pose_ground_truth",1000,
                             callStage0domCallback);
     companionshipRobot.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000,
                                 callEventTriggerCallback);
-    companionshipRobot.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_5/location", 1000,
+    companionshipRobot.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_3/location", 1000,
                                         callUpdateDesiredLocationCallback);
-    companionshipRobot.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_5/toResident", 1000, callGoToResident);
-    companionshipRobot.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_5/toHome", 1000, callGoToHome);
+    companionshipRobot.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toResident", 1000, callGoToResident);
+    companionshipRobot.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toHome", 1000, callGoToHome);
         
     // Create a client to make service requests to the Resident
     companionshipRobot.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");

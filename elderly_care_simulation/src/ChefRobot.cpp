@@ -132,7 +132,7 @@ void stageCallBack(nav_msgs::Odometry msg) {
  */
 int main(int argc, char **argv) {
 
-    const std::string rid = "robot_6";
+    const std::string rid = "robot_4";
 
     ros::init(argc, argv, "Chef_Robot");
 
