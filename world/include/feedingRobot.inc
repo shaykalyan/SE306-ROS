@@ -5,7 +5,7 @@ define feedingRobot position
   obstacle_return 0
   block
   (
-    color "yellow"
+    color "DarkViolet"
     points [4]
     point[0] [0 0]
     point[1] [0 1]
@@ -25,7 +25,7 @@ define feedingRobot position
   )
   block
   (
-    color "yellow"
+    color "DarkViolet"
     points [4]
     point[0] [1 1]
     point[1] [1 2]
@@ -55,7 +55,7 @@ define feedingRobot position
   )
   block
   (
-    color "yellow"
+    color "DarkViolet"
     points [4]
     point[0] [0 1]
     point[1] [0 2]
@@ -75,7 +75,7 @@ define feedingRobot position
   )
   block
   (
-    color "yellow"
+    color "DarkViolet"
     points [4]
     point[0] [1 0]
     point[1] [1 1]

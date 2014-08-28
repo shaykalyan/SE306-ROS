@@ -1,7 +1,9 @@
 #include "ros/ros.h"
 
 #include "EventTriggerUtility.h"
+#include "GuiCommConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
+#include "elderly_care_simulation/GuiComm.h"
 #include <queue>
 #include <unistd.h> // sleep
 #include "Scheduler.h"
@@ -14,6 +16,7 @@ Scheduler::Scheduler(){
     concurrentWeight = 0;
     allowNewEvents = true;
     stopRosInfoSpam = false;
+    dayNightCycle = false;
 
     randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = false;
     randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_ILL] = false;
@@ -73,6 +76,14 @@ int Scheduler::getEventQueueSize() const {
     return eventQueue.size();
 }
 
+void Scheduler::setDayNightCycle(bool val) {
+    dayNightCycle = val;
+}
+
+bool Scheduler::hasDayNightCycle() const {
+    return dayNightCycle;
+}
+
 /**
  * Callback function to deal with external events
  */
@@ -84,6 +95,7 @@ void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
         ROS_INFO("Scheduler: Additional events are not allowed at this time.");
         return;
     }
+
 
     // If the incoming event is a random event
     if(randomEventLimit.count(msg.event_type) != 0) {
@@ -99,6 +111,10 @@ void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
             return;
         }
     }
+    
+    // reset boolean flag to allow pending event to be re-published
+    // in the case that the external event will sit at the top of queue
+    stopRosInfoSpam = false;
 
     ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
              eventTypeToString(msg.event_type),
@@ -125,20 +141,53 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
                           priorityToString(eatMsg.event_priority));
 
                 eventQueue.push(EventNode(eatMsg));
-            }else{
+                
+                // reset boolean flag to allow pending feed event to be re-published to GUI
+                // since the eat event is of a higher priority, it will float to the top of queue
+                stopRosInfoSpam = false;
+            } else {
 
                 // ILL has a weight of 0, but still blocks all other events (taking up 2 slots)
                 // Therefore need to -2 to concurrent weight to free the slot.
                 if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ILL ||
                     msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
                     concurrentWeight -= 2;
-                }else {
+
+                } else {
+
+                    if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP) {
+                        sleep(10);
+                    }
+
                     concurrentWeight -= msg.event_weight;
+
                 }
                 
+
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
             }
         }
+    }
+}
+
+/**
+ * Callback function to react to actions triggered via the Interactive GUI
+ */
+void Scheduler::guiCommunicationCallback(GuiComm msg) {
+    if (msg.msg_type == GUI_COMM_MSG_TYPE_REQUEST) {
+        switch(msg.action) {
+        case GUI_COMM_ACTION_POPULATE:
+            resetRandomEventOccurrence();
+            clearEventQueue();
+            populateDailyTasks();
+            setDayNightCycle(true);
+            break;
+        case GUI_COMM_ACTION_CLEAR:
+            clearEventQueue();
+            setDayNightCycle(false);
+            break;
+        }
+        ROS_INFO("Scheduler: GUI action received [%s]", actionToString(msg.action));
     }
 }
 
@@ -179,31 +228,32 @@ void Scheduler::populateDailyTasks() {
         // ======================================
 
         // // Morning
-        // { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_TOILET,  EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
         // // Noon
-        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_RELATIVE,        EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_FRIEND,          EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_RELATIVE,        EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_FRIEND,          EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
 
 
-        // // Evening
-        // { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
-        // { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
+        // Evening
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
     };
     for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
         eventQueue.push(EventNode(createEventRequestMsg(eventSequence[i][0], eventSequence[i][1])));
@@ -280,7 +330,6 @@ void Scheduler::dequeueEvent() {
                 if(msg.event_type == EVENT_TRIGGER_EVENT_TYPE_WAKE) {
                     allowNewEvents = true;
                 }
-                
                 eventTriggerPub.publish(msg);
                 concurrentWeight += msg.event_weight;
                 eventQueue.pop();
@@ -289,9 +338,17 @@ void Scheduler::dequeueEvent() {
 
     } else {
         if(!stopRosInfoSpam){
+            stopRosInfoSpam = true;
+
             ROS_INFO("Scheduler: Pending event: [%s]", 
                 eventTypeToString(msg.event_type));
-            stopRosInfoSpam = true;
+
+            // publish pending event to GuiComm topic
+            GuiComm pendingMsg;
+            pendingMsg.msg_type = GUI_COMM_MSG_TYPE_INFO;
+            pendingMsg.event_type = msg.event_type;
+            pendingMsg.action = GUI_COMM_ACTION_UNDEFINED;
+            guiCommPub.publish(pendingMsg);
         }
     }
 }
@@ -302,6 +359,10 @@ void callEventTriggerCallback(EventTrigger msg) {
 
 void callExternalEventReceivedCallback(EventTrigger msg) {
     scheduler.externalEventReceivedCallback(msg);
+}
+
+void callGuiCommunicationCallback(GuiComm msg) {
+    scheduler.guiCommunicationCallback(msg);
 }
 
 /**
@@ -319,16 +380,15 @@ int main(int argc, char **argv) {
 
     // advertise to event_trigger topic
     scheduler.eventTriggerPub = nodeHandle.advertise<EventTrigger>("event_trigger",1000, true);
+    scheduler.guiCommPub = nodeHandle.advertise<GuiComm>("gui_communication",1000, true);
 
     // subscribe to event_trigger topic
     scheduler.eventTriggerSub = nodeHandle.subscribe<EventTrigger>("event_trigger",1000, callEventTriggerCallback);
     scheduler.externalEventSub = nodeHandle.subscribe<EventTrigger>("external_event",1000, callExternalEventReceivedCallback);
+    scheduler.guiCommSub = nodeHandle.subscribe<GuiComm>("gui_communication",1000, callGuiCommunicationCallback);
     
     ros::Rate loop_rate(10);
 
-    // populate queue with day's events
-    
-    scheduler.populateDailyTasks();
 
     //a count of howmany messages we have sent
     int count = 0;
@@ -336,14 +396,14 @@ int main(int argc, char **argv) {
 
     while (ros::ok()) {
 
-        if(scheduler.getEventQueueSize() == 0 && scheduler.getConcurrentWeight() <= 0) {
-            ROS_INFO("Day Ends....");
-            sleep(10);
+        if( scheduler.getEventQueueSize() == 0 && 
+            scheduler.getConcurrentWeight() <= 0 && 
+            scheduler.hasDayNightCycle()) {
+
             scheduler.clearEventQueue();
             scheduler.resetConcurrentWeight();
             scheduler.resetRandomEventOccurrence();
             scheduler.populateDailyTasks();
-            ROS_INFO("Day Starts....");
         }else {
             scheduler.dequeueEvent();
         }

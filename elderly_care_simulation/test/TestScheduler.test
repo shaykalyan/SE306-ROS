@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="elderly_care_simulation" type="Scheduler" name="Scheduler" />
+  <test test-name="TestScheduler" pkg="elderly_care_simulation" type="TestScheduler" />
+</launch>

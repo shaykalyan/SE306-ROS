@@ -47,7 +47,7 @@ EntertainmentRobot::~EntertainmentRobot() {
  */
 void EntertainmentRobot::goToResident(const std_msgs::Empty) {
     ROS_INFO("Entertainment: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
-    goToLocation(residentPoi.getLocation());
+    goToLocation(residentPoi.getLocation(), true);
     currentLocationState = GOING_TO_RESIDENT;
 }
 
