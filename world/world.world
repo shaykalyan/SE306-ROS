@@ -15,6 +15,7 @@ include "include/friendRobot.inc"
 include "include/relativeRobot.inc"
 include "include/feedingRobot.inc"
 include "include/doctorRobot.inc"
+include "include/alphabet.inc"
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -26,13 +27,12 @@ interval_sim 100
 velocity_bounds     [-10 10 -10 10 0 0 -90 90]          
 acceleration_bounds [-10 10 -10 10 0 0 -90 90]
 
-window
-( 
+window( 
   #size of the window in pixels
-  size [800 600]
-  center [0.312 -2.287]
-  rotate [0.000 0.000]
-  scale 29.282
+  size [800 800]
+  center [-3.000 -3.000]
+  rotate [70.000 -45.000]
+  scale 23
   show_data 0
   show_flags 1
   show_blocks 1
@@ -49,88 +49,84 @@ window
 )
 
 # load an environment bitmap
-floorplan
-( 
+floorplan( 
   name "alpha-house"
   bitmap "house.png"
   size [20.000 20.000 0.500]
   pose [0.000 0.000 0.010 0.000]
 )
 
-wood-floor
-(
+wood-floor(
   name "wood-floor"
   pose [0.000 0.000 0.000 0.000]
 )
 
-grass
-(
+grass(
   name "grass"
   pose [-1.900 8.500 0.010 0.000]
 )
 
-tiles
-(
+tiles(
   name "tiles"
   pose [5.500 -5.940 0.010 0.000]
 )
 
-bed
-( 
+bed( 
   name "bed"
   pose [-3.100 -8.200 0.010 0.000]
 )
 
-couch
-(
+couch(
   name "couch"
   pose [-7.500 -9.000 0.010 0.000]
 )
 
-tv
-(
+tv(
   name "tv"
   pose [-7.550 0.550 0.010 0.000]
 )
 
-shower
-(
+shower(
   name "shower"
-  pose [7.954 -3.123 0.020 0.000]
+  pose [7.954 -3.200 0.020 0.000]
 )
 
-toilet
-(
+toilet(
   name "toilet"
   pose [3.000 -9.000 0.020 90.000]
 )
 
-sink
-(
+sink(
   name "sink"
   pose [8.800 -7.500 0.020 180.000]
 )
 
-oven
-(
+oven(
   name "oven"
   pose [7.000 8.700 0.010 0.000]
 )
 
-bench
-(
+fridge(
+  name "fridge"
+  pose [8.650 8.700 0.010 -90.000]
+)
+
+bench(
   name "kitchen bench"
   pose [4.100 8.700 0.010 0.000]
 )
 
-table
-(
+table(
   name "kitchen table"
   pose [5.700 2.900 0.010 0.000]
 )
 
-hospital
-(
+small-table(
+  name "hallway table"
+  pose [-7.700 8.900 0.010 0.000]
+)
+
+hospital(
   name "hospital"
   pose [7.000 -13.000 0.000 0.000]
 )
@@ -199,4 +195,167 @@ feedingRobot(
 doctorRobot(
   name "DoctorRobot"
   pose [5.000 -13.000 0.000 0.000]
+)
+
+### Flowers
+pink-flower(
+  name "pink-1"
+  pose [-3.810 8.940 0.000 2.000]
+)
+
+pink-flower(
+  name "pink-2"
+  pose [-3.410 8.640 0.000 43.000]
+)
+
+pink-flower(
+  name "pink-3"
+  pose [-3.110 8.940 0.000 25.000]
+)
+
+pink-flower(
+  name "pink-4"
+  pose [-3.110 8.640 0.000 29.000]
+)
+
+pink-flower(
+  name "pink-5"
+  pose [-2.950 8.540 0.000 11.000]
+)
+
+pink-flower(
+  name "pink-6"
+  pose [-2.750 8.970 0.000 59.000]
+)
+
+pink-flower(
+  name "pink-7"
+  pose [-1.670 8.170 0.000 76.000]
+)
+
+pink-flower(
+  name "pink-8"
+  pose [-1.450 8.230 0.000 66.000]
+)
+
+blue-flower(
+  name "blue-1"
+  pose [-1.110 8.940 0.000 2.000]
+)
+
+blue-flower(
+  name "blue-2"
+  pose [-2.410 8.540 0.000 43.000]
+)
+
+blue-flower(
+  name "blue-3"
+  pose [-1.410 8.640 0.000 25.000]
+)
+
+blue-flower(
+  name "blue-4"
+  pose [-2.330 8.340 0.000 29.000]
+)
+
+blue-flower(
+  name "blue-5"
+  pose [-1.950 8.840 0.000 11.000]
+)
+
+blue-flower(
+  name "blue-6"
+  pose [-3.750 8.270 0.000 59.000]
+)
+
+blue-flower(
+  name "blue-7"
+  pose [-4.120 8.470 0.000 76.000]
+)
+
+blue-flower(
+  name "blue-8"
+  pose [-3.450 8.230 0.000 66.000]
+)
+
+white-flower(
+  name "white-1"
+  pose [-0.110 8.940 0.000 2.000]
+)
+
+white-flower(
+  name "white-2"
+  pose [-1.580 9.140 0.000 43.000]
+)
+
+white-flower(
+  name "white-3"
+  pose [-0.410 8.640 0.000 25.000]
+)
+
+white-flower(
+  name "white-4"
+  pose [-3.330 8.340 0.000 29.000]
+)
+
+white-flower(
+  name "white-5"
+  pose [-0.950 8.680 0.000 11.000]
+)
+
+white-flower(
+  name "white-6"
+  pose [-2.730 7.930 0.000 59.000]
+)
+
+white-flower(
+  name "white-7"
+  pose [-4.020 8.670 0.000 76.000]
+)
+
+white-flower(
+  name "white-8"
+  pose [-1.450 8.030 0.000 66.000]
+)
+
+
+### Below this line are the letters for the words "GROUP ONE"
+letter-G(
+  name "G"
+  pose [-3.000 16.000 0.000 0.000]
+)
+
+letter-R(
+  name "R"
+  pose [1.000 16.000 0.000 0.000]
+)
+
+letter-O(
+  name "O-1"
+  pose [5.000 16.000 0.000 0.000]
+)
+
+letter-U(
+  name "U"
+  pose [9.000 16.000 0.000 0.000]
+)
+
+letter-P(
+  name "P"
+  pose [13.000 16.000 0.000 0.000]
+)
+
+letter-O(
+  name "O-2"
+  pose [16.000 13.000 0.000 -90.000]
+)
+
+letter-N(
+  name "N"
+  pose [16.000 9.000 0.000 -90.000]
+)
+
+letter-E(
+  name "E"
+  pose [16.000 5.000 0.000 -90.000]
 )
