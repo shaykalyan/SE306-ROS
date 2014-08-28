@@ -115,7 +115,14 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
             }
             performingTask = true;
             goToResident(emptyMessage);
+
         } else {
+
+            if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_CONVERSATION ||
+               msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SHOWER ||
+               msg.event_type == EVENT_TRIGGER_EVENT_TYPE_EXERCISE ||
+               msg.event_type == EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT){
+
                 elderly_care_simulation::EventTrigger msgOut;
                 msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
                 msgOut.event_type = msg.event_type;
@@ -124,6 +131,7 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
                 msgOut.result = EVENT_TRIGGER_RESULT_FAILURE;
                 eventTriggerPub.publish(msgOut);
                 ROS_INFO("Caregiver: Failure reply Message Sent");
+            }
         }
     }
 }
