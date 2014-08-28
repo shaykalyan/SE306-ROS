@@ -12,7 +12,7 @@
 
 class Scheduler {
 
-static const int MAX_CONCURRENT_WEIGHT = 2;
+static const int MAX_CONCURRENT_WEIGHT = 5;
 
 public:
 

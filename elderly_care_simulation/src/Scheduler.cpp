@@ -94,6 +94,11 @@ bool Scheduler::hasDayNightCycle() const {
 void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
 
     if(msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
+
+        if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
+            return;
+        }
+
         // Only allows random events to be added to event queue in the allowed
         // timeframe (between WAKE and SLEEP)
         if(!allowNewEvents) {
@@ -137,6 +142,10 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
         if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
 
+            if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
+                return;
+            }
+
             if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));
 
@@ -157,7 +166,7 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
                 // Therefore need to -2 to concurrent weight to free the slot.
                 if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ILL ||
                     msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
-                    concurrentWeight -= 2;
+                    concurrentWeight -= 5;
 
                 } else {
 
@@ -290,7 +299,7 @@ void Scheduler::dequeueEvent() {
     
     // Publish event if enough concurrent weight available
     if (concurrentWeight + msg.event_weight <= MAX_CONCURRENT_WEIGHT) {
-
+        sleep(1);
         ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
 
         stopRosInfoSpam = false;
@@ -308,7 +317,7 @@ void Scheduler::dequeueEvent() {
                 allowNewEvents = false;
 
                 // ILL has a weight of 0, but still blocks all other events
-                concurrentWeight += 2;
+                concurrentWeight += 5;
                 eventTriggerPub.publish(msg);
                 eventQueue.pop();
 
@@ -322,7 +331,7 @@ void Scheduler::dequeueEvent() {
                 allowNewEvents = false;
 
                 // VERY_ILL has a weight of 0, but still blocks all other events
-                concurrentWeight += 2;
+                concurrentWeight += 5;
                 eventTriggerPub.publish(msg);
                 eventQueue.pop();
 
