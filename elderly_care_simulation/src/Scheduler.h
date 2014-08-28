@@ -5,6 +5,7 @@
 
 #include "EventTriggerUtility.h"
 #include "elderly_care_simulation/EventTrigger.h"
+#include "elderly_care_simulation/GuiComm.h"
 #include <queue>
 #include "EventNode.h"
 #include <unistd.h> // sleep
@@ -16,16 +17,21 @@ static const int MAX_CONCURRENT_WEIGHT = 2;
 public:
 
     ros::Publisher eventTriggerPub;
+    ros::Publisher guiCommPub;
     ros::Subscriber eventTriggerSub;
     ros::Subscriber externalEventSub;
+    ros::Subscriber guiCommSub;
 
     Scheduler();
     ~Scheduler();
     elderly_care_simulation::EventTrigger createEventRequestMsg(int eventType, int priority);
     void externalEventReceivedCallback(elderly_care_simulation::EventTrigger msg);
     void eventTriggerCallback(elderly_care_simulation::EventTrigger msg);
+    void guiCommunicationCallback(elderly_care_simulation::GuiComm msg);
     int getConcurrentWeight() const;
     int getEventQueueSize() const;
+    void setDayNightCycle(bool val);
+    bool hasDayNightCycle() const;
     void clearEventQueue();
     void resetRandomEventOccurrence();
     void resetConcurrentWeight();
@@ -39,6 +45,7 @@ private:
     std::map<int, bool> randomEventLimit;
     bool allowNewEvents;
     bool stopRosInfoSpam;
+    bool dayNightCycle;
 };
 
 #endif
