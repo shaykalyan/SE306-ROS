@@ -94,6 +94,11 @@ bool Scheduler::hasDayNightCycle() const {
 void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
 
     if(msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
+
+        if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
+            return;
+        }
+
         // Only allows random events to be added to event queue in the allowed
         // timeframe (between WAKE and SLEEP)
         if(!allowNewEvents) {
@@ -142,7 +147,7 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
 
                 EventTrigger eatMsg;
                 eatMsg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT, EVENT_TRIGGER_PRIORITY_HIGH);
-                ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]",
+                ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s].",
                           eventTypeToString(eatMsg.event_type),
                           priorityToString(eatMsg.event_priority));
 
@@ -161,17 +166,15 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
 
                 } else {
 
-                    // if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP) {
-                    //     sleep(10);
-                    // }
-
                     concurrentWeight -= msg.event_weight;
-
                 }
                 
 
-                ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
+                ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));
             }
+        } else {
+            concurrentWeight -= msg.event_weight;
+            ROS_INFO("Scheduler: [%s] discarded.", eventTypeToString(msg.event_type));
         }
     }
 }

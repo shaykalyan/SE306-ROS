@@ -54,99 +54,76 @@ void Caregiver::eventTriggerReply() {
     // create response message
     elderly_care_simulation::EventTrigger msg;
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
+    msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
+    msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
     msg.event_type = MY_TASK;
 
      switch (msg.event_type) {
         case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
-        {
-            msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
-            msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
             eventTriggerPub.publish(msg);
             ROS_INFO("Caregiver: Reply Message Sent");
             break;
-        }
 
          case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
-        {
-            msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
-            msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
             eventTriggerPub.publish(msg);
             ROS_INFO("Caregiver: Reply Message Sent");
             break;
-
-        }
 
         case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
-        {
-            msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
-            msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
             eventTriggerPub.publish(msg);
             ROS_INFO("Caregiver: Reply Message Sent");
             break;
-
-        }
 
         case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
-        {
-            msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
-            msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
             eventTriggerPub.publish(msg);
             ROS_INFO("Caregiver: Reply Message Sent");
             break;
-
-        }
     }
 }
 
 void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
+    std_msgs::Empty emptyMessage;
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
-        MY_TASK = msg.event_type;
-        // TODO: NEW ROBOT CHANGE HERE
-        switch (msg.event_type) {
-            case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
-            {
-                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));
-                performingTask = true;
-                std_msgs::Empty emptyMessage;
-                goToResident(emptyMessage);
-                break;
 
-            }    
+        if(!performingTask) {
+            MY_TASK = msg.event_type;
+            // TODO: NEW ROBOT CHANGE HERE
+            switch (msg.event_type) {
+                case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
+                    ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));
+                    break;
 
-            case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
-            {
-                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
-                performingTask = true;                
-                std_msgs::Empty emptyMessage;
-                goToResident(emptyMessage);
-                break;
+                case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
+                    ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
+                    break;
 
-            } 
+                case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
+                    ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
+                    break; 
 
-            case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
-            {
-                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
-                performingTask = true;                
-                std_msgs::Empty emptyMessage;
-                goToResident(emptyMessage);
-                break;
+                case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
 
-            }   
-
-            case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
-            {
-                ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
-                performingTask = true;                
-                std_msgs::Empty emptyMessage;
-                goToResident(emptyMessage);
-                break;
-
+                    ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
+                    break;
+                default:
+                    break;
             }
+            performingTask = true;
+            goToResident(emptyMessage);
+        } else {
+                elderly_care_simulation::EventTrigger msgOut;
+                msgOut.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
+                msgOut.event_type = msg.event_type;
+                msgOut.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
+                msgOut.event_weight = msg.event_weight;
+                msgOut.result = EVENT_TRIGGER_RESULT_FAILURE;
+                eventTriggerPub.publish(msgOut);
+                ROS_INFO("Caregiver: Failure reply Message Sent");
         }
     }
 }
@@ -159,6 +136,7 @@ void Caregiver::performTask() {
     // Generate the service call
     elderly_care_simulation::PerformTask performTaskSrv;
     performTaskSrv.request.taskType = MY_TASK;
+    std_msgs::Empty emptyMessage;
 
     if (MY_TASK == EVENT_TRIGGER_EVENT_TYPE_SHOWER){
         performTaskSrv.request.taskRequiresPoi = true;
@@ -172,39 +150,29 @@ void Caregiver::performTask() {
     
     switch (performTaskSrv.response.result) {
         case PERFORM_TASK_RESULT_ACCEPTED:
-        {
             // Resident has accepted the task but keep going
             ROS_INFO("Caregiver: Resident has accepted the task but says keep going");
             startSpinning(true);        
             break;
-        }
 
         case PERFORM_TASK_RESULT_FINISHED:
-        {
             // Resident accepted the task and has had enough
             ROS_INFO("Caregiver: Resident has accepted the task and has had enough");            
-            performingTask = false;            
-            std_msgs::Empty emptyMessage;
+            performingTask = false;
             goToHome(emptyMessage);
             stopSpinning();
             eventTriggerReply();
             break;
-        }
 
         case PERFORM_TASK_RESULT_BUSY:
-        {
             // Resident is busy
             ROS_INFO("Caregiver: Resident is busy");
             break;
-        }
 
         case PERFORM_TASK_RESULT_TAKE_ME_THERE:
-        {
             ROS_INFO("Caregiver: Resident is going to the shower");       
-            std_msgs::Empty emptyMessage;
             goToShower(emptyMessage);
             break;
-        }
     }
 }
 
