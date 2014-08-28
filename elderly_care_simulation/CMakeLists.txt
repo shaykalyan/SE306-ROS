@@ -61,6 +61,7 @@ rosbuild_add_executable(TestResident EXCLUDE_FROM_ALL src/test/TestResident.cpp)
 rosbuild_add_gtest_build_flags(TestResident)
 rosbuild_add_rostest(test/TestResident.test)
 
+
 rosbuild_add_executable(TestCaregiverRobot EXCLUDE_FROM_ALL src/test/TestCaregiverRobot.cpp)
 rosbuild_add_library(CaregiverLib src/Caregiver.cpp)
 rosbuild_add_gtest_build_flags(TestCaregiverRobot)
@@ -107,6 +108,13 @@ rosbuild_add_library(ChefRobotLib src/ChefRobot.cpp)
 rosbuild_add_gtest_build_flags(TestChefRobot)
 rosbuild_add_rostest(test/TestChefRobot.test)
 target_link_libraries(TestChefRobot ChefRobotLib Robot Poi StaticPoi)
+
+rosbuild_add_executable(TestEscortRobot EXCLUDE_FROM_ALL src/test/TestEscortRobot.cpp)
+rosbuild_add_library(EscortRobotLib src/EscortRobot.cpp)
+rosbuild_add_gtest_build_flags(TestEscortRobot)
+rosbuild_add_rostest(test/TestEscortRobot.test)
+target_link_libraries(TestEscortRobot EscortRobotLib Robot Poi StaticPoi)
+
 
 # Robot Nodes
 rosbuild_add_executable(Resident src/Resident.cpp)
