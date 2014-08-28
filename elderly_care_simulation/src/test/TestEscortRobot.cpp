@@ -19,12 +19,12 @@ using namespace elderly_care_simulation;
 EscortRobot doctor;
 
 // Publishers and subcribers
-ros::Publisher residentEventPublisher;
-ros::Subscriber residentEventSubscriber;
+//ros::Publisher residentEventPublisher;
+//ros::Subscriber residentEventSubscriber;
 
-void eventTriggeredCallback(elderly_care_simulation::EventTrigger msg) {
-    doctor.eventTriggered(msg);
-}
+//void eventTriggeredCallback(EventTrigger msg) {
+//    doctor.eventTriggered(msg);
+//}
 
 
 /**
@@ -67,6 +67,7 @@ class EscortRobotTest : public ::testing::Test {
 };
 
 EventTrigger eventTriggerForEventType(int eventType) {
+    ROS_INFO("Making a message");
     EventTrigger msg;
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
     msg.event_type = eventType;
@@ -79,16 +80,34 @@ EventTrigger eventTriggerForEventType(int eventType) {
 /** 
  * Any calls to the doctor that are not VERY_ILL events should be ignored.
  */
-TEST_F(EscortRobotTest, ignoreIrrelvantEvents) {
+TEST_F(EscortRobotTest, ignoreIrrelevantEvents) {
+    ROS_INFO("Starting test");
 
     ASSERT_EQ(EscortRobot::AT_BASE, doctor.currentLocationState);
     ASSERT_FALSE(doctor.performingTask);
 
-    residentEventPublisher.publish(eventTriggerForEventType(EVENT_TRIGGER_EVENT_TYPE_MEDICATION));
+    doctor.eventTriggered(eventTriggerForEventType(EVENT_TRIGGER_EVENT_TYPE_MEDICATION));
 
     // The doctor should not change its state
     ASSERT_EQ(EscortRobot::AT_BASE, doctor.currentLocationState);
     ASSERT_FALSE(doctor.performingTask);
+}
+
+/** 
+ * Any calls to the doctor that are VERY_ILL events should result in a change
+ * of state in the doctor.
+ */
+TEST_F(EscortRobotTest, acceptRelevantEvents) {
+
+    ASSERT_EQ(EscortRobot::AT_BASE, doctor.currentLocationState);
+    ASSERT_FALSE(doctor.performingTask);
+
+    doctor.eventTriggered(eventTriggerForEventType(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL));
+
+    // The doctor should change its state
+    //ASSERT_GT(doctor.locationQueue.size(), 0);
+    ASSERT_TRUE(doctor.performingTask);
+    ASSERT_EQ(EscortRobot::GOING_TO_POI, doctor.currentLocationState);
 }
 
 int main(int argc, char **argv) {
@@ -97,8 +116,8 @@ int main(int argc, char **argv) {
     ros::NodeHandle nodeHandle;
 
     // Advertise and subscribe to topics
-    residentEventPublisher = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("resident_event",1000, true);
-    residentEventSubscriber = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_trigger",1000, eventTriggeredCallback);
+    //residentEventPublisher = nodeHandle.advertise<EventTrigger>("event_trigger",1000, true);
+    //residentEventSubscriber = nodeHandle.subscribe<EventTrigger>("event_trigger",1000, eventTriggeredCallback);
 
     // Run tests to see if we received messages as expected
     testing::InitGoogleTest(&argc, argv);
