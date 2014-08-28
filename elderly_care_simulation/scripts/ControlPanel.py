@@ -401,17 +401,23 @@ class DiceRollerGUI:
         injectEvent.event_weight = getEventWeight(injectEvent.event_type)
         injectEvent.result = self.resultDict[self.eventResult.get()]
 
-        self.externalEventPub.publish(injectEvent)
-
-        # If sleep is 'injected', follow it up with a 'wake' event
-        if (injectEvent.event_type == ET_EVENT_TYPE_SLEEP):
-            injectEvent = EventTrigger()
-            injectEvent.msg_type = ET_MSG_TYPE_REQUEST
-            injectEvent.event_type = ET_EVENT_TYPE_WAKE
-            injectEvent.event_priority = ET_EVENT_PRIORITY_MEDIUM
-            injectEvent.event_weight = getEventWeight(ET_EVENT_TYPE_WAKE)
-            injectEvent.result = ET_EVENT_RESULT_UNDEFINED
+        if injectEvent.msg_type == ET_MSG_TYPE_REQUEST:
             self.externalEventPub.publish(injectEvent)
+
+            # If sleep is 'injected', follow it up with a 'wake' event
+            if (injectEvent.event_type == ET_EVENT_TYPE_SLEEP):
+                injectEvent = EventTrigger()
+                injectEvent.msg_type = ET_MSG_TYPE_REQUEST
+                injectEvent.event_type = ET_EVENT_TYPE_WAKE
+                injectEvent.event_priority = ET_EVENT_PRIORITY_MEDIUM
+                injectEvent.event_weight = getEventWeight(ET_EVENT_TYPE_WAKE)
+                injectEvent.result = ET_EVENT_RESULT_UNDEFINED
+                self.externalEventPub.publish(injectEvent)
+
+        elif injectEvent.msg_type == ET_MSG_TYPE_RESPONSE:
+            self.eventTriggerPub.publish(injectEvent)
+        else:
+            return
 
     #Update undefined state
     def undefined(self, result):
