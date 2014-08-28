@@ -1,0 +1,4 @@
+<launch>
+  	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/house-navigation.pgm"/>
+  <test test-name="TestPathServer" pkg="elderly_care_simulation" type="TestPathServer" />
+</launch>
