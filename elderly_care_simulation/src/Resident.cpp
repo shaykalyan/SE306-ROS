@@ -381,6 +381,9 @@ int main(int argc, char **argv) {
     // Advertise that the Resident responds to PerformTask service calls
 	ros::ServiceServer service = nodeHandle.advertiseService("perform_task", callPerformTaskServiceHandler);
 
+    int toiletCount = 0;
+    int sleepCount = 0;
+
 	while (ros::ok())
 	{
 		resident.updateCurrentVelocity();
@@ -395,9 +398,36 @@ int main(int argc, char **argv) {
                 } else if (resident.currentMovementTarget == resident.HALLWAY) {
                     resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY);
                 } else if (resident.currentMovementTarget == resident.BED) {
-                    resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_SLEEP);
+
+                    if (sleepCount < 100) {
+                        sleepCount++;
+                        resident.startSpinning(true);
+                        ros::spinOnce();
+                        loop_rate.sleep();
+                        continue;
+
+                    } else {
+                        resident.stopSpinning();
+                        resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_SLEEP);
+                        sleepCount = 0;
+                    }
+
+                    
                 } else if (resident.currentMovementTarget == resident.TOILET) {
-                    resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_TOILET);
+
+                    if (toiletCount < 50) {
+                        toiletCount++;
+                        resident.startSpinning(true);
+                        ros::spinOnce();
+                        loop_rate.sleep();
+                        continue;
+
+                    } else {
+                        resident.stopSpinning();
+                        resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_TOILET);
+                        toiletCount = 0;
+                    }
+                    
                 }
 
                 resident.currentMovementState = resident.STATIONARY;
