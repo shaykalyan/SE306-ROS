@@ -281,6 +281,12 @@ void Resident::eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
                 currentMovementState = MOVING;
                 currentMovementTarget = HALLWAY;
                 break;
+            case EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_TOILET:
+                ROS_INFO("Resident: Event Recieved: [%s]", eventTypeToString(msg.event_type));
+                goToLocation(toiletPoi.getLocation());
+                currentMovementState = MOVING;
+                currentMovementTarget = TOILET;
+                break;
             default:
                 return;
 
@@ -375,9 +381,6 @@ int main(int argc, char **argv) {
     // Advertise that the Resident responds to PerformTask service calls
 	ros::ServiceServer service = nodeHandle.advertiseService("perform_task", callPerformTaskServiceHandler);
 
-	// A count of howmany messages we have sent
-	int count = 0;
-
 	while (ros::ok())
 	{
 		resident.updateCurrentVelocity();
@@ -393,6 +396,8 @@ int main(int argc, char **argv) {
                     resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY);
                 } else if (resident.currentMovementTarget == resident.BED) {
                     resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_SLEEP);
+                } else if (resident.currentMovementTarget == resident.TOILET) {
+                    resident.eventTriggerReply(EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_TOILET);
                 }
 
                 resident.currentMovementState = resident.STATIONARY;
@@ -403,7 +408,6 @@ int main(int argc, char **argv) {
 
 		ros::spinOnce();
 		loop_rate.sleep();
-		++count;
 	}
 
     return 0;

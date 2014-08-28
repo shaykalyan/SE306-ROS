@@ -48,7 +48,7 @@ CompanionshipRobot::~CompanionshipRobot() {
  */
 void CompanionshipRobot::goToResident(const std_msgs::Empty) {
     ROS_INFO("CompanionshipRobot: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
-    goToLocation(residentPoi.getLocation());
+    goToLocation(residentPoi.getLocation(), true);
     currentLocationState = GOING_TO_RESIDENT;
 }
 

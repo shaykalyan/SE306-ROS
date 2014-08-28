@@ -33,7 +33,7 @@ Caregiver::~Caregiver(){
 }
 
 void Caregiver::goToResident(const std_msgs::Empty) {
-    goToLocation(residentPoi.getLocation());
+    goToLocation(residentPoi.getLocation(), true);
     ROS_INFO("CAREGIVER Going To Resident: %f %f %f", residentPoi.getLocation().x,residentPoi.getLocation().y,residentPoi.getLocation().z);    
     currentLocationState = GOING_TO_RESIDENT;
 }
@@ -45,7 +45,7 @@ void Caregiver::goToHome(const std_msgs::Empty) {
 }
 
 void Caregiver::goToShower(const std_msgs::Empty){
-    goToLocation(showerPoi.getLocation());
+    goToLocation(showerPoi.getLocation(), true);
     ROS_INFO("Caregiver Going Shower: %f %f %f",showerPoi.getLocation().x,showerPoi.getLocation().y,showerPoi.getLocation().z);    
     currentLocationState = GOING_TO_SHOWER;
 }
@@ -59,7 +59,6 @@ void Caregiver::eventTriggerReply() {
      switch (msg.event_type) {
         case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
         {
-            msg.event_type = EVENT_TRIGGER_EVENT_TYPE_CONVERSATION;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
             msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
@@ -70,7 +69,6 @@ void Caregiver::eventTriggerReply() {
 
          case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
         {
-            msg.event_type = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
             msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
@@ -82,7 +80,6 @@ void Caregiver::eventTriggerReply() {
 
         case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
         {
-            msg.event_type = EVENT_TRIGGER_EVENT_TYPE_EXERCISE;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
             msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
@@ -94,7 +91,6 @@ void Caregiver::eventTriggerReply() {
 
         case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
         {
-            msg.event_type = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
             msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
             msg.event_weight = getEventWeight(msg.event_type);
             msg.result = EVENT_TRIGGER_RESULT_SUCCESS;

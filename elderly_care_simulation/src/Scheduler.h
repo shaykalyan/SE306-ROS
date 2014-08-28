@@ -30,6 +30,8 @@ public:
     void guiCommunicationCallback(elderly_care_simulation::GuiComm msg);
     int getConcurrentWeight() const;
     int getEventQueueSize() const;
+    void setDayNightCycle(bool val);
+    bool hasDayNightCycle() const;
     void clearEventQueue();
     void resetRandomEventOccurrence();
     void resetConcurrentWeight();
@@ -43,6 +45,7 @@ private:
     std::map<int, bool> randomEventLimit;
     bool allowNewEvents;
     bool stopRosInfoSpam;
+    bool dayNightCycle;
 };
 
 #endif

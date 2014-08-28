@@ -1,11 +1,11 @@
-define medicationRobot position
+define feedingRobot position
 (
   size [0.75 0.75 0.75]
   drive "diff"
   obstacle_return 0
   block
   (
-    color "yellow"
+    color "DarkViolet"
     points [4]
     point[0] [0 0]
     point[1] [0 1]
@@ -15,7 +15,7 @@ define medicationRobot position
   )
   block
   (
-    color "black"
+    color "white"
     points [4]
     point[0] [0 1]
     point[1] [0 2]
@@ -25,7 +25,7 @@ define medicationRobot position
   )
   block
   (
-    color "yellow"
+    color "DarkViolet"
     points [4]
     point[0] [1 1]
     point[1] [1 2]
@@ -35,7 +35,7 @@ define medicationRobot position
   )
   block
   (
-    color "black"
+    color "white"
     points [4]
     point[0] [1 0]
     point[1] [1 1]
@@ -45,7 +45,7 @@ define medicationRobot position
   )
   block
   (
-    color "black"
+    color "white"
     points [4]
     point[0] [0 0]
     point[1] [0 1]
@@ -55,7 +55,7 @@ define medicationRobot position
   )
   block
   (
-    color "yellow"
+    color "DarkViolet"
     points [4]
     point[0] [0 1]
     point[1] [0 2]
@@ -65,7 +65,7 @@ define medicationRobot position
   )
   block
   (
-    color "black"
+    color "white"
     points [4]
     point[0] [1 1]
     point[1] [1 2]
@@ -75,7 +75,7 @@ define medicationRobot position
   )
   block
   (
-    color "yellow"
+    color "DarkViolet"
     points [4]
     point[0] [1 0]
     point[1] [1 1]
