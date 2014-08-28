@@ -302,8 +302,8 @@ class DiceRollerGUI:
 
         # Label for event changing
         Label(self.frame_eventChange, text="Change Events", bg='ivory4', width=10).pack(side=TOP, padx=5, pady=5, fill=X)
-        Button(self.frame_eventChange, text="Repopulate\nDaily Events", width=10, command=self.repopulateEventsCallback).pack(side=TOP, padx=10, pady=10, fill=X)
-        Button(self.frame_eventChange, text="Clear All\nEvents", width=10, command=self.clearEventsCallback).pack(side=TOP, padx=10, pady=10, fill=X)
+        Button(self.frame_eventChange, text="Start Day", width=10, command=self.repopulateEventsCallback).pack(side=TOP, padx=10, pady=10, fill=X)
+        Button(self.frame_eventChange, text="Clear Schedule", width=10, command=self.clearEventsCallback).pack(side=TOP, padx=10, pady=10, fill=X)
 
 
         ######################### SET UP ROSPY #########################
@@ -356,6 +356,11 @@ class DiceRollerGUI:
 
     # Callback method for event_trigger topic
     def event_trigger_callback(self, msg):
+        rospy.loginfo("Message type: " + str(msg.msg_type))
+        rospy.loginfo("Event type: " + str(msg.event_type))
+        rospy.loginfo("Event Priority: " + str(msg.event_priority))
+        rospy.loginfo("Event Weight: " + str(msg.event_weight))
+        rospy.loginfo("Message result: " + str(msg.result))
         self.events[msg.event_type](msg)
 
 
@@ -396,17 +401,23 @@ class DiceRollerGUI:
         injectEvent.event_weight = getEventWeight(injectEvent.event_type)
         injectEvent.result = self.resultDict[self.eventResult.get()]
 
-        self.externalEventPub.publish(injectEvent)
-
-        # If sleep is 'injected', follow it up with a 'wake' event
-        if (injectEvent.event_type == ET_EVENT_TYPE_SLEEP):
-            injectEvent = EventTrigger()
-            injectEvent.msg_type = ET_MSG_TYPE_REQUEST
-            injectEvent.event_type = ET_EVENT_TYPE_WAKE
-            injectEvent.event_priority = ET_EVENT_PRIORITY_MEDIUM
-            injectEvent.event_weight = getEventWeight(ET_EVENT_TYPE_WAKE)
-            injectEvent.result = ET_EVENT_RESULT_UNDEFINED
+        if injectEvent.msg_type == ET_MSG_TYPE_REQUEST:
             self.externalEventPub.publish(injectEvent)
+
+            # If sleep is 'injected', follow it up with a 'wake' event
+            if (injectEvent.event_type == ET_EVENT_TYPE_SLEEP):
+                injectEvent = EventTrigger()
+                injectEvent.msg_type = ET_MSG_TYPE_REQUEST
+                injectEvent.event_type = ET_EVENT_TYPE_WAKE
+                injectEvent.event_priority = ET_EVENT_PRIORITY_MEDIUM
+                injectEvent.event_weight = getEventWeight(ET_EVENT_TYPE_WAKE)
+                injectEvent.result = ET_EVENT_RESULT_UNDEFINED
+                self.externalEventPub.publish(injectEvent)
+
+        elif injectEvent.msg_type == ET_MSG_TYPE_RESPONSE:
+            self.eventTriggerPub.publish(injectEvent)
+        else:
+            return
 
     #Update undefined state
     def undefined(self, result):
@@ -485,7 +496,7 @@ class DiceRollerGUI:
             if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.caregiver_task.set("None")
                 self.resident_task_done()
-                self.removeCurrentEvents("Moral Support")
+                self.removeCurrentEvents("Moral")
 
     #Update relative state
     def relative(self, message):
@@ -551,7 +562,7 @@ class DiceRollerGUI:
     def medication(self, message):
         if (message.msg_type == ET_MSG_TYPE_REQUEST):
             if (message.result == ET_EVENT_RESULT_UNDEFINED):
-                self.medication_task.set("Drugging")
+                self.medication_task.set("Administering")
                 self.new_resident_task("Medicating")
                 self.addCurrentEvents("Medication")
                 if (self.next_event.get() == "Medication"):
