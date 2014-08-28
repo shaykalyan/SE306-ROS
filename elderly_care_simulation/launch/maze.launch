@@ -1,5 +1,5 @@
 <launch>
-	<node name="stage" pkg="stage_ros" type="stageros" args="$(find elderly_care_simulation)/../world/world.world"/>
+	<node name="stage" pkg="stage_ros" type="stageros" args="$(find elderly_care_simulation)/../world/maze.world"/>
 
 	<node name="resident" pkg="elderly_care_simulation" type="Resident" />
 	<node name="scheduler" pkg="elderly_care_simulation" type="Scheduler" />
@@ -17,7 +17,6 @@
 	<node name="illDiceRoller" pkg="elderly_care_simulation" type="IllDiceRoller" />
     <node name="VeryIllDiceRoller" pkg="elderly_care_simulation" type="VeryIllDiceRoller" />
     <node name="ControlPanel" pkg="elderly_care_simulation" type="ControlPanel.py" />
-	<node name="console" pkg="rqt_console" type="rqt_console" />
 	
-	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/house-navigation.pgm"/>
+	<node name="pathServer" pkg="elderly_care_simulation" type="PathServer.py" args="$(find elderly_care_simulation)/../world/maze-navigation.pgm"/>
 </launch>

@@ -31,6 +31,7 @@ public:
     int getConcurrentWeight() const;
     int getEventQueueSize() const;
     void setDayNightCycle(bool val);
+    void setAllowNewEvents(bool val);
     bool hasDayNightCycle() const;
     void clearEventQueue();
     void resetRandomEventOccurrence();

@@ -32,6 +32,88 @@ define grass model
   )
 )
 
+define pink-flower model
+(
+  size [0.2 0.2 0.6]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "ForestGreen"
+    points [4]
+    point[0] [1.25 1.25]
+    point[1] [1.25 1.75]
+    point[2] [1.75 1.75]
+    point[3] [1.75 1.25]
+    z [0 0.8]
+  )
+  block
+  (
+    color "DeepPink"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 3]
+    point[2] [3 3]
+    point[3] [3 0]
+    z [0.8 1]
+  )
+)
+
+define blue-flower model
+(
+  size [0.2 0.2 0.6]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "ForestGreen"
+    points [4]
+    point[0] [1.25 1.25]
+    point[1] [1.25 1.75]
+    point[2] [1.75 1.75]
+    point[3] [1.75 1.25]
+    z [0 0.8]
+  )
+  block
+  (
+    color "LightSkyBlue"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 3]
+    point[2] [3 3]
+    point[3] [3 0]
+    z [0.8 1]
+  )
+)
+
+define white-flower model
+(
+  size [0.2 0.2 0.6]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "ForestGreen"
+    points [4]
+    point[0] [1.25 1.25]
+    point[1] [1.25 1.75]
+    point[2] [1.75 1.75]
+    point[3] [1.75 1.25]
+    z [0 0.8]
+  )
+  block
+  (
+    color "ivory"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 3]
+    point[2] [3 3]
+    point[3] [3 0]
+    z [0.8 1]
+  )
+)
+
+
 define tiles model
 (
 size [8.9 8.1 0.01]
@@ -404,4 +486,6 @@ size [8.9 8.1 0.01]
     z [0 0.5]
   )
 )
+
+
 

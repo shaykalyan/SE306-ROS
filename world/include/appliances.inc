@@ -272,3 +272,40 @@ define tv model
     z [0.2 1.45]
   )
 )
+
+define fridge model
+(
+  size [1.5 1.5 3]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "DarkGray"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 1]
+    point[2] [1 1]
+    point[3] [1 0]
+    z [0 1.6]
+  )
+  block
+  (
+    color "DarkGray"
+    points [4]
+    point[0] [1 0.01]
+    point[1] [1 0.99]
+    point[2] [1.05 0.99]
+    point[3] [1.05 0.01]
+    z [0.01 0.59]
+  )
+  block
+  (
+    color "DarkGray"
+    points [4]
+    point[0] [1 0.01]
+    point[1] [1 0.99]
+    point[2] [1.05 0.99]
+    point[3] [1.05 0.01]
+    z [0.61 1.59]
+  )
+)
