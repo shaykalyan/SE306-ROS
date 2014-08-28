@@ -172,7 +172,7 @@ class DiceRollerGUI:
         ET_EVENT_TYPE_VERY_ILL : self.veryIll, ET_EVENT_TYPE_MEDICATION : self.medication, ET_EVENT_TYPE_COOK : self.cook,
         ET_EVENT_TYPE_ENTERTAINMENT : self.entertainment, ET_EVENT_TYPE_COMPANIONSHIP : self.companionship, ET_EVENT_TYPE_WAKE : self.wake,
         ET_EVENT_TYPE_SLEEP : self.sleep, ET_EVENT_TYPE_MOVE_TO_KITCHEN : self.move_kitchen, ET_EVENT_TYPE_MOVE_TO_BEDROOM : self.move_bedroom,
-        ET_EVENT_TYPE_MOVE_TO_HALLWAY : self.move_hallway}
+        ET_EVENT_TYPE_MOVE_TO_HALLWAY : self.move_hallway, ET_EVENT_TYPE_MOVE_TO_TOILET : self.move_toilet}
 
         
         ######################### SET UP CURRENT EVENT LIST #########################
@@ -198,11 +198,6 @@ class DiceRollerGUI:
         Label(self.frame_events, text="").pack(fill=X)
         Label(self.frame_events, text="Upcoming Event", relief=gridRelief, bg='ivory4').pack(fill=X)
         Label(self.frame_events, textvariable=self.next_event, relief=gridRelief).pack(fill=X)
-
-        # Dictionary which maps different events to different method which will respond to them.
-        """self.next_events = {0:"", 1:"Eat", 2:"Shower", 3:"Exercise", 4:"Converse", 5:"Support", 6:"Relative", 7:"Friend", 8:"Ill", 9:"Very Ill",
-        10:"Medication", 11:"Cook", 12:"Entertainment", 13:"Companionship", 14:"Wake", 15:"Sleep", 16:"Walk kitchen", 17:"Walk bedroom",
-        18:"Walk hallway"}"""
 
 
         ######################### SET UP DICE ROLLER MONITOR #########################
@@ -251,7 +246,7 @@ class DiceRollerGUI:
 
         # Set up event type dropdown menu
         self.typeOptions = ["Undefined", "Shower", "Exercise", "Conversation", "Moral", "Relative", "Friend", "Ill", "Very Ill", 
-        "Medication", "Cook", "Entertainment", "Companionship", "Wake", "Sleep", "Kitchen", "Bedroom", "Hallway"]
+        "Medication", "Cook", "Entertainment", "Companionship", "Wake", "Sleep", "Kitchen", "Bedroom", "Hallway", "Toilet"]
         self.eventType = StringVar(self.root)
         self.eventType.set(self.typeOptions[0])
 
@@ -261,7 +256,7 @@ class DiceRollerGUI:
         "Relative" : ET_EVENT_TYPE_RELATIVE, "Friend" : ET_EVENT_TYPE_FRIEND, "Ill" : ET_EVENT_TYPE_ILL, "Very Ill" : ET_EVENT_TYPE_VERY_ILL,
         "Medication" : ET_EVENT_TYPE_MEDICATION, "Cook" : ET_EVENT_TYPE_COOK, "Entertainment" : ET_EVENT_TYPE_ENTERTAINMENT,
         "Companionship" : ET_EVENT_TYPE_COMPANIONSHIP, "Wake" : ET_EVENT_TYPE_WAKE, "Sleep" : ET_EVENT_TYPE_SLEEP, "Kitchen" : ET_EVENT_TYPE_MOVE_TO_KITCHEN,
-         "Bedroom" : ET_EVENT_TYPE_MOVE_TO_BEDROOM, "Hallway" : ET_EVENT_TYPE_MOVE_TO_HALLWAY}
+         "Bedroom" : ET_EVENT_TYPE_MOVE_TO_BEDROOM, "Hallway" : ET_EVENT_TYPE_MOVE_TO_HALLWAY, "Toilet" : ET_EVENT_TYPE_MOVE_TO_TOILET}
 
         # Set up event message menu
         self.messageOptions = ["Undefined", "Request", "Response"]
@@ -358,14 +353,6 @@ class DiceRollerGUI:
 
     # Callback method for event_trigger topic
     def event_trigger_callback(self, msg):
-        """msg_type = msg.msg_type
-        event_type = msg.event_type
-        result = msg.result
-        print("Event trigger detected")
-        print("Message type: ", msg_type)
-        print("Event type: ", event_type)
-        print("result: ", result)"""
-
         self.events[msg.event_type](msg)
 
 
@@ -405,13 +392,6 @@ class DiceRollerGUI:
         injectEvent.event_priority = int(self.eventPriority.get())
         injectEvent.event_weight = getEventWeight(injectEvent.event_type)
         injectEvent.result = self.resultDict[self.eventResult.get()]
-
-        """print("Event trigger detected")
-        print("Message type: ", injectEvent.msg_type)
-        print("Event type: ", injectEvent.event_type)
-        print("Priority type: ", injectEvent.event_priority)
-        print("Weight type: ", injectEvent.event_weight)
-        print("result: ", injectEvent.result)"""
 
         self.eventTriggerPub.publish(injectEvent)
 
@@ -569,7 +549,7 @@ class DiceRollerGUI:
         if (message.msg_type == ET_MSG_TYPE_REQUEST):
             if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.medication_task.set("Drugging")
-                self.new_resident_task("Tripping")
+                self.new_resident_task("Medicating")
                 self.addCurrentEvents("Medication")
                 if (self.next_event.get() == "Medication"):
                     self.next_event.set("")
@@ -657,6 +637,7 @@ class DiceRollerGUI:
         elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
             if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task_done()
+                self.removeCurrentEvents("Walk kitchen")
 
     #Update sleep state
     def move_bedroom(self, message):
@@ -669,6 +650,7 @@ class DiceRollerGUI:
         elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
             if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task_done()
+                self.removeCurrentEvents("Walk bedroom")
 
     #Update sleep state
     def move_hallway(self, message):
@@ -681,6 +663,20 @@ class DiceRollerGUI:
         elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
             if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task_done()
+                self.removeCurrentEvents("Walk hallway")
+
+    #Update sleep state
+    def move_toilet(self, message):
+        if (message.msg_type == ET_MSG_TYPE_REQUEST):
+            if (message.result == ET_EVENT_RESULT_UNDEFINED):
+                self.new_resident_task("Walk toilet")
+                self.addCurrentEvents("Walk toilet")
+                if (self.next_event.get() == "Walk toilet"):
+                    self.next_event.set("")
+        elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
+            if (message.result == ET_EVENT_RESULT_SUCCESS):
+                self.resident_task_done()
+                self.removeCurrentEvents("Walk toilet")
 
     # Update task status for resident with new task
     def new_resident_task(self, task):
@@ -716,20 +712,6 @@ class DiceRollerGUI:
         for current in self.current_events:
             if (current.get() == currentEvent):
                 current.set("")
-
-    """def addCurrentEvent(self, newEvent):
-        self.current_tasks[self.current_tasks.index("")] = newEvent
-
-    def removeCurrentEvent(self, currentEvent):
-        self.current_tasks[self.current_tasks.index(currentEvent)] = newEvent
-
-    #Update undefined state
-    def update_robot_task(self, data):
-        self.dice_label.set(data)
-
-    #Update undefined state
-    def update_dice_label(self, data):
-        self.dice_label.set(data)"""
 
 if __name__=='__main__':
     gui = DiceRollerGUI()
