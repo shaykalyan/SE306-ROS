@@ -1,13 +1,20 @@
 include "include/resident.inc"
-include "include/companionship.inc"
+include "include/companionshipRobot.inc"
 include "include/robot.inc"
 include "include/furniture.inc"
 include "include/floorplan.inc"
 include "include/appliances.inc"
 include "include/hospital.inc"
 include "include/floor.inc"
-include "include/entertainment.inc"
+include "include/entertainmentRobot.inc"
 include "include/medicationRobot.inc"
+include "include/nurseRobot.inc"
+include "include/caregiverRobot.inc"
+include "include/chefRobot.inc"
+include "include/friendRobot.inc"
+include "include/relativeRobot.inc"
+include "include/feedingRobot.inc"
+include "include/doctorRobot.inc"
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -24,9 +31,9 @@ window
 ( 
   #size of the window in pixels
   size [800 600]
-  center [0 0]
+  center [0 -3]
   rotate [65 -50]
-  scale 25
+  scale 20
   show_data 0
   show_flags 1
   show_blocks 1
@@ -126,7 +133,7 @@ table
 hospital
 (
   name "hospital"
-  pose [4 -14 0 0]
+  pose [7 -13 0 0]
 )
 
 # throw in some robots
@@ -145,52 +152,52 @@ robot(
   pose [ -8 -8 0 180 ]
 )
 
-robot(
-  name "Relative"
-  pose [ 12 7 0 180 ]
+relativeRobot(
+  name "RelativeRobot"
+  pose [ 12 8 0 0 ]
 )
 
-robot(
-  name "Friend"
-  pose [ 12 5 0 180 ]
+friendRobot(
+  name "FriendRobot"
+  pose [ 12 2 0 0 ]
 )
 
-companionship(
-  name "Companionship"
-  pose [ 12 3 0 180 ]
+companionshipRobot(
+  name "CompanionshipRobot"
+  pose [ -8 -13 0 0 ]
 )
 
-robot(
-  name "Chef"
-  pose [ 12 1 0 180 ]
+chefRobot(
+  name "ChefRobot"
+  pose [ -4 -13 0 0 ]
 )
 
 medicationRobot(
   name "MedicationRobot"
-  pose [ 12 -1 0 180 ]
+  pose [ -6 -13 0 0 ]
 )
 
-robot(
-  name "Nurse"
-  pose [2 -14 0 90 ]
+nurseRobot(
+  name "NurseRobot"
+  pose [ 3 -13 0 0 ]
 )
 
-robot(
-  name "Caregiver"
-  pose [ 12 -3 0 180 ]
+caregiverRobot(
+  name "CaregiverRobot"
+  pose [ 12 4 0 0 ]
 )
 
-entertainment (
-  name "Entertainment"
-  pose [ 12 -5 0 180 ]
+entertainmentRobot(
+  name "EntertainmentRobot"
+  pose [ -10 -13 0 0 ]
 )
 
-robot(
+feedingRobot(
   name "FeedingRobot"
-  pose [12 -7 0 180 ]
+  pose [12 6 0 0 ]
 )
 
-robot(
+doctorRobot(
   name "DoctorRobot"
-  pose [6 -14 0 90]
+  pose [5 -13 0 0]
 )

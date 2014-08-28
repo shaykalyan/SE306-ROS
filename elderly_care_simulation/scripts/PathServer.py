@@ -92,14 +92,13 @@ def find_path(req):
         to_node =  get_x_location(to_point.x), get_y_location(to_point.y)
 
         if from_node not in graph:
-            return False
+            raise rospy.ServiceException()
         
         path = shortest_path(from_node, to_node)
 
         return create_response_message(path)
     except Exception as e:
-        return False
-
+        raise rospy.ServiceException()
 
 def find_path_server():
     """

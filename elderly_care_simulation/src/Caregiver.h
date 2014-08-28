@@ -31,7 +31,7 @@
  * Author: Matthew Chiam
  */
 
-;class Caregiver : public Robot {
+class Caregiver : public Robot {
 	public:
 		Caregiver();
 		~Caregiver();
