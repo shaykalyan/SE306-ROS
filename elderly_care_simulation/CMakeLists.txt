@@ -80,6 +80,10 @@ rosbuild_add_gtest_build_flags(TestRelativeRobot)
 rosbuild_add_rostest(test/TestRelativeRobot.test)
 target_link_libraries(TestRelativeRobot RelativeRobotLib Robot Poi StaticPoi)
 
+rosbuild_add_executable(TestPathServer EXCLUDE_FROM_ALL src/test/TestPathServer.cpp)
+rosbuild_add_gtest_build_flags(TestPathServer)
+rosbuild_add_rostest(test/TestPathServer.test)
+
 rosbuild_add_executable(TestCompanionshipRobot EXCLUDE_FROM_ALL src/test/TestCompanionshipRobot.cpp)
 rosbuild_add_library(CompanionshipRobotLib src/CompanionshipRobot.cpp)
 rosbuild_add_gtest_build_flags(TestCompanionshipRobot)
