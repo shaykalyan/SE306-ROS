@@ -177,10 +177,14 @@ void Scheduler::guiCommunicationCallback(GuiComm msg) {
     if (msg.msg_type == GUI_COMM_MSG_TYPE_REQUEST) {
         switch(msg.action) {
         case GUI_COMM_ACTION_POPULATE:
+            resetRandomEventOccurrence();
+            clearEventQueue();
             populateDailyTasks();
+            setDayNightCycle(true);
             break;
         case GUI_COMM_ACTION_CLEAR:
             clearEventQueue();
+            setDayNightCycle(false);
             break;
         }
         ROS_INFO("Scheduler: GUI action received [%s]", actionToString(msg.action));
