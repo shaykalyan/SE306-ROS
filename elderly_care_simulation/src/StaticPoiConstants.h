@@ -77,8 +77,8 @@ const float FEEDER_BASE_Y    = 6.0f;
 
 
 // DoctorRobot locations
-const float ADJACENT_HOSPITAL_X = 12.0f;
-const float ADJACENT_HOSPITAL_Y = 3.0f;
+const float ADJACENT_HOSPITAL_X = 7.0f;
+const float ADJACENT_HOSPITAL_Y = -13.0f;
 
 const float DOCTOR_BASE_X = 5.0f;
 const float DOCTOR_BASE_Y = -13.0f;
