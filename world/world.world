@@ -15,6 +15,7 @@ include "include/friendRobot.inc"
 include "include/relativeRobot.inc"
 include "include/feedingRobot.inc"
 include "include/doctorRobot.inc"
+include "include/alphabet.inc"
 
 #resolution of the underline bitmap model in meters.
 resolution 0.02 
@@ -30,7 +31,7 @@ window
 ( 
   #size of the window in pixels
   size [800 800]
-  center [0.000 -3.000]
+  center [-3.000 -3.000]
   rotate [70.000 -45.000]
   scale 23
   show_data 0
@@ -205,4 +206,54 @@ feedingRobot(
 doctorRobot(
   name "DoctorRobot"
   pose [5.000 -13.000 0.000 0.000]
+)
+
+
+### Below this line are the letters for the words "GROUP ONE"
+letter-G
+(
+  name "G"
+  pose [-3.000 16.000 0.000 0.000]
+)
+
+letter-R
+(
+  name "R"
+  pose [1.000 16.000 0.000 0.000]
+)
+
+letter-O
+(
+  name "O-1"
+  pose [5.000 16.000 0.000 0.000]
+)
+
+letter-U
+(
+  name "U"
+  pose [9.000 16.000 0.000 0.000]
+)
+
+letter-P
+(
+  name "P"
+  pose [13.000 16.000 0.000 0.000]
+)
+
+letter-O
+(
+  name "O-2"
+  pose [16.000 13.000 0.000 -90.000]
+)
+
+letter-N
+(
+  name "N"
+  pose [16.000 9.000 0.000 -90.000]
+)
+
+letter-E
+(
+  name "E"
+  pose [16.000 5.000 0.000 -90.000]
 )
