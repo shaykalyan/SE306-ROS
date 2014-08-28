@@ -42,7 +42,7 @@ class Resident : public Robot, public Poi {
 		};
 
 		enum MovementTarget {
-			NONE, KITCHEN, BEDROOM, HALLWAY, BED
+			NONE, KITCHEN, BEDROOM, HALLWAY, BED, TOILET
 		};
 
 		MovementState currentMovementState;
@@ -68,6 +68,7 @@ class Resident : public Robot, public Poi {
         StaticPoi hallwayPoi = StaticPoi(HALLWAY_X, HALLWAY_Y, 0.0f);
         StaticPoi bedroomPoi = StaticPoi(BEDROOM_X, BEDROOM_Y, 0.0f);
         StaticPoi bedPoi = StaticPoi(BED_X, BED_Y, 0.0f);
+        StaticPoi toiletPoi = StaticPoi(TOILET_X, TOILET_Y, 0.0f);
 
         virtual geometry_msgs::Point getLocation() {
             return currentLocation.position;

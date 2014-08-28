@@ -44,7 +44,7 @@ RelativeRobot::~RelativeRobot() {
  */
 void RelativeRobot::goToResident(const std_msgs::Empty) {
     ROS_INFO("Relative: Going to %f, %f", residentPoi.getLocation().x, residentPoi.getLocation().y);
-    goToLocation(residentPoi.getLocation());
+    goToLocation(residentPoi.getLocation(), true);
     currentLocationState = GOING_TO_RESIDENT;
 }
 

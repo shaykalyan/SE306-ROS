@@ -26,14 +26,13 @@ interval_sim 100
 velocity_bounds     [-10 10 -10 10 0 0 -90 90]          
 acceleration_bounds [-10 10 -10 10 0 0 -90 90]
 
-
 window
 ( 
   #size of the window in pixels
   size [800 600]
-  center [0 -3]
-  rotate [65 -50]
-  scale 20
+  center [0.312 -2.287]
+  rotate [0.000 0.000]
+  scale 29.282
   show_data 0
   show_flags 1
   show_blocks 1
@@ -54,150 +53,150 @@ floorplan
 ( 
   name "alpha-house"
   bitmap "house.png"
-  size [20 20 0.5]
-  pose [0 0 0.01 0]
+  size [20.000 20.000 0.500]
+  pose [0.000 0.000 0.010 0.000]
 )
 
 wood-floor
 (
   name "wood-floor"
-  pose [0 0 0 0]
+  pose [0.000 0.000 0.000 0.000]
 )
 
 grass
 (
   name "grass"
-  pose [-1.9 8.5 0.01 0]
+  pose [-1.900 8.500 0.010 0.000]
 )
 
 tiles
 (
   name "tiles"
-  pose [5.5 -5.94 0.01 0]
+  pose [5.500 -5.940 0.010 0.000]
 )
 
 bed
 ( 
   name "bed"
-  pose [-3.1 -8.2 0.01 0]
+  pose [-3.100 -8.200 0.010 0.000]
 )
 
 couch
 (
   name "couch"
-  pose [-7.5 -9 0.01 0]
+  pose [-7.500 -9.000 0.010 0.000]
 )
 
 tv
 (
   name "tv"
-  pose [-7.55 0.55 0.01 0]
+  pose [-7.550 0.550 0.010 0.000]
 )
 
 shower
 (
   name "shower"
-  pose [8.65 -3.05 0.02 0]
+  pose [7.954 -3.123 0.020 0.000]
 )
 
 toilet
 (
   name "toilet"
-  pose [3 -9 0.02 90]
+  pose [3.000 -9.000 0.020 90.000]
 )
 
 sink
 (
   name "sink"
-  pose [8.8 -7.5 0.02 180]
+  pose [8.800 -7.500 0.020 180.000]
 )
 
 oven
 (
   name "oven"
-  pose [8.7 8.7 0.01 0]
+  pose [7.000 8.700 0.010 0.000]
 )
 
 bench
 (
   name "kitchen bench"
-  pose [5.7 8.7 0.01 0]
+  pose [4.100 8.700 0.010 0.000]
 )
 
 table
 (
   name "kitchen table"
-  pose [5.7 2.9 0.01 0]
+  pose [5.700 2.900 0.010 0.000]
 )
 
 hospital
 (
   name "hospital"
-  pose [7 -13 0 0]
+  pose [7.000 -13.000 0.000 0.000]
 )
 
 # throw in some robots
 resident(
   name "Resident"
-  pose [0 0 0 270]
+  pose [-3 -8 0.000 -90.000]
 )
 
 robot(
   name "Visitor"
-  pose [5 6 0 180]
+  pose [5.000 6.000 0.000 180.000]
 )
 
 robot(
   name "Assistant"
-  pose [ -8 -8 0 180 ]
+  pose [ -8.000 -8.000 0.000 180.000 ]
 )
 
 relativeRobot(
   name "RelativeRobot"
-  pose [ 12 8 0 0 ]
+  pose [ 12.000 8.000 0.000 0.000 ]
 )
 
 friendRobot(
   name "FriendRobot"
-  pose [ 12 2 0 0 ]
+  pose [ 12.000 2.000 0.000 0.000 ]
 )
 
 companionshipRobot(
   name "CompanionshipRobot"
-  pose [ -8 -13 0 0 ]
+  pose [ -8.000 -13.000 0.000 0.000 ]
 )
 
 chefRobot(
   name "ChefRobot"
-  pose [ -4 -13 0 0 ]
+  pose [ -6.000 -13.000 0.000 0.000 ]
 )
 
 medicationRobot(
   name "MedicationRobot"
-  pose [ -6 -13 0 0 ]
+  pose [ -4.000 -13.000 0.000 0.000 ]
 )
 
 nurseRobot(
   name "NurseRobot"
-  pose [ 3 -13 0 0 ]
+  pose [ 3.000 -13.000 0.000 0.000 ]
 )
 
 caregiverRobot(
   name "CaregiverRobot"
-  pose [ 12 4 0 0 ]
+  pose [ 12.000 4.000 0.000 0.000 ]
 )
 
 entertainmentRobot(
   name "EntertainmentRobot"
-  pose [ -10 -13 0 0 ]
+  pose [ -10.000 -13.000 0.000 0.000 ]
 )
 
 feedingRobot(
-  name "FeedingRobot"
-  pose [12 6 0 0 ]
+  name "CaregiverRobot (Feeding)"
+  pose [12.000 6.000 0.000 0.000 ]
 )
 
 doctorRobot(
   name "DoctorRobot"
-  pose [5 -13 0 0]
+  pose [5.000 -13.000 0.000 0.000]
 )

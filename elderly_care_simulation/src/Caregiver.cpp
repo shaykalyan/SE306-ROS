@@ -33,7 +33,7 @@ Caregiver::~Caregiver(){
 }
 
 void Caregiver::goToResident(const std_msgs::Empty) {
-    goToLocation(residentPoi.getLocation());
+    goToLocation(residentPoi.getLocation(), true);
     ROS_INFO("CAREGIVER Going To Resident: %f %f %f", residentPoi.getLocation().x,residentPoi.getLocation().y,residentPoi.getLocation().z);    
     currentLocationState = GOING_TO_RESIDENT;
 }
@@ -45,7 +45,7 @@ void Caregiver::goToHome(const std_msgs::Empty) {
 }
 
 void Caregiver::goToShower(const std_msgs::Empty){
-    goToLocation(showerPoi.getLocation());
+    goToLocation(showerPoi.getLocation(), true);
     ROS_INFO("Caregiver Going Shower: %f %f %f",showerPoi.getLocation().x,showerPoi.getLocation().y,showerPoi.getLocation().z);    
     currentLocationState = GOING_TO_SHOWER;
 }

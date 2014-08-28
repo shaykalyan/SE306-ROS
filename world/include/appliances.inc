@@ -1,6 +1,6 @@
 define shower model
 (
-  size [1.5 1.5 3]
+  size [1.75 1.75 3]
   obstacle_return 0
   gui_move 0
   block
@@ -26,7 +26,7 @@ define shower model
   block
   (
     color "GhostWhite"
-    points [4]
+    points [4] 
     point[0] [0 0.99]
     point[1] [0 1]
     point[2] [1 1]
