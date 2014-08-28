@@ -5,14 +5,14 @@
 #include "math.h"
 #include <vector>
 
-#include "../StaticPoiConstants.h"
-#include "../EventTriggerUtility.h"
-#include "../PerformTaskConstants.h"
-#include "../EntertainmentRobot.h"
-#include "../Robot.h"
-#include "../Poi.h"
-#include "../StaticPoi.h"
-#include "../EventNode.h"
+#include "StaticPoiConstants.h"
+#include "EventTriggerUtility.h"
+#include "PerformTaskConstants.h"
+#include "EntertainmentRobot.h"
+#include "Robot.h"
+#include "Poi.h"
+#include "StaticPoi.h"
+#include "EventNode.h"
 #include "elderly_care_simulation/EventTrigger.h"
 
 using namespace elderly_care_simulation;
