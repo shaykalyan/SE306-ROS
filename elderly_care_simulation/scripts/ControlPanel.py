@@ -318,6 +318,9 @@ class DiceRollerGUI:
         # Initialise publisher for clearing or populating the schedule
         self.guiCommunication = rospy.Publisher('gui_communication', GuiComm, queue_size=1000)
 
+        # Initialise publisher for clearing or populating the schedule
+        self.externalEventPub = rospy.Publisher('external_event', EventTrigger, queue_size=1000)
+
         # subscribe to EventTrigger topic
         rospy.Subscriber("event_trigger", EventTrigger, self.event_trigger_callback)
 
@@ -393,7 +396,7 @@ class DiceRollerGUI:
         injectEvent.event_weight = getEventWeight(injectEvent.event_type)
         injectEvent.result = self.resultDict[self.eventResult.get()]
 
-        self.eventTriggerPub.publish(injectEvent)
+        self.externalEventPub.publish(injectEvent)
 
         # If sleep is 'injected', follow it up with a 'wake' event
         if (injectEvent.event_type == ET_EVENT_TYPE_SLEEP):
@@ -403,7 +406,7 @@ class DiceRollerGUI:
             injectEvent.event_priority = ET_EVENT_PRIORITY_MEDIUM
             injectEvent.event_weight = getEventWeight(ET_EVENT_TYPE_WAKE)
             injectEvent.result = ET_EVENT_RESULT_UNDEFINED
-            self.eventTriggerPub.publish(injectEvent)
+            self.externalEventPub.publish(injectEvent)
 
     #Update undefined state
     def undefined(self, result):
