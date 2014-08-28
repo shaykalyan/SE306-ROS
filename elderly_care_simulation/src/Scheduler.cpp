@@ -290,7 +290,7 @@ void Scheduler::dequeueEvent() {
     
     // Publish event if enough concurrent weight available
     if (concurrentWeight + msg.event_weight <= MAX_CONCURRENT_WEIGHT) {
-
+        sleep(1);
         ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
 
         stopRosInfoSpam = false;
