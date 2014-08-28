@@ -102,7 +102,7 @@ void EscortRobot::performTask() {
         case PERFORM_TASK_RESULT_TAKE_ME_THERE: 
         {
             currentLocationState = GOING_TO_POI;
-            goToLocation(poi);
+            goToPoi();
             ROS_INFO("Resident wants to be taken to the POI");
             break;
         }
