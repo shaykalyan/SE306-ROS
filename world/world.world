@@ -30,9 +30,9 @@ acceleration_bounds [-10 10 -10 10 0 0 -90 90]
 window( 
   #size of the window in pixels
   size [800 800]
-  center [-3.000 -3.000]
-  rotate [70.000 -45.000]
-  scale 23
+  center [0.000 -2.000]
+  rotate [0.000 0.000]
+  scale 30
   show_data 0
   show_flags 1
   show_blocks 1
