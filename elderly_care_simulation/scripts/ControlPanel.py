@@ -612,22 +612,26 @@ class DiceRollerGUI:
         if (message.msg_type == ET_MSG_TYPE_REQUEST):
             if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.new_resident_task("Waking")
+                self.addCurrentEvents("Waking")
                 if (self.next_event.get() == "Waking"):
                     self.next_event.set("")
         elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
             if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task_done()
+                self.removeCurrentEvents("Waking")
 
     #Update sleep state
     def sleep(self, message):
         if (message.msg_type == ET_MSG_TYPE_REQUEST):
             if (message.result == ET_EVENT_RESULT_UNDEFINED):
                 self.new_resident_task("Sleeping")
+                self.addCurrentEvents("Sleeping")
                 if (self.next_event.get() == "Sleeping"):
                     self.next_event.set("")
         elif (message.msg_type == ET_MSG_TYPE_RESPONSE):
             if (message.result == ET_EVENT_RESULT_SUCCESS):
                 self.resident_task_done()
+                self.removeCurrentEvents("Sleeping")
 
     #Update sleep state
     def move_kitchen(self, message):
