@@ -55,61 +55,22 @@ void Caregiver::eventTriggerReply() {
     elderly_care_simulation::EventTrigger msg;
     msg.msg_type = EVENT_TRIGGER_MSG_TYPE_RESPONSE;
     msg.event_type = MY_TASK;
+    msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
+    msg.event_weight = getEventWeight(msg.event_type);
+    msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
+    eventTriggerPub.publish(msg);
+    ROS_INFO("Caregiver: Reply Message Sent: %d", MY_TASK);
 
-     switch (msg.event_type) {
-        case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
-        {
-            msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
-            msg.event_weight = getEventWeight(msg.event_type);
-            msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
-            eventTriggerPub.publish(msg);
-            ROS_INFO("Caregiver: Reply Message Sent");
-            break;
-        }
-
-         case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
-        {
-            msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
-            msg.event_weight = getEventWeight(msg.event_type);
-            msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
-            eventTriggerPub.publish(msg);
-            ROS_INFO("Caregiver: Reply Message Sent");
-            break;
-
-        }
-
-        case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
-        {
-            msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
-            msg.event_weight = getEventWeight(msg.event_type);
-            msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
-            eventTriggerPub.publish(msg);
-            ROS_INFO("Caregiver: Reply Message Sent");
-            break;
-
-        }
-
-        case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
-        {
-            msg.event_priority = EVENT_TRIGGER_PRIORITY_UNDEFINED;
-            msg.event_weight = getEventWeight(msg.event_type);
-            msg.result = EVENT_TRIGGER_RESULT_SUCCESS;
-            eventTriggerPub.publish(msg);
-            ROS_INFO("Caregiver: Reply Message Sent");
-            break;
-
-        }
-    }
 }
 
 void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 {
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
-        MY_TASK = msg.event_type;
         // TODO: NEW ROBOT CHANGE HERE
         switch (msg.event_type) {
             case EVENT_TRIGGER_EVENT_TYPE_CONVERSATION:
             {
+                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_CONVERSATION;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));
                 performingTask = true;
                 std_msgs::Empty emptyMessage;
@@ -120,6 +81,7 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_SHOWER:
             {
+                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_SHOWER;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
                 performingTask = true;                
                 std_msgs::Empty emptyMessage;
@@ -130,6 +92,7 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_EXERCISE:
             {
+                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_EXERCISE;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
                 performingTask = true;                
                 std_msgs::Empty emptyMessage;
@@ -140,6 +103,7 @@ void Caregiver::eventTriggerCallback(elderly_care_simulation::EventTrigger msg)
 
             case EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT:
             {
+                MY_TASK = EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT;
                 ROS_INFO("Caregiver: Event Recieved: [%s]", eventTypeToString(MY_TASK));                
                 performingTask = true;                
                 std_msgs::Empty emptyMessage;
