@@ -29,10 +29,10 @@ acceleration_bounds [-10 10 -10 10 0 0 -90 90]
 window
 ( 
   #size of the window in pixels
-  size [800 600]
-  center [0.312 -2.287]
-  rotate [0.000 0.000]
-  scale 29.282
+  size [800 800]
+  center [0.000 -3.000]
+  rotate [70.000 -45.000]
+  scale 23
   show_data 0
   show_flags 1
   show_blocks 1
@@ -96,7 +96,7 @@ tv
 shower
 (
   name "shower"
-  pose [7.954 -3.123 0.020 0.000]
+  pose [7.954 -3.200 0.020 0.000]
 )
 
 toilet
@@ -127,6 +127,12 @@ table
 (
   name "kitchen table"
   pose [5.700 2.900 0.010 0.000]
+)
+
+small-table
+(
+  name "hallway table"
+  pose [-7.700 8.900 0.010 0.000]
 )
 
 hospital

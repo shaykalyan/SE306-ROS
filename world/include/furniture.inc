@@ -205,3 +205,60 @@ define couch model
     z [0.3 0.7]
   )
 )
+
+define small-table model
+(
+  size [2.5 1 1.25]
+  obstacle_return 0
+  gui_move 0
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 0.05]
+    point[2] [0.05 0.05]
+    point[3] [0.05 0]
+    z [0 1.2]
+  )
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0 0.95]
+    point[1] [0 1]
+    point[2] [0.05 1]
+    point[3] [0.05 0.95]
+    z [0 1.2]
+  )
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0.95 0.95]
+    point[1] [0.95 1]
+    point[2] [1 1]
+    point[3] [1 0.95]
+    z [0 1.2]
+  )
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0.95 0]
+    point[1] [0.95 0.05]
+    point[2] [1 0.05]
+    point[3] [1 0]
+    z [0 1.2]
+  )
+  block
+  (
+    color "peru"
+    points [4]
+    point[0] [0 0]
+    point[1] [0 1]
+    point[2] [1 1]
+    point[3] [1 0]
+    z [1.2 1.25]
+  )
+)
