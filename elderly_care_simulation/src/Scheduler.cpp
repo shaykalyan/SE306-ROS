@@ -157,7 +157,7 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
                 // Therefore need to -2 to concurrent weight to free the slot.
                 if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ILL ||
                     msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
-                    concurrentWeight -= 2;
+                    concurrentWeight -= 5;
 
                 } else {
 
@@ -308,7 +308,7 @@ void Scheduler::dequeueEvent() {
                 allowNewEvents = false;
 
                 // ILL has a weight of 0, but still blocks all other events
-                concurrentWeight += 2;
+                concurrentWeight += 5;
                 eventTriggerPub.publish(msg);
                 eventQueue.pop();
 
@@ -322,7 +322,7 @@ void Scheduler::dequeueEvent() {
                 allowNewEvents = false;
 
                 // VERY_ILL has a weight of 0, but still blocks all other events
-                concurrentWeight += 2;
+                concurrentWeight += 5;
                 eventTriggerPub.publish(msg);
                 eventQueue.pop();
 
