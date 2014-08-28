@@ -2,7 +2,7 @@ define letter-G model
 (
   size [3 0.5 3]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "black"
@@ -69,7 +69,7 @@ define letter-R model
 (
   size [3 0.5 3]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "black"
@@ -126,7 +126,7 @@ define letter-O model
 (
   size [3 0.5 3]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "black"
@@ -173,7 +173,7 @@ define letter-U model
 (
   size [3 0.5 3]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "black"
@@ -210,7 +210,7 @@ define letter-P model
 (
   size [3 0.5 3]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "black"
@@ -257,7 +257,7 @@ define letter-N model
 (
   size [3 0.5 3]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "black"
@@ -294,7 +294,7 @@ define letter-E model
 (
   size [3 0.5 3]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "black"

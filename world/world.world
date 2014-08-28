@@ -118,6 +118,12 @@ oven
   pose [7.000 8.700 0.010 0.000]
 )
 
+fridge
+(
+  name "fridge"
+  pose [8.650 8.700 0.010 -90.000]
+)
+
 bench
 (
   name "kitchen bench"
