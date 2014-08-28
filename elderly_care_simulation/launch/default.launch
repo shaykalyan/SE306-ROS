@@ -5,8 +5,6 @@
 	<node name="scheduler" pkg="elderly_care_simulation" type="Scheduler" />
 	<node name="feeder" pkg="elderly_care_simulation" type="FeedingRobot" />
     <node name="doctor" pkg="elderly_care_simulation" type="DoctorRobot" />
-	<!-- <node name="visitor" pkg="elderly_care_simulation" type="Visitor" /> -->
-	<!-- <node name="assistant" pkg="elderly_care_simulation" type="Assistant" /> -->
 	<node name="entertainment" pkg="elderly_care_simulation" type="EntertainmentRobot" />
 	<node name="caregiver" pkg="elderly_care_simulation" type="Caregiver" />
 	<node name="nurse" pkg="elderly_care_simulation" type="NurseRobot" />

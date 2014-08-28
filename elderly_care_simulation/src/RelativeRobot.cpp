@@ -170,20 +170,20 @@ int main(int argc, char **argv) {
     relative = RelativeRobot();
 
     // Initialise publishers
-    relative.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_3/cmd_vel",1000);
+    relative.robotNodeStagePub = nodeHandle.advertise<geometry_msgs::Twist>("robot_1/cmd_vel",1000);
     relative.eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger", 1000, true);
 
     // Initialise subscribers
     relative.residentStageSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_0/base_pose_ground_truth",1000,
                                  updateResidentPositionCallback);
-    relative.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_3/base_pose_ground_truth",1000,
+    relative.stageOdoSub = nodeHandle.subscribe<nav_msgs::Odometry>("robot_1/base_pose_ground_truth",1000,
                             callStage0domCallback);
     relative.eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000,
                                 callEventTriggerCallback);
-    relative.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_3/location", 1000,
+    relative.locationInstructionsSub = nodeHandle.subscribe<geometry_msgs::Point>("robot_1/location", 1000,
                                         callUpdateDesiredLocationCallback);
-    relative.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toResident", 1000, callGoToResident);
-    relative.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_3/toHome", 1000, callGoToHome);
+    relative.pathToRobotSub = nodeHandle.subscribe<std_msgs::Empty>("robot_1/toResident", 1000, callGoToResident);
+    relative.pathToHomeSub = nodeHandle.subscribe<std_msgs::Empty>("robot_1/toHome", 1000, callGoToHome);
         
     // Create a client to make service requests to the Resident
     relative.performTaskClient = nodeHandle.serviceClient<elderly_care_simulation::PerformTask>("perform_task");

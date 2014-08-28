@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
     EscortRobot feeder(EVENT_TRIGGER_EVENT_TYPE_EAT, base, table);
 
-    const std::string rid = "robot_11";
+    const std::string rid = "robot_9";
 
     ros::init(argc, argv, "Feeding_Robot");
 

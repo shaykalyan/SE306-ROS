@@ -137,16 +137,6 @@ resident(
   pose [-3 -8 0.000 -90.000]
 )
 
-robot(
-  name "Visitor"
-  pose [5.000 6.000 0.000 180.000]
-)
-
-robot(
-  name "Assistant"
-  pose [ -8.000 -8.000 0.000 180.000 ]
-)
-
 relativeRobot(
   name "RelativeRobot"
   pose [ 12.000 8.000 0.000 0.000 ]
