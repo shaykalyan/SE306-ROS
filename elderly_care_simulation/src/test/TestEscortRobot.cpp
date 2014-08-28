@@ -18,9 +18,20 @@ using namespace elderly_care_simulation;
 
 EscortRobot doctor;
 
+// Store received messages
+std::vector<EventTrigger> receivedEventTriggers;
+
 // Publishers and subcribers
 //ros::Publisher residentEventPublisher;
-//ros::Subscriber residentEventSubscriber;
+ros::Subscriber residentEventSubscriber;
+
+/**
+ * Callback for the 'event_trigger' topic messages.
+ * Simply logs the received message into a list.
+ */
+void eventTriggerCallback(EventTrigger msg) {
+    receivedEventTriggers.push_back(msg);
+}
 
 //void eventTriggeredCallback(EventTrigger msg) {
 //    doctor.eventTriggered(msg);
@@ -48,16 +59,12 @@ class EscortRobotTest : public ::testing::Test {
         // and cleaning up each test, you can define the following methods:
 
         virtual void SetUp() {
-            // Instantiate a new doctor for each test
-            geometry_msgs::Point base;
-            base.x = 3.0f;
-            base.y = 3.0f;
+            // Clear any received messages
+            // Store received messages
+            receivedEventTriggers.clear();
 
-            geometry_msgs::Point hospital;
-            hospital.x = 4.0f;
-            hospital.y = 4.0f;
-
-            doctor = EscortRobot(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL, base, hospital);
+            doctor.performingTask = false;
+            doctor.currentLocationState = EscortRobot::AT_BASE;
         }
 
         virtual void TearDown() {
@@ -110,14 +117,54 @@ TEST_F(EscortRobotTest, acceptRelevantEvents) {
     ASSERT_EQ(EscortRobot::GOING_TO_POI, doctor.currentLocationState);
 }
 
+/** 
+ * Asking the doctor to notify completion of its task should result in the correct
+ * EventTrigger message being send on the "event_trigger" topic.
+ */
+TEST_F(EscortRobotTest, notifyTaskCompletion) {
+
+    doctor.notifySchedulerOfTaskCompletion();
+
+    // Wait until a message has been received
+    ros::Rate loop_rate(10);
+    while(receivedEventTriggers.size() == 0) {
+        loop_rate.sleep();
+        ros::spinOnce();
+    }
+    
+    /*** ASSERTIONS BEGIN ***/
+    
+    // Check we received only one EventTrigger
+    ASSERT_EQ(1, receivedEventTriggers.size());
+    
+    EventTrigger msg = receivedEventTriggers[0];
+    
+    // Check that the message has the correct information
+    ASSERT_EQ(EVENT_TRIGGER_MSG_TYPE_RESPONSE, msg.msg_type);
+    ASSERT_EQ(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL, msg.event_type);
+    ASSERT_EQ(EVENT_TRIGGER_RESULT_SUCCESS, msg.result);
+}
+
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "TestEscortRobot");
     ros::NodeHandle nodeHandle;
 
+    // Instantiate a new doctor for each test
+    geometry_msgs::Point base;
+    base.x = 3.0f;
+    base.y = 3.0f;
+
+    geometry_msgs::Point hospital;
+    hospital.x = 4.0f;
+    hospital.y = 4.0f;
+
+    doctor = EscortRobot(EVENT_TRIGGER_EVENT_TYPE_VERY_ILL, base, hospital);
+
     // Advertise and subscribe to topics
     //residentEventPublisher = nodeHandle.advertise<EventTrigger>("event_trigger",1000, true);
-    //residentEventSubscriber = nodeHandle.subscribe<EventTrigger>("event_trigger",1000, eventTriggeredCallback);
+    doctor.eventTriggerPub = nodeHandle.advertise<EventTrigger>("event_trigger",1000, true);
+    ros::Subscriber eventTriggerSub = nodeHandle.subscribe<EventTrigger>("event_trigger", 1000, eventTriggerCallback);
 
     // Run tests to see if we received messages as expected
     testing::InitGoogleTest(&argc, argv);
