@@ -277,7 +277,7 @@ define fridge model
 (
   size [1.5 1.5 3]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "DarkGray"

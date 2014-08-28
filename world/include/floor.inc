@@ -36,7 +36,7 @@ define pink-flower model
 (
   size [0.2 0.2 0.6]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "ForestGreen"
@@ -63,7 +63,7 @@ define blue-flower model
 (
   size [0.2 0.2 0.6]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "ForestGreen"
@@ -90,7 +90,7 @@ define white-flower model
 (
   size [0.2 0.2 0.6]
   obstacle_return 0
-  gui_move 1
+  gui_move 0
   block
   (
     color "ForestGreen"
