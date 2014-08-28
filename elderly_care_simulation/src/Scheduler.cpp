@@ -93,7 +93,7 @@ bool Scheduler::hasDayNightCycle() const {
  */
 void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
 
-    if(msg.event_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
+    if(msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
         // Only allows random events to be added to event queue in the allowed
         // timeframe (between WAKE and SLEEP)
         if(!allowNewEvents) {
