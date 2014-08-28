@@ -94,6 +94,11 @@ bool Scheduler::hasDayNightCycle() const {
 void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
 
     if(msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
+
+        if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
+            return;
+        }
+
         // Only allows random events to be added to event queue in the allowed
         // timeframe (between WAKE and SLEEP)
         if(!allowNewEvents) {
@@ -136,6 +141,10 @@ void Scheduler::eventTriggerCallback(EventTrigger msg) {
     
     if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
         if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
+
+            if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
+                return;
+            }
 
             if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
                 ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));
