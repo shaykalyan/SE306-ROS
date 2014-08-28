@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import roslib
+import rospkg
 import roslib; roslib.load_manifest('elderly_care_simulation')
 from elderly_care_simulation.msg import DiceRollTrigger, EventTrigger, DiceRollReport, GuiComm
 from Tkinter import *
@@ -94,7 +95,6 @@ class DiceRollerGUI:
         gridRelief = RIDGE
         gridAnchor = W
         gridWidth = 15
-        imageWidth = 5
         gridHeight = 2
 
         # Creates Labels which will eventually contain information about robots and their tasks
@@ -104,61 +104,63 @@ class DiceRollerGUI:
         Label(self.frame_robotGrid, text="Current Task", anchor=gridAnchor, relief=gridRelief, bg='ivory4', width=gridWidth).grid(row=0, column=2)
 
         # : Row 1: Resident
-        self.resident_image = PhotoImage(file="scripts/robot_images/resident.gif", height=15, width=15)
+        rospack = rospkg.RosPack()
+        self.pkg_path = rospack.get_path("elderly_care_simulation")
+        self.resident_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/resident.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.resident_image, anchor=gridAnchor, relief=gridRelief, height=15, width=17).grid(row=1, column=0)
         Label(self.frame_robotGrid, text="Resident", anchor=gridAnchor, relief=gridRelief, height=gridHeight, width=gridWidth).grid(row=1, column=1)
         Label(self.frame_robotGrid, textvariable=self.resident_task, anchor=gridAnchor, relief=gridRelief, height=gridHeight, width=gridWidth).grid(row=1, column=2)
 
         # : Row 2: Cook
-        self.cook_image = PhotoImage(file="scripts/robot_images/chef.gif")
-        Label(self.frame_robotGrid, image=self.cook_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=2, column=0)
+        self.cook_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/chef.gif"), height=15, width=15)
+        Label(self.frame_robotGrid, image=self.cook_image, anchor=gridAnchor, relief=gridRelief, height=15, width=17).grid(row=2, column=0)
         Label(self.frame_robotGrid, text="Cook", anchor=gridAnchor, relief=gridRelief, height=gridHeight, width=gridWidth).grid(row=2, column=1)
         Label(self.frame_robotGrid, textvariable=self.cook_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=2, column=2)
 
         # : Row 3: Medication
-        self.medication_image = PhotoImage(file="scripts/robot_images/medication.gif", height=15, width=15)
+        self.medication_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/medication.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.medication_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=3, column=0)
         Label(self.frame_robotGrid, text="Medication", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=3, column=1)
         Label(self.frame_robotGrid, textvariable=self.medication_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=3, column=2)
 
         # : Row 4: Entertainment
-        self.entertainment_image = PhotoImage(file="scripts/robot_images/entertainment.gif", height=15, width=15)
+        self.entertainment_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/entertainment.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.entertainment_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=4, column=0)
         Label(self.frame_robotGrid, text="Entertainment", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=4, column=1)
         Label(self.frame_robotGrid, textvariable=self.entertainment_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=4, column=2)
 
         # : Row 5: Companionship
-        self.companionship_image = PhotoImage(file="scripts/robot_images/companionship.gif", height=15, width=15)
+        self.companionship_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/companionship.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.companionship_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=5, column=0)
         Label(self.frame_robotGrid, text="Companionship", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=5, column=1)
         Label(self.frame_robotGrid, textvariable=self.companion_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=5, column=2)
 
         # : Row 6: Friend
-        self.friend_image = PhotoImage(file="scripts/robot_images/friend.gif", height=15, width=15)
+        self.friend_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/friend.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.friend_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=6, column=0)
         Label(self.frame_robotGrid, text="Friend", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=6, column=1)
         Label(self.frame_robotGrid, textvariable=self.friend_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=6, column=2)
 
         # : Row 7: Relative
-        self.relative_image = PhotoImage(file="scripts/robot_images/relative.gif", height=15, width=15)
+        self.relative_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/relative.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.relative_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=7, column=0)
         Label(self.frame_robotGrid, text="Relative", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=7, column=1)
         Label(self.frame_robotGrid, textvariable=self.relative_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=7, column=2)
 
         # : Row 8: Doctor
-        self.doctor_image = PhotoImage(file="scripts/robot_images/doctor.gif", height=15, width=15)
+        self.doctor_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/doctor.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.doctor_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=8, column=0)
         Label(self.frame_robotGrid, text="Doctor", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=8, column=1)
         Label(self.frame_robotGrid, textvariable=self.doctor_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=8, column=2)
 
         # : Row 9: Nurse
-        self.nurse_image = PhotoImage(file="scripts/robot_images/nurse.gif", height=15, width=15)
+        self.nurse_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/nurse.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.nurse_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=9, column=0)
         Label(self.frame_robotGrid, text="Nurse", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=1)
         Label(self.frame_robotGrid, textvariable=self.nurse_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=9, column=2)
 
         # : Row 10: Caregivier
-        self.caregiver_image = PhotoImage(file="scripts/robot_images/caregiver.gif", height=15, width=15)
+        self.caregiver_image = PhotoImage(file=(self.pkg_path + "/scripts/robot_images/caregiver.gif"), height=15, width=15)
         Label(self.frame_robotGrid, image=self.caregiver_image, anchor=gridAnchor, relief=gridRelief, height=15, width=15).grid(row=10, column=0)
         Label(self.frame_robotGrid, text="Caregivier", anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=1)
         Label(self.frame_robotGrid, textvariable=self.caregiver_task, anchor=gridAnchor, relief=gridRelief, width=gridWidth, height=gridHeight).grid(row=10, column=2)
