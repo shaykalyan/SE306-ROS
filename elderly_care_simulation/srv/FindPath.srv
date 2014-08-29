@@ -1,0 +1,4 @@
+geometry_msgs/Point to_point
+geometry_msgs/Point from_point
+---
+geometry_msgs/Point[] path

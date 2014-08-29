@@ -1,103 +1,435 @@
 #include "ros/ros.h"
-#include "std_msgs/String.h"
-#include <geometry_msgs/Twist.h>
-#include <nav_msgs/Odometry.h>
-#include <sensor_msgs/LaserScan.h>
 
-#include <sstream>
-#include "math.h"
-#include "EventTriggerConstants.h"
+#include "EventTriggerUtility.h"
+#include "GuiCommConstants.h"
 #include "elderly_care_simulation/EventTrigger.h"
+#include "elderly_care_simulation/GuiComm.h"
 #include <queue>
-#include <vector>
-#include <utility>
-#include "EventNode.h"
 #include <unistd.h> // sleep
+#include "Scheduler.h"
 
-// flag to indicate scheduler's status
-bool readyToSend = true;
+using namespace elderly_care_simulation;
 
-// globals
-std::priority_queue<EventNode > eventQueue;
+Scheduler scheduler;
 
-void residentEventCallback(elderly_care_simulation::EventTrigger msg) {
-	ROS_INFO("Scheduler: Received Message from Resident");
-	int priority = 2; // default
-	switch(msg.event_type) {
-		case EVENT_TRIGGER_EVENT_TYPE_VISITOR:
-			priority = 2;
-			break;
-		case EVENT_TRIGGER_EVENT_TYPE_ASSISTANT:
-			priority = 2;
-			break;
-	}
-	ROS_INFO("Scheduler: Adding request to queue");
-	eventQueue.push(EventNode(priority, msg));
+Scheduler::Scheduler(){
+    concurrentWeight = 0;
+    allowNewEvents = true;
+    stopRosInfoSpam = false;
+    dayNightCycle = false;
+
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_MORAL_SUPPORT] = false;
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_ILL] = false;
+    randomEventLimit[EVENT_TRIGGER_EVENT_TYPE_VERY_ILL] = false;
 }
 
-void eventTriggerCallback(elderly_care_simulation::EventTrigger msg) {
-	
-	if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
-		if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
-			if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-				ROS_INFO("Scheduler: Response from Visitor");
-			} else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-				ROS_INFO("Scheduler: Response from Assitant");
-			}
-			// reset ability to send
-			readyToSend = true;
-		}
-	}
+Scheduler::~Scheduler() {}
+
+/**
+ * Creates a Request EventTrigger message for requesting robot tasks.
+ * @param eventType the event type for the message
+ */
+EventTrigger Scheduler::createEventRequestMsg(int eventType, int priority){
+    EventTrigger msg;
+    msg.msg_type = EVENT_TRIGGER_MSG_TYPE_REQUEST;
+    msg.event_type = eventType;
+    msg.event_priority = priority;
+    msg.event_weight = getEventWeight(eventType);
+    msg.result = EVENT_TRIGGER_RESULT_UNDEFINED;
+
+    return msg;
 }
 
+/**
+ * Clears the eventQueue.
+ */
+void Scheduler::clearEventQueue() {
+    eventQueue = std::priority_queue<EventNode >();
+}
+
+/**
+ * Reset all random event occurrence back to false.
+ */
+void Scheduler::resetRandomEventOccurrence() {
+
+    for(std::map<int, bool >::iterator iter = randomEventLimit.begin(); iter != randomEventLimit.end(); ++iter) {
+        randomEventLimit[iter->first] = false;
+    }
+}
+
+void Scheduler::resetConcurrentWeight() {
+    concurrentWeight = 0;
+}
+
+/**
+ * Returns the current concurrent weight count
+ */
+int Scheduler::getConcurrentWeight() const {
+    return concurrentWeight;
+}
+
+
+/**
+ * Returns the current event queue size
+ */
+int Scheduler::getEventQueueSize() const {
+    return eventQueue.size();
+}
+
+void Scheduler::setAllowNewEvents(bool val) {
+    allowNewEvents = val;
+}
+
+void Scheduler::setDayNightCycle(bool val) {
+    dayNightCycle = val;
+}
+
+bool Scheduler::hasDayNightCycle() const {
+    return dayNightCycle;
+}
+
+/**
+ * Callback function to deal with external events
+ */
+void Scheduler::externalEventReceivedCallback(EventTrigger msg) {
+
+    if(msg.msg_type == EVENT_TRIGGER_MSG_TYPE_REQUEST) {
+
+        if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
+            return;
+        }
+
+        // Only allows random events to be added to event queue in the allowed
+        // timeframe (between WAKE and SLEEP)
+        if(!allowNewEvents) {
+            ROS_INFO("Scheduler: Additional events are not allowed at this time.");
+            return;
+        }
+
+
+        // If the incoming event is a random event
+        if(randomEventLimit.count(msg.event_type) != 0) {
+
+            // If it havent occured before, change the flag and continue
+            if(randomEventLimit[msg.event_type] == false) {
+                randomEventLimit[msg.event_type] = true;
+
+            // If event occured before, then block it
+            } else {
+                ROS_INFO("Scheduler: [%s] cannot occur more than once per day.", 
+                    eventTypeToString(msg.event_type));
+                return;
+            }
+        }
+        
+        // reset boolean flag to allow pending event to be re-published
+        // in the case that the external event will sit at the top of queue
+        stopRosInfoSpam = false;
+
+        ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]", 
+                 eventTypeToString(msg.event_type),
+                 priorityToString(msg.event_priority));
+
+        eventQueue.push(EventNode(msg));
+    }
+}
+
+/**
+ * Callback function to deal with events replied from service provider robots
+ */
+void Scheduler::eventTriggerCallback(EventTrigger msg) {
+    
+    if (msg.msg_type == EVENT_TRIGGER_MSG_TYPE_RESPONSE) {
+        if(msg.result == EVENT_TRIGGER_RESULT_SUCCESS){
+
+            if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_UNDEFINED) {
+                return;
+            }
+
+            if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_COOK) {
+                ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));
+
+                EventTrigger eatMsg;
+                eatMsg = createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_EAT, EVENT_TRIGGER_PRIORITY_HIGH);
+                ROS_INFO("Scheduler: Enqueuing event: [%s] with priority [%s]",
+                          eventTypeToString(eatMsg.event_type),
+                          priorityToString(eatMsg.event_priority));
+
+                eventQueue.push(EventNode(eatMsg));
+                
+                // reset boolean flag to allow pending feed event to be re-published to GUI
+                // since the eat event is of a higher priority, it will float to the top of queue
+                stopRosInfoSpam = false;
+            } else {
+
+                // ILL has a weight of 0, but still blocks all other events (taking up 2 slots)
+                // Therefore need to -2 to concurrent weight to free the slot.
+                if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ILL ||
+                    msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VERY_ILL) {
+                    concurrentWeight -= 5;
+
+                } else {
+
+                    // if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_SLEEP) {
+                    //     sleep(10);
+                    // }
+
+                    concurrentWeight -= msg.event_weight;
+
+                }
+                
+
+                ROS_INFO("Scheduler: [%s] done.", eventTypeToString(msg.event_type));       
+            }
+        }
+    }
+}
+
+/**
+ * Callback function to react to actions triggered via the Interactive GUI
+ */
+void Scheduler::guiCommunicationCallback(GuiComm msg) {
+    if (msg.msg_type == GUI_COMM_MSG_TYPE_REQUEST) {
+        switch(msg.action) {
+        case GUI_COMM_ACTION_POPULATE:
+            resetRandomEventOccurrence();
+            clearEventQueue();
+            populateDailyTasks();
+            setDayNightCycle(true);
+            setAllowNewEvents(true);
+            break;
+        case GUI_COMM_ACTION_CLEAR:
+            clearEventQueue();
+            resetRandomEventOccurrence();
+            resetConcurrentWeight();
+            setDayNightCycle(false);
+            setAllowNewEvents(true);
+            break;
+        }
+        ROS_INFO("Scheduler: GUI action received [%s]", actionToString(msg.action));
+    }
+}
+
+/**
+ * Populates daily scheduled tasks into the event queue.
+ * 
+ * Daily Schedule will be queued in the following sequence:
+ * NOTE: The timestamp is just for referencing purpose.
+ *
+ *  07:00   WAKE
+ *  07:00   COOK ---> EAT
+ *  07:00   MEDICATION
+ *  08:00   EXERCISE
+ *  09:00   SHOWER
+ *  10:00   ENTERTAINMENT
+ *
+ *  12:00   COOK ---> EAT
+ *  12:00   MEDICATION
+ *  13:00   CONVERSATION
+ *  14:00   FRIEND & RELATIVE
+ *  16:00   ENTERTAINMENT
+ *
+ *  18:00   COOK ---> EAT
+ *  18:00   MEDICATION
+ *  19:00   COMPANIONSHIP
+ *  20:00   SLEEP
+ *  
+ *  PAUSE FOR 20 SEC
+ *  CLEAR LIST & REPOPULATE DAILY TASKS
+ *
+ */
+void Scheduler::populateDailyTasks() {
+
+    int eventSequence[][2] = {
+
+        // ======================================
+        // =        COMMENTED OUT STUFF         =
+        // ======================================
+
+        // // Morning
+        { EVENT_TRIGGER_EVENT_TYPE_WAKE,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_TOILET,  EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_EXERCISE,        EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_SHOWER,          EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
+
+        // // Noon
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_CONVERSATION,    EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_HALLWAY, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_RELATIVE,        EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_FRIEND,          EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COOK,            EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_ENTERTAINMENT,   EVENT_TRIGGER_PRIORITY_LOW },
+
+
+        // Evening
+        { EVENT_TRIGGER_EVENT_TYPE_MEDICATION,      EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_MOVE_TO_BEDROOM, EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_COMPANIONSHIP,   EVENT_TRIGGER_PRIORITY_LOW },
+        { EVENT_TRIGGER_EVENT_TYPE_SLEEP,           EVENT_TRIGGER_PRIORITY_VERY_LOW }
+    };
+    for(unsigned int i = 0; i < sizeof(eventSequence)/sizeof(*eventSequence); i++) {
+        eventQueue.push(EventNode(createEventRequestMsg(eventSequence[i][0], eventSequence[i][1])));
+    }
+}
+
+/**
+ * Dequeues an event and publishes to the event_trigger topic.
+ * Allows concurrent events to be triggered up to the limit
+ * set in MAX_CONCURRENT_WEIGHT
+ *
+ * COOK event is not affected as it acts independently of the 
+ * Resident.
+ */
+void Scheduler::dequeueEvent() {
+
+    if (eventQueue.size() < 1) {
+        return;
+    }
+
+    EventTrigger msg;
+    msg = eventQueue.top().getEventTriggerMessage();
+
+    
+    // Publish event if enough concurrent weight available
+    if (concurrentWeight + msg.event_weight <= MAX_CONCURRENT_WEIGHT) {
+        sleep(1);
+        ROS_INFO("Scheduler: Publishing event: [%s]", eventTypeToString(msg.event_type));
+
+        stopRosInfoSpam = false;
+        switch(msg.event_type) {
+            case EVENT_TRIGGER_EVENT_TYPE_SLEEP:
+                allowNewEvents = true;
+
+                concurrentWeight += msg.event_weight;
+                eventTriggerPub.publish(msg);
+                eventQueue.pop();
+                
+                break;
+
+            case EVENT_TRIGGER_EVENT_TYPE_ILL:
+                allowNewEvents = false;
+
+                // ILL has a weight of 0, but still blocks all other events
+                concurrentWeight += 5;
+                eventTriggerPub.publish(msg);
+                eventQueue.pop();
+
+                eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_SLEEP,
+                                                                EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
+                eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_WAKE,
+                                                                EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
+                break;
+
+            case EVENT_TRIGGER_EVENT_TYPE_VERY_ILL:
+                allowNewEvents = false;
+
+                // VERY_ILL has a weight of 0, but still blocks all other events
+                concurrentWeight += 5;
+                eventTriggerPub.publish(msg);
+                eventQueue.pop();
+
+                clearEventQueue();
+
+                // Enqueue a SLEEP event with max priority so when resident comes back from 
+                // hospital it goes to sleep right away.
+                // Since the queue is now empty after the SLEEP event, a new batch of daily
+                // schedules will be repopulated automatically (in the main method).
+                eventQueue.push(EventNode(createEventRequestMsg(EVENT_TRIGGER_EVENT_TYPE_SLEEP,
+                                                                EVENT_TRIGGER_PRIORITY_VERY_HIGH)));
+                break;
+
+            default:
+                if(msg.event_type == EVENT_TRIGGER_EVENT_TYPE_WAKE) {
+                    allowNewEvents = true;
+                }
+                eventTriggerPub.publish(msg);
+                concurrentWeight += msg.event_weight;
+                eventQueue.pop();
+                break;
+        }
+
+    } else {
+        if(!stopRosInfoSpam){
+            stopRosInfoSpam = true;
+
+            ROS_INFO("Scheduler: Pending event: [%s]", 
+                eventTypeToString(msg.event_type));
+
+            // publish pending event to GuiComm topic
+            GuiComm pendingMsg;
+            pendingMsg.msg_type = GUI_COMM_MSG_TYPE_INFO;
+            pendingMsg.event_type = msg.event_type;
+            pendingMsg.action = GUI_COMM_ACTION_UNDEFINED;
+            guiCommPub.publish(pendingMsg);
+        }
+    }
+}
+
+void callEventTriggerCallback(EventTrigger msg) {
+    scheduler.eventTriggerCallback(msg);
+}
+
+void callExternalEventReceivedCallback(EventTrigger msg) {
+    scheduler.externalEventReceivedCallback(msg);
+}
+
+void callGuiCommunicationCallback(GuiComm msg) {
+    scheduler.guiCommunicationCallback(msg);
+}
+
+/**
+ * Main
+ */
 int main(int argc, char **argv) {
 
-	//You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
-	ros::init(argc, argv, "Scheduler");
+    //You must call ros::init() first of all. ros::init() function needs to see argc and argv. The third argument is the name of the node
+    ros::init(argc, argv, "Scheduler");
 
-	//NodeHandle is the main access point to communicate with ros.
-	ros::NodeHandle nodeHandle;
+    //NodeHandle is the main access point to communicate with ros.
+    ros::NodeHandle nodeHandle;
 
-	// advertise to event_trigger topic
-	ros::Publisher eventTriggerPub = nodeHandle.advertise<elderly_care_simulation::EventTrigger>("event_trigger",1000, true);
+    scheduler = Scheduler();
 
-	// subscribe to event_trigger topic
-	ros::Subscriber eventTriggerSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("event_trigger",1000, eventTriggerCallback);
-	ros::Subscriber residentEventSub = nodeHandle.subscribe<elderly_care_simulation::EventTrigger>("resident_event",1000, residentEventCallback);
-	
-	ros::Rate loop_rate(10);
+    // advertise to event_trigger topic
+    scheduler.eventTriggerPub = nodeHandle.advertise<EventTrigger>("event_trigger",1000, true);
+    scheduler.guiCommPub = nodeHandle.advertise<GuiComm>("gui_communication",1000, true);
 
-	//a count of howmany messages we have sent
-	int count = 0;
+    // subscribe to event_trigger topic
+    scheduler.eventTriggerSub = nodeHandle.subscribe<EventTrigger>("event_trigger",1000, callEventTriggerCallback);
+    scheduler.externalEventSub = nodeHandle.subscribe<EventTrigger>("external_event",1000, callExternalEventReceivedCallback);
+    scheduler.guiCommSub = nodeHandle.subscribe<GuiComm>("gui_communication",1000, callGuiCommunicationCallback);
+    
+    ros::Rate loop_rate(10);
 
-	while (ros::ok()) {
 
-		if (readyToSend) {
+    //a count of howmany messages we have sent
+    int count = 0;
+    sleep(5);
 
-			if(eventQueue.size() > 0) {
+    while (ros::ok()) {
 
-				// block scheduler
-				readyToSend = false;
+        if( scheduler.getEventQueueSize() == 0 && 
+            scheduler.getConcurrentWeight() <= 0 && 
+            scheduler.hasDayNightCycle()) {
 
-				elderly_care_simulation::EventTrigger msg;
-				msg = eventQueue.top().getEventTriggerMessage();
-				eventQueue.pop();
+            scheduler.clearEventQueue();
+            scheduler.resetConcurrentWeight();
+            scheduler.resetRandomEventOccurrence();
+            scheduler.populateDailyTasks();
+        }else {
+            scheduler.dequeueEvent();
+        }
 
-				if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_VISITOR) {
-					ROS_INFO("Scheduler: Publishing to Visitor");
-				} else if (msg.event_type == EVENT_TRIGGER_EVENT_TYPE_ASSISTANT) {
-					ROS_INFO("Scheduler: Publishing to Assitant");
-				}
-				eventTriggerPub.publish(msg);
-			}
-			
-			
-		}
-
-		ros::spinOnce();
-
-		loop_rate.sleep();
-		++count;
-	}
-	return 0;
+        ros::spinOnce();
+        loop_rate.sleep();
+        ++count;
+    }
+    return 0;
 }
